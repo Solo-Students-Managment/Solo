@@ -11,10 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "preview": "vite preview",
-    "knip": "knip",
-    "knip:fix": "knip --fix",
-    "knip:production": "knip --production"
+    "preview": "vite preview"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
