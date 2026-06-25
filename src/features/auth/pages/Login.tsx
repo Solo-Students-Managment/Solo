@@ -1,14 +1,12 @@
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-import { LoginForm } from '../components/LoginForm';
 import { LoginBackground } from '../components/LoginBackground';
+import { LoginForm } from '../components/LoginForm';
 
 export function Login() {
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
-
-  if (isAuthenticated) return null;
 
   const handleLogin = (username: string, password: string) => {
     const success = login(username.trim(), password);

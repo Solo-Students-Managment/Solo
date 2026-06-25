@@ -1,19 +1,24 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { Toaster } from '@/components/ui/sonner';
 import { ChatProvider } from '@/contexts/ChatContext';
 import { ExamProvider } from '@/contexts/ExamContext';
 import { HomeworkProvider } from '@/contexts/HomeworkContext';
+import { RevenueProvider } from '@/contexts/RevenueContext';
 import { SessionApprovalProvider } from '@/contexts/SessionApprovalContext';
 import { SessionScoreProvider } from '@/contexts/SessionScoreContext';
 import { StudentProvider } from '@/contexts/StudentContext';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { Toaster } from '@/components/ui/sonner';
+import { TicketProvider } from '@/contexts/TicketContext';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { AttendancePage } from '@/pages/AttendancePage';
 import { DashboardHomePage } from '@/pages/DashboardHomePage';
-import { LoginPage } from '@/pages/LoginPage';
 import { SessionDetailPage } from '@/pages/SessionDetailPage';
 import { SessionsListPage } from '@/pages/SessionsListPage';
+import { AdminAnalyticsPage } from '@/pages/admin/AdminAnalyticsPage';
+import { AdminRevenuePage } from '@/pages/admin/AdminRevenuePage';
+import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
+import { LoginPage } from '@/pages/auth/LoginPage';
 import { ExamCreatePage } from '@/pages/exams/ExamCreatePage';
 import { ExamDetailPage } from '@/pages/exams/ExamDetailPage';
 import { ExamsPage } from '@/pages/exams/ExamsPage';
@@ -22,13 +27,9 @@ import { MessagesPage } from '@/pages/messages/MessagesPage';
 import { SessionFormPage } from '@/pages/teacher/SessionFormPage';
 import { StudentCreatePage } from '@/pages/teacher/StudentCreatePage';
 import { StudentDetailPage } from '@/pages/teacher/StudentDetailPage';
-import { TicketProvider } from '@/contexts/TicketContext';
-import { RevenueProvider } from '@/contexts/RevenueContext';
-import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
-import { AdminAnalyticsPage } from '@/pages/admin/AdminAnalyticsPage';
-import { AdminRevenuePage } from '@/pages/admin/AdminRevenuePage';
-import { TicketsPage } from '@/pages/tickets/TicketsPage';
 import { StudentsListPage } from '@/pages/teacher/StudentsListPage';
+import { TicketsPage } from '@/pages/tickets/TicketsPage';
+import { PublicRoute } from './components/PublicRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
 export default function App() {
@@ -44,7 +45,9 @@ export default function App() {
                     <ExamProvider>
                       <BrowserRouter>
                         <Routes>
-                          <Route path="/login" element={<LoginPage />} />
+                          <Route element={<PublicRoute />}>
+                            <Route path="/login" element={<LoginPage />} />
+                          </Route>
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
                           <Route element={<ProtectedRoute />}>
