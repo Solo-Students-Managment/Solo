@@ -1,0 +1,17 @@
+{
+  "entry": ["src/main.tsx"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src/mocks/**/*",
+    "src/features/auth/types/types.ts",
+    "src/features/auth/validation/loginSchema.ts",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "ignoreDependencies": [
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-dropdown-menu",
+    "@radix-ui/react-tooltip"
+  ],
+  "ignoreExportsUsedInFile": true
+}
