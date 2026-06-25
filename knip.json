@@ -1,17 +1,55 @@
 {
   "entry": ["src/main.tsx"],
   "project": ["src/**/*.{ts,tsx}"],
+
   "ignore": [
     "src/mocks/**/*",
-    "src/features/auth/types/types.ts",
-    "src/features/auth/validation/loginSchema.ts",
+    "src/features/auth/types/**/*",
+    "src/features/auth/validation/**/*",
     "**/*.test.*",
-    "**/*.spec.*"
+    "**/*.spec.*",
+    "dist",
+    "coverage"
   ],
+
   "ignoreDependencies": [
+    "@radix-ui/react-avatar",
+    "@radix-ui/react-checkbox",
+    "@radix-ui/react-collapsible",
     "@radix-ui/react-dialog",
     "@radix-ui/react-dropdown-menu",
-    "@radix-ui/react-tooltip"
+    "@radix-ui/react-label",
+    "@radix-ui/react-select",
+    "@radix-ui/react-separator",
+    "@radix-ui/react-slot",
+    "@radix-ui/react-tabs",
+    "@radix-ui/react-tooltip",
+
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge",
+    "lucide-react",
+
+    "formik",
+    "framer-motion",
+    "react-router-dom",
+    "recharts",
+    "sonner",
+    "yup",
+
+    "@testing-library/jest-dom",
+    "@testing-library/react",
+    "@testing-library/user-event",
+    "jsdom",
+    "vitest",
+    "rollup-plugin-visualizer"
   ],
-  "ignoreExportsUsedInFile": true
+
+  "ignoreExportsUsedInFile": true,
+
+  "rules": {
+    "exports": "warn",
+    "files": "warn",
+    "dependencies": "warn"
+  }
 }
