@@ -1,10 +1,10 @@
-import type { User } from '@/types'
+import type { User } from '@/types';
 
-export const DEMO_PASSWORD = 'demo123'
+export const DEMO_PASSWORD = 'demo123';
 
-export const DEMO_STUDENT_ID = 'user-student-1'
-export const DEMO_PARENT_ID = 'user-parent-1'
-export const DEMO_TEACHER_ID = 'user-teacher-1'
+export const DEMO_STUDENT_ID = 'user-student-1';
+export const DEMO_PARENT_ID = 'user-parent-1';
+export const DEMO_TEACHER_ID = 'user-teacher-1';
 
 export const seedUsers: User[] = [
   {
@@ -84,4 +84,4 @@ export const seedUsers: User[] = [
     username: 'fateme@demo.local',
     password: DEMO_PASSWORD,
   },
-]
+];

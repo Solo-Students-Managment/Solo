@@ -1,6 +1,6 @@
-import type { AdminStats } from '@/types'
-import { mockStudents } from './students'
-import { getUserById } from './users'
+import type { AdminStats } from '@/types';
+import { mockStudents } from './students';
+import { getUserById } from './users';
 
 export const mockAdminStats: AdminStats = {
   averageScore: 15.6,
@@ -47,17 +47,17 @@ export const mockAdminStats: AdminStats = {
     .sort((a, b) => b.averageScore - a.averageScore)
     .slice(0, 10)
     .map((student) => {
-      const user = getUserById(student.userId)
+      const user = getUserById(student.userId);
       const total =
         student.attendanceStats.present +
         student.attendanceStats.absent +
-        student.attendanceStats.late
+        student.attendanceStats.late;
       return {
         studentId: student.userId,
         name: user?.name ?? 'نامشخص',
         level: student.level,
         avgScore: student.averageScore,
         attendanceRate: total > 0 ? Math.round((student.attendanceStats.present / total) * 100) : 0,
-      }
+      };
     }),
-}
+};

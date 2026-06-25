@@ -1,30 +1,32 @@
-import type { AdminStats } from '@/types'
-import { getAllStudents, getAllUsers, getUserById } from '@/lib/studentStore'
-import { mockAdminStats } from '@/mocks/adminStats'
+import type { AdminStats } from '@/types';
+import { getAllStudents, getAllUsers, getUserById } from '@/lib/studentStore';
+import { mockAdminStats } from '@/mocks/adminStats';
 
 function getAttendanceRate(stats: { present: number; absent: number; late: number }) {
-  const total = stats.present + stats.absent + stats.late
-  if (total === 0) return 0
-  return Math.round((stats.present / total) * 100)
+  const total = stats.present + stats.absent + stats.late;
+  if (total === 0) return 0;
+  return Math.round((stats.present / total) * 100);
 }
 
 export function computeAdminStats(): AdminStats {
-  const students = getAllStudents()
-  const users = getAllUsers()
-  const teachers = users.filter((user) => user.role === 'teacher')
-  const parents = users.filter((user) => user.role === 'parent')
+  const students = getAllStudents();
+  const users = getAllUsers();
+  const teachers = users.filter((user) => user.role === 'teacher');
+  const parents = users.filter((user) => user.role === 'parent');
 
   const averageScore =
     students.length > 0
-      ? Math.round((students.reduce((sum, s) => sum + s.averageScore, 0) / students.length) * 10) / 10
-      : 0
+      ? Math.round((students.reduce((sum, s) => sum + s.averageScore, 0) / students.length) * 10) /
+        10
+      : 0;
 
   const attendanceRate =
     students.length > 0
       ? Math.round(
-          students.reduce((sum, s) => sum + getAttendanceRate(s.attendanceStats), 0) / students.length,
+          students.reduce((sum, s) => sum + getAttendanceRate(s.attendanceStats), 0) /
+            students.length
         )
-      : 0
+      : 0;
 
   const studentRankings = [...students]
     .sort((a, b) => b.averageScore - a.averageScore)
@@ -35,7 +37,7 @@ export function computeAdminStats(): AdminStats {
       level: student.level,
       avgScore: student.averageScore,
       attendanceRate: getAttendanceRate(student.attendanceStats),
-    }))
+    }));
 
   return {
     ...mockAdminStats,
@@ -50,5 +52,5 @@ export function computeAdminStats(): AdminStats {
       month: item.month,
       count: Math.max(1, students.length - (5 - index)),
     })),
-  }
+  };
 }

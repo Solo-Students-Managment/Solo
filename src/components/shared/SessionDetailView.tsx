@@ -1,21 +1,21 @@
-import { CheckCircle2, Clock } from 'lucide-react'
-import type { Session } from '@/types'
-import { useSessionFinalScore } from '@/contexts/SessionScoreContext'
-import { formatPersianDate } from '@/lib/formatters'
-import { useStudentName, useTeacherName } from '@/hooks/useMockData'
-import { AttendanceBadge } from '@/components/shared/AttendanceBadge'
-import { HomeworkSection } from '@/components/shared/HomeworkSection'
-import { SessionScoreSection } from '@/components/shared/SessionScoreSection'
-import { ScoreBadge } from '@/components/shared/ScoreBadge'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { CheckCircle2, Clock } from 'lucide-react';
+import type { Session } from '@/types';
+import { useSessionFinalScore } from '@/contexts/SessionScoreContext';
+import { formatPersianDate } from '@/lib/formatters';
+import { useStudentName, useTeacherName } from '@/hooks/useMockData';
+import { AttendanceBadge } from '@/components/shared/AttendanceBadge';
+import { HomeworkSection } from '@/components/shared/HomeworkSection';
+import { SessionScoreSection } from '@/components/shared/SessionScoreSection';
+import { ScoreBadge } from '@/components/shared/ScoreBadge';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 interface SessionDetailViewProps {
-  session: Session
-  readOnly?: boolean
-  showApprovalStatus?: boolean
-  parentConfirmed?: boolean
+  session: Session;
+  readOnly?: boolean;
+  showApprovalStatus?: boolean;
+  parentConfirmed?: boolean;
 }
 
 export function SessionDetailView({
@@ -24,9 +24,9 @@ export function SessionDetailView({
   showApprovalStatus = false,
   parentConfirmed,
 }: SessionDetailViewProps) {
-  const teacherName = useTeacherName(session.teacherId)
-  const studentName = useStudentName(session.studentId)
-  const finalScore = useSessionFinalScore(session.id, session.finalScore)
+  const teacherName = useTeacherName(session.teacherId);
+  const studentName = useStudentName(session.studentId);
+  const finalScore = useSessionFinalScore(session.id, session.finalScore);
 
   return (
     <div className="space-y-6">
@@ -35,7 +35,9 @@ export function SessionDetailView({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <CardTitle>{session.topic}</CardTitle>
-              <p className="mt-2 text-sm text-muted-foreground">{formatPersianDate(session.date)}</p>
+              <p className="text-muted-foreground mt-2 text-sm">
+                {formatPersianDate(session.date)}
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <AttendanceBadge status={session.attendanceStatus} />
@@ -45,11 +47,11 @@ export function SessionDetailView({
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-sm text-muted-foreground">مدرس</p>
+            <p className="text-muted-foreground text-sm">مدرس</p>
             <p className="font-medium">{teacherName}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">زبان‌آموز</p>
+            <p className="text-muted-foreground text-sm">زبان‌آموز</p>
             <p className="font-medium">{studentName}</p>
           </div>
         </CardContent>
@@ -80,13 +82,13 @@ export function SessionDetailView({
         </CardHeader>
         <CardContent className="space-y-3">
           {session.speaking.questions.length > 0 ? (
-            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
               {session.speaking.questions.map((question) => (
                 <li key={question}>{question}</li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground">سوالی ثبت نشده</p>
+            <p className="text-muted-foreground text-sm">سوالی ثبت نشده</p>
           )}
           <ScoreBadge score={session.speaking.score} />
           <p className="text-sm">{session.speaking.feedback}</p>
@@ -120,7 +122,7 @@ export function SessionDetailView({
           </div>
           <Separator />
           <div>
-            <p className="text-sm text-muted-foreground">پیشنهاد جلسه بعد</p>
+            <p className="text-muted-foreground text-sm">پیشنهاد جلسه بعد</p>
             <p className="mt-1 text-sm">{session.teacherEvaluation.nextSessionRecommendation}</p>
           </div>
           <ScoreBadge score={session.teacherEvaluation.teacherNoteScore} />
@@ -151,8 +153,8 @@ export function SessionDetailView({
       )}
 
       {!readOnly && (
-        <p className="text-sm text-muted-foreground">حالت ویرایش در فاز بعد فعال می‌شود.</p>
+        <p className="text-muted-foreground text-sm">حالت ویرایش در فاز بعد فعال می‌شود.</p>
       )}
     </div>
-  )
+  );
 }

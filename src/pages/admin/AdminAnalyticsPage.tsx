@@ -8,12 +8,12 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts'
-import { useMemo } from 'react'
-import { useStudents } from '@/contexts/StudentContext'
-import { computeAdminStats } from '@/lib/adminAnalytics'
-import { StatCard } from '@/components/shared/StatCard'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+} from 'recharts';
+import { useMemo } from 'react';
+import { useStudents } from '@/contexts/StudentContext';
+import { computeAdminStats } from '@/lib/adminAnalytics';
+import { StatCard } from '@/components/shared/StatCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -21,21 +21,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { formatNumber, formatPercent, formatScore, toPersianDigits } from '@/lib/formatters'
+} from '@/components/ui/table';
+import { formatNumber, formatPercent, formatScore, toPersianDigits } from '@/lib/formatters';
 
 export function AdminAnalyticsPage() {
-  const { version } = useStudents()
+  const { version } = useStudents();
   const stats = useMemo(() => {
-    void version
-    return computeAdminStats()
-  }, [version])
+    void version;
+    return computeAdminStats();
+  }, [version]);
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold">تحلیل‌ها</h2>
-        <p className="text-sm text-muted-foreground">گزارش عملکرد آموزشگاه</p>
+        <p className="text-muted-foreground text-sm">گزارش عملکرد آموزشگاه</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -51,7 +51,9 @@ export function AdminAnalyticsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle className="text-base">پیشرفت نمرات ماهانه</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">پیشرفت نمرات ماهانه</CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -68,7 +70,9 @@ export function AdminAnalyticsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">روند ثبت‌نام</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">روند ثبت‌نام</CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -77,7 +81,12 @@ export function AdminAnalyticsPage() {
                   <XAxis dataKey="month" />
                   <YAxis tickFormatter={(v) => toPersianDigits(v)} />
                   <Tooltip formatter={(v) => [formatNumber(Number(v)), 'تعداد']} />
-                  <Line type="monotone" dataKey="count" stroke="var(--color-chart-3)" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="var(--color-chart-3)"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -85,7 +94,9 @@ export function AdminAnalyticsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">نرخ انجام تکالیف</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">نرخ انجام تکالیف</CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -102,7 +113,9 @@ export function AdminAnalyticsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">روند حضور</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">روند حضور</CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -111,7 +124,12 @@ export function AdminAnalyticsPage() {
                   <XAxis dataKey="month" />
                   <YAxis domain={[0, 100]} tickFormatter={(v) => `${toPersianDigits(v)}٪`} />
                   <Tooltip formatter={(v) => [`${toPersianDigits(Number(v))}٪`, 'حضور']} />
-                  <Line type="monotone" dataKey="rate" stroke="var(--color-chart-4)" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="rate"
+                    stroke="var(--color-chart-4)"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -120,7 +138,9 @@ export function AdminAnalyticsPage() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">رتبه‌بندی زبان‌آموزان</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">رتبه‌بندی زبان‌آموزان</CardTitle>
+        </CardHeader>
         <CardContent>
           <div className="rounded-xl border">
             <Table>
@@ -149,5 +169,5 @@ export function AdminAnalyticsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

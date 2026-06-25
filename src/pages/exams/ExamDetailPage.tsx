@@ -1,14 +1,14 @@
-import { Link, useParams } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
-import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
-import { useExams } from '@/contexts/ExamContext'
-import { useMockData, useStudentName } from '@/hooks/useMockData'
-import { EXAM_QUESTION_TYPE_LABELS, EXAM_STATUS_LABELS, normalizeQuestion } from '@/lib/exams'
-import { formatNumber, formatPersianDateTime, formatScore } from '@/lib/formatters'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Link, useParams } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
+
+import { useExams } from '@/contexts/ExamContext';
+import { useMockData, useStudentName } from '@/hooks/useMockData';
+import { EXAM_QUESTION_TYPE_LABELS, EXAM_STATUS_LABELS, normalizeQuestion } from '@/lib/exams';
+import { formatNumber, formatPersianDateTime, formatScore } from '@/lib/formatters';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -16,16 +16,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function ExamDetailPage() {
-  const { id } = useParams()
-  const { user } = useAuth()
-  const { getExamById, getAssignmentsForExam, assignExam } = useExams()
-  const { teacherStudents } = useMockData()
+  const { id } = useParams();
+  const { user } = useAuth();
+  const { getExamById, getAssignmentsForExam, assignExam } = useExams();
+  const { teacherStudents } = useMockData();
 
-  const exam = id ? getExamById(id) : undefined
-  const assignments = id ? getAssignmentsForExam(id) : []
+  const exam = id ? getExamById(id) : undefined;
+  const assignments = id ? getAssignmentsForExam(id) : [];
 
   if (!exam) {
     return (
@@ -35,20 +36,20 @@ export function ExamDetailPage() {
           <Link to="/dashboard/exams">بازگشت</Link>
         </Button>
       </div>
-    )
+    );
   }
 
-  const assignedStudentIds = new Set(assignments.map((item) => item.studentId))
+  const assignedStudentIds = new Set(assignments.map((item) => item.studentId));
 
   const handleAssign = (studentId: string) => {
-    if (!user || !id) return
-    const result = assignExam(id, studentId, user.id)
+    if (!user || !id) return;
+    const result = assignExam(id, studentId, user.id);
     if (result) {
-      toast.success('آزمون به زبان‌آموز اختصاص یافت')
+      toast.success('آزمون به زبان‌آموز اختصاص یافت');
     } else {
-      toast.info('این آزمون قبلاً به این زبان‌آموز اختصاص داده شده')
+      toast.info('این آزمون قبلاً به این زبان‌آموز اختصاص داده شده');
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -62,7 +63,7 @@ export function ExamDetailPage() {
       <Card>
         <CardHeader>
           <CardTitle>{exam.title}</CardTitle>
-          <p className="text-sm text-muted-foreground">{exam.description}</p>
+          <p className="text-muted-foreground text-sm">{exam.description}</p>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Badge variant="secondary">{formatNumber(exam.questions.length)} سوال</Badge>
@@ -77,7 +78,7 @@ export function ExamDetailPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {exam.questions.map((rawQuestion, index) => {
-            const question = normalizeQuestion(rawQuestion)
+            const question = normalizeQuestion(rawQuestion);
             return (
               <div key={question.id} className="rounded-lg border p-4">
                 <div className="flex flex-wrap items-center gap-2">
@@ -87,7 +88,7 @@ export function ExamDetailPage() {
                   <Badge variant="outline">{EXAM_QUESTION_TYPE_LABELS[question.type]}</Badge>
                 </div>
                 {question.type === 'choice' ? (
-                  <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                  <ul className="text-muted-foreground mt-2 space-y-1 text-sm">
                     {question.options.map((option, oIndex) => (
                       <li
                         key={oIndex}
@@ -101,14 +102,14 @@ export function ExamDetailPage() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     {question.sampleAnswer
                       ? `پاسخ نمونه: ${question.sampleAnswer}`
                       : 'بدون پاسخ نمونه — هر پاسخ غیرخالی قبول می‌شود'}
                   </p>
                 )}
               </div>
-            )
+            );
           })}
         </CardContent>
       </Card>
@@ -171,7 +172,7 @@ export function ExamDetailPage() {
         </Card>
       )}
     </div>
-  )
+  );
 }
 
 function AssignRow({
@@ -180,12 +181,12 @@ function AssignRow({
   isAssigned,
   onAssign,
 }: {
-  userId: string
-  level: string
-  isAssigned: boolean
-  onAssign: () => void
+  userId: string;
+  level: string;
+  isAssigned: boolean;
+  onAssign: () => void;
 }) {
-  const name = useStudentName(userId)
+  const name = useStudentName(userId);
 
   return (
     <TableRow>
@@ -198,35 +199,33 @@ function AssignRow({
         </Button>
       </TableCell>
     </TableRow>
-  )
+  );
 }
 
 function ResultRow({
   assignment,
 }: {
   assignment: {
-    id: string
-    studentId: string
-    status: keyof typeof EXAM_STATUS_LABELS
-    score: number | null
-    submittedAt: string | null
-    assignedAt: string
-  }
+    id: string;
+    studentId: string;
+    status: keyof typeof EXAM_STATUS_LABELS;
+    score: number | null;
+    submittedAt: string | null;
+    assignedAt: string;
+  };
 }) {
-  const name = useStudentName(assignment.studentId)
+  const name = useStudentName(assignment.studentId);
 
   return (
     <TableRow>
       <TableCell>{name}</TableCell>
       <TableCell>{EXAM_STATUS_LABELS[assignment.status]}</TableCell>
-      <TableCell>
-        {assignment.score !== null ? formatScore(assignment.score) : '—'}
-      </TableCell>
+      <TableCell>{assignment.score !== null ? formatScore(assignment.score) : '—'}</TableCell>
       <TableCell>
         {assignment.submittedAt
           ? formatPersianDateTime(assignment.submittedAt)
           : formatPersianDateTime(assignment.assignedAt)}
       </TableCell>
     </TableRow>
-  )
+  );
 }

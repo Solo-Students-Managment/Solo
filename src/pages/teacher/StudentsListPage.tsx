@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom'
-import { Plus } from 'lucide-react'
-import { useMockData, useStudentName } from '@/hooks/useMockData'
-import { getAttendanceRate } from '@/mocks/students'
-import { ScoreBadge } from '@/components/shared/ScoreBadge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
+import { useMockData, useStudentName } from '@/hooks/useMockData';
+import { getAttendanceRate } from '@/mocks/students';
+import { ScoreBadge } from '@/components/shared/ScoreBadge';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -11,20 +11,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { formatPercent, formatPersianDate } from '@/lib/formatters'
-import { getSessionsByStudentId } from '@/mocks/sessions'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/table';
+import { formatPercent, formatPersianDate } from '@/lib/formatters';
+import { getSessionsByStudentId } from '@/mocks/sessions';
+import { Button } from '@/components/ui/button';
 
 export function StudentsListPage() {
-  const { teacherStudents } = useMockData()
+  const { teacherStudents } = useMockData();
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">زبان‌آموزان</h2>
-          <p className="text-sm text-muted-foreground">لیست زبان‌آموزان کلاس</p>
+          <p className="text-muted-foreground text-sm">لیست زبان‌آموزان کلاس</p>
         </div>
         <Button asChild>
           <Link to="/dashboard/students/new">
@@ -58,24 +58,24 @@ export function StudentsListPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 function StudentRow({
   userId,
   student,
 }: {
-  userId: string
+  userId: string;
   student: {
-    level: string
-    averageScore: number
-    attendanceStats: { present: number; absent: number; late: number }
-  }
+    level: string;
+    averageScore: number;
+    attendanceStats: { present: number; absent: number; late: number };
+  };
 }) {
-  const name = useStudentName(userId)
-  const rate = getAttendanceRate(student.attendanceStats)
-  const sessions = getSessionsByStudentId(userId)
-  const lastSession = sessions[0]
+  const name = useStudentName(userId);
+  const rate = getAttendanceRate(student.attendanceStats);
+  const sessions = getSessionsByStudentId(userId);
+  const lastSession = sessions[0];
 
   return (
     <TableRow>
@@ -85,17 +85,15 @@ function StudentRow({
         <ScoreBadge score={student.averageScore} />
       </TableCell>
       <TableCell>{formatPercent(rate)}</TableCell>
-      <TableCell>
-        {lastSession ? formatPersianDate(lastSession.date) : '—'}
-      </TableCell>
+      <TableCell>{lastSession ? formatPersianDate(lastSession.date) : '—'}</TableCell>
       <TableCell>
         <Link
           to={`/dashboard/students/${userId}`}
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-primary text-sm font-medium hover:underline"
         >
           جزئیات
         </Link>
       </TableCell>
     </TableRow>
-  )
+  );
 }

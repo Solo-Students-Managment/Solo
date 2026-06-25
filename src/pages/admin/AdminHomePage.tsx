@@ -11,13 +11,13 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts'
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { useStudents } from '@/contexts/StudentContext'
-import { computeAdminStats } from '@/lib/adminAnalytics'
-import { StatCard } from '@/components/shared/StatCard'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+} from 'recharts';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { useStudents } from '@/contexts/StudentContext';
+import { computeAdminStats } from '@/lib/adminAnalytics';
+import { StatCard } from '@/components/shared/StatCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -25,42 +25,50 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { formatNumber, formatPercent, formatScore, toPersianDigits } from '@/lib/formatters'
+} from '@/components/ui/table';
+import { formatNumber, formatPercent, formatScore, toPersianDigits } from '@/lib/formatters';
 
 const CHART_COLORS = [
   'var(--color-chart-1)',
   'var(--color-chart-2)',
   'var(--color-chart-3)',
   'var(--color-chart-4)',
-]
+];
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 
 export function AdminHomePage() {
-  const { version } = useStudents()
+  const { version } = useStudents();
   const adminStats = useMemo(() => {
-    void version
-    return computeAdminStats()
-  }, [version])
+    void version;
+    return computeAdminStats();
+  }, [version]);
 
   const homeworkPie = [
     { name: 'انجام شده', value: adminStats.homeworkCompletionRate },
     { name: 'انجام نشده', value: 100 - adminStats.homeworkCompletionRate },
-  ]
+  ];
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold">داشبورد مدیریتی</h2>
-        <p className="text-sm text-muted-foreground">آمار کلی آموزشگاه</p>
+        <p className="text-muted-foreground text-sm">آمار کلی آموزشگاه</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" asChild><Link to="/dashboard/admin/users">مدیریت کاربران</Link></Button>
-        <Button variant="outline" size="sm" asChild><Link to="/dashboard/admin/analytics">تحلیل‌ها</Link></Button>
-        <Button variant="outline" size="sm" asChild><Link to="/dashboard/admin/revenue">درآمد</Link></Button>
-        <Button variant="outline" size="sm" asChild><Link to="/dashboard/tickets">تیکت‌ها</Link></Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/dashboard/admin/users">مدیریت کاربران</Link>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/dashboard/admin/analytics">تحلیل‌ها</Link>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/dashboard/admin/revenue">درآمد</Link>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/dashboard/tickets">تیکت‌ها</Link>
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -73,7 +81,10 @@ export function AdminHomePage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard title="انجام تکالیف" value={formatPercent(adminStats.homeworkCompletionRate)} />
-        <StatCard title="مشاهده گزارش اولیا" value={formatPercent(adminStats.parentReportViewRate)} />
+        <StatCard
+          title="مشاهده گزارش اولیا"
+          value={formatPercent(adminStats.parentReportViewRate)}
+        />
         <StatCard title="زبان‌آموزان فعال" value={formatNumber(adminStats.activeStudents)} />
       </div>
 
@@ -137,7 +148,12 @@ export function AdminHomePage() {
                   <XAxis dataKey="month" />
                   <YAxis domain={[0, 100]} tickFormatter={(v) => `${toPersianDigits(v)}٪`} />
                   <Tooltip formatter={(value) => [`${toPersianDigits(Number(value))}٪`, 'حضور']} />
-                  <Line type="monotone" dataKey="rate" stroke="var(--color-chart-2)" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="rate"
+                    stroke="var(--color-chart-2)"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -177,5 +193,5 @@ export function AdminHomePage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

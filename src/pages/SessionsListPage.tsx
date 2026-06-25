@@ -1,42 +1,43 @@
-import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
-import { useMockData, useStudentName } from '@/hooks/useMockData'
-import { SessionForm } from '@/components/teacher/SessionForm'
-import { SessionsTable } from '@/components/shared/SessionsTable'
+import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
+import { useMockData, useStudentName } from '@/hooks/useMockData';
+import { SessionForm } from '@/components/teacher/SessionForm';
+import { SessionsTable } from '@/components/shared/SessionsTable';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function SessionsListPage() {
-  const { user } = useAuth()
-  const { sessions, teacherStudents } = useMockData()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [studentFilter, setStudentFilter] = useState<string>('all')
+  const { user } = useAuth();
+  const { sessions, teacherStudents } = useMockData();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [studentFilter, setStudentFilter] = useState<string>('all');
 
-  const isTeacher = user?.role === 'teacher'
-  const activeTab = searchParams.get('tab') === 'new' && isTeacher ? 'new' : 'list'
+  const isTeacher = user?.role === 'teacher';
+  const activeTab = searchParams.get('tab') === 'new' && isTeacher ? 'new' : 'list';
 
   const filteredSessions = useMemo(() => {
-    if (studentFilter === 'all') return sessions
-    return sessions.filter((session) => session.studentId === studentFilter)
-  }, [sessions, studentFilter])
+    if (studentFilter === 'all') return sessions;
+    return sessions.filter((session) => session.studentId === studentFilter);
+  }, [sessions, studentFilter]);
 
-  const showStudent = isTeacher
-  const showConfirmation = user?.role === 'parent'
+  const showStudent = isTeacher;
+  const showConfirmation = user?.role === 'parent';
 
   const handleTabChange = (value: string) => {
     if (value === 'new') {
-      setSearchParams({ tab: 'new' })
-      return
+      setSearchParams({ tab: 'new' });
+      return;
     }
-    setSearchParams({})
-  }
+    setSearchParams({});
+  };
 
   const sessionsTable = (
     <SessionsTable
@@ -44,14 +45,14 @@ export function SessionsListPage() {
       showStudent={showStudent}
       showConfirmation={showConfirmation}
     />
-  )
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">لیست جلسات</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {user?.role === 'parent'
               ? 'گزارش کامل جلسات فرزند'
               : isTeacher
@@ -95,10 +96,10 @@ export function SessionsListPage() {
         sessionsTable
       )}
     </div>
-  )
+  );
 }
 
 function StudentOption({ userId }: { userId: string }) {
-  const name = useStudentName(userId)
-  return <>{name}</>
+  const name = useStudentName(userId);
+  return <>{name}</>;
 }

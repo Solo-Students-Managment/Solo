@@ -1,16 +1,16 @@
-import type { ChoiceExamQuestion, ExamQuestion, TextExamQuestion } from '@/types'
-import { createQuestionId } from '@/lib/exams'
+import type { ChoiceExamQuestion, ExamQuestion, TextExamQuestion } from '@/types';
+import { createQuestionId } from '@/lib/exams';
 
 function makeChoiceQuestion(
   text: string,
   options: [string, string, string, string],
-  correctIndex: number,
+  correctIndex: number
 ): ChoiceExamQuestion {
-  return { id: createQuestionId(), type: 'choice', text, options, correctIndex }
+  return { id: createQuestionId(), type: 'choice', text, options, correctIndex };
 }
 
 function makeTextQuestion(text: string, sampleAnswer?: string): TextExamQuestion {
-  return { id: createQuestionId(), type: 'text', text, sampleAnswer }
+  return { id: createQuestionId(), type: 'text', text, sampleAnswer };
 }
 
 export const seedExams = [
@@ -30,16 +30,16 @@ export const seedExams = [
           'She plays tennis every day.',
           'They will arrive tomorrow.',
         ],
-        1,
+        1
       ),
       makeChoiceQuestion(
         'گزینه صحیح: She ___ to London twice.',
         ['go', 'goes', 'has been', 'going'],
-        2,
+        2
       ),
       makeTextQuestion(
         'یک جمله با Present Perfect بنویسید (حداقل ۵ کلمه)',
-        'I have studied English for two years.',
+        'I have studied English for two years.'
       ),
     ] satisfies ExamQuestion[],
   },
@@ -54,12 +54,12 @@ export const seedExams = [
       makeChoiceQuestion(
         'معادل "کتابخانه" کدام است؟',
         ['Hospital', 'Library', 'Kitchen', 'Station'],
-        1,
+        1
       ),
       makeTextQuestion('کلمه "Brother" را در یک جمله انگلیسی به کار ببرید.'),
     ] satisfies ExamQuestion[],
   },
-]
+];
 
 export const seedAssignments = [
   {
@@ -73,4 +73,4 @@ export const seedAssignments = [
     score: null,
     submittedAt: null,
   },
-]
+];

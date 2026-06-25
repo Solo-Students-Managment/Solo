@@ -1,5 +1,5 @@
-import type { Ticket, TicketComment, TicketPriority, TicketStatus } from '@/types'
-import { DEMO_TEACHER_ID } from '@/mocks/seedUsers'
+import type { Ticket, TicketComment, TicketPriority, TicketStatus } from '@/types';
+import { DEMO_TEACHER_ID } from '@/mocks/seedUsers';
 
 export const seedTickets: Ticket[] = [
   {
@@ -38,7 +38,7 @@ export const seedTickets: Ticket[] = [
     createdAt: '2025-04-20T11:00:00',
     updatedAt: '2025-04-22T16:30:00',
   },
-]
+];
 
 export const seedTicketComments: TicketComment[] = [
   {
@@ -49,14 +49,14 @@ export const seedTicketComments: TicketComment[] = [
     body: 'رمز عبور بازنشانی شد. لطفاً مجدداً تست کنید.',
     createdAt: '2025-04-25T14:00:00',
   },
-]
+];
 
 export function createTicketId() {
-  return `ticket-${crypto.randomUUID()}`
+  return `ticket-${crypto.randomUUID()}`;
 }
 
 export function createCommentId() {
-  return `tcomment-${crypto.randomUUID()}`
+  return `tcomment-${crypto.randomUUID()}`;
 }
 
 export const TICKET_STATUSES: { value: TicketStatus; label: string }[] = [
@@ -64,10 +64,10 @@ export const TICKET_STATUSES: { value: TicketStatus; label: string }[] = [
   { value: 'in_progress', label: 'در حال بررسی' },
   { value: 'resolved', label: 'حل شده' },
   { value: 'closed', label: 'بسته' },
-]
+];
 
 export const TICKET_PRIORITIES: { value: TicketPriority; label: string }[] = [
   { value: 'low', label: 'کم' },
   { value: 'medium', label: 'متوسط' },
   { value: 'high', label: 'بالا' },
-]
+];

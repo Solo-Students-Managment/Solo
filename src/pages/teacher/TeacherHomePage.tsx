@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom'
-import { AlertTriangle, CalendarDays, TrendingUp, Users } from 'lucide-react'
-import { useMockData, useStudentName } from '@/hooks/useMockData'
-import { getAttendanceRate } from '@/mocks/students'
-import { SessionsTable } from '@/components/shared/SessionsTable'
-import { StatCard } from '@/components/shared/StatCard'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Link } from 'react-router-dom';
+import { AlertTriangle, CalendarDays, TrendingUp, Users } from 'lucide-react';
+import { useMockData, useStudentName } from '@/hooks/useMockData';
+import { getAttendanceRate } from '@/mocks/students';
+import { SessionsTable } from '@/components/shared/SessionsTable';
+import { StatCard } from '@/components/shared/StatCard';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -13,33 +13,33 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { formatNumber, formatPercent, formatScore } from '@/lib/formatters'
+} from '@/components/ui/table';
+import { formatNumber, formatPercent, formatScore } from '@/lib/formatters';
 
 export function TeacherHomePage() {
-  const { teacherStudents, sessions } = useMockData()
+  const { teacherStudents, sessions } = useMockData();
 
   const sessionsThisMonth = sessions.filter((session) => {
-    const date = new Date(session.date)
-    const now = new Date('2025-04-26')
-    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
-  })
+    const date = new Date(session.date);
+    const now = new Date('2025-04-26');
+    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  });
 
   const avgClassScore =
     teacherStudents.reduce((sum, student) => sum + student.averageScore, 0) /
-    (teacherStudents.length || 1)
+    (teacherStudents.length || 1);
 
   const needsAttention = teacherStudents.filter((student) => {
-    const rate = getAttendanceRate(student.attendanceStats)
-    return student.averageScore < 14 || rate < 80
-  })
+    const rate = getAttendanceRate(student.attendanceStats);
+    return student.averageScore < 14 || rate < 80;
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">داشبورد مدرس</h2>
-          <p className="text-sm text-muted-foreground">مدیریت کلاس و پیگیری زبان‌آموزان</p>
+          <p className="text-muted-foreground text-sm">مدیریت کلاس و پیگیری زبان‌آموزان</p>
         </div>
         <Button asChild>
           <Link to="/dashboard/sessions?tab=new">ثبت جلسه جدید</Link>
@@ -50,17 +50,17 @@ export function TeacherHomePage() {
         <StatCard
           title="تعداد زبان‌آموزان"
           value={formatNumber(teacherStudents.length)}
-          icon={<Users className="h-4 w-4 text-primary" />}
+          icon={<Users className="text-primary h-4 w-4" />}
         />
         <StatCard
           title="جلسات این ماه"
           value={formatNumber(sessionsThisMonth.length)}
-          icon={<CalendarDays className="h-4 w-4 text-primary" />}
+          icon={<CalendarDays className="text-primary h-4 w-4" />}
         />
         <StatCard
           title="میانگین نمرات کلاس"
           value={formatScore(Math.round(avgClassScore * 10) / 10)}
-          icon={<TrendingUp className="h-4 w-4 text-primary" />}
+          icon={<TrendingUp className="text-primary h-4 w-4" />}
         />
         <StatCard
           title="نیاز به توجه"
@@ -103,22 +103,22 @@ export function TeacherHomePage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 function AttentionRow({
   userId,
   student,
 }: {
-  userId: string
+  userId: string;
   student: {
-    level: string
-    averageScore: number
-    attendanceStats: { present: number; absent: number; late: number }
-  }
+    level: string;
+    averageScore: number;
+    attendanceStats: { present: number; absent: number; late: number };
+  };
 }) {
-  const name = useStudentName(userId)
-  const rate = getAttendanceRate(student.attendanceStats)
+  const name = useStudentName(userId);
+  const rate = getAttendanceRate(student.attendanceStats);
 
   return (
     <TableRow>
@@ -127,5 +127,5 @@ function AttentionRow({
       <TableCell>{formatScore(student.averageScore)}</TableCell>
       <TableCell>{formatPercent(rate)}</TableCell>
     </TableRow>
-  )
+  );
 }

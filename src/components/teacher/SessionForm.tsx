@@ -1,51 +1,51 @@
-import { useState } from 'react'
-import { toast } from 'sonner'
-import type { HomeworkTask } from '@/types'
-import { useHomework } from '@/contexts/HomeworkContext'
-import { useSessionScore } from '@/contexts/SessionScoreContext'
-import { clampSessionScore } from '@/lib/sessionScore'
-import { useMockData, useStudentName } from '@/hooks/useMockData'
-import { createTaskId } from '@/lib/homework'
-import { HomeworkTaskEditor } from '@/components/shared/HomeworkTaskEditor'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState } from 'react';
+import { toast } from 'sonner';
+import type { HomeworkTask } from '@/types';
+import { useHomework } from '@/contexts/HomeworkContext';
+import { useSessionScore } from '@/contexts/SessionScoreContext';
+import { clampSessionScore } from '@/lib/sessionScore';
+import { useMockData, useStudentName } from '@/hooks/useMockData';
+import { createTaskId } from '@/lib/homework';
+import { HomeworkTaskEditor } from '@/components/shared/HomeworkTaskEditor';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DEFAULT_HOMEWORK_TASKS: HomeworkTask[] = [
   { id: createTaskId(), title: 'تمرین گرامر' },
   { id: createTaskId(), title: 'مرور واژگان' },
-]
+];
 
 export function SessionForm() {
-  const { teacherStudents } = useMockData()
-  const { saveTasks } = useHomework()
-  const { setScore } = useSessionScore()
-  const [studentId, setStudentId] = useState(teacherStudents[0]?.userId ?? '')
-  const [homeworkTasks, setHomeworkTasks] = useState<HomeworkTask[]>(DEFAULT_HOMEWORK_TASKS)
-  const [sessionScore, setSessionScore] = useState('16')
+  const { teacherStudents } = useMockData();
+  const { saveTasks } = useHomework();
+  const { setScore } = useSessionScore();
+  const [studentId, setStudentId] = useState(teacherStudents[0]?.userId ?? '');
+  const [homeworkTasks, setHomeworkTasks] = useState<HomeworkTask[]>(DEFAULT_HOMEWORK_TASKS);
+  const [sessionScore, setSessionScore] = useState('16');
 
   const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
-    const validTasks = homeworkTasks.filter((task) => task.title.trim())
+    event.preventDefault();
+    const validTasks = homeworkTasks.filter((task) => task.title.trim());
     if (validTasks.length === 0) {
-      toast.error('حداقل یک مورد تکلیف تعریف کنید')
-      return
+      toast.error('حداقل یک مورد تکلیف تعریف کنید');
+      return;
     }
 
-    const draftSessionId = `session-draft-${Date.now()}`
-    saveTasks(draftSessionId, validTasks)
-    setScore(draftSessionId, clampSessionScore(Number(sessionScore)))
-    toast.success('جلسه با موفقیت ثبت شد (نمایشی — تکلیف و نمره ذخیره شد)')
-  }
+    const draftSessionId = `session-draft-${Date.now()}`;
+    saveTasks(draftSessionId, validTasks);
+    setScore(draftSessionId, clampSessionScore(Number(sessionScore)));
+    toast.success('جلسه با موفقیت ثبت شد (نمایشی — تکلیف و نمره ذخیره شد)');
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -191,10 +191,10 @@ export function SessionForm() {
         <Button type="submit">ثبت جلسه</Button>
       </div>
     </form>
-  )
+  );
 }
 
 function StudentLabel({ userId }: { userId: string }) {
-  const name = useStudentName(userId)
-  return <>{name}</>
+  const name = useStudentName(userId);
+  return <>{name}</>;
 }

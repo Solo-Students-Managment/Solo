@@ -6,19 +6,19 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts'
-import type { Session } from '@/types'
-import { useSessionScore } from '@/contexts/SessionScoreContext'
-import { formatPersianDate, formatScore, toPersianDigits } from '@/lib/formatters'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+} from 'recharts';
+import type { Session } from '@/types';
+import { useSessionScore } from '@/contexts/SessionScoreContext';
+import { formatPersianDate, formatScore, toPersianDigits } from '@/lib/formatters';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ProgressChartProps {
-  sessions: Session[]
-  title?: string
+  sessions: Session[];
+  title?: string;
 }
 
 export function ProgressChart({ sessions, title = 'نمودار پیشرفت' }: ProgressChartProps) {
-  const { getScore } = useSessionScore()
+  const { getScore } = useSessionScore();
 
   const data = [...sessions]
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -26,7 +26,7 @@ export function ProgressChart({ sessions, title = 'نمودار پیشرفت' }:
     .map((session) => ({
       name: formatPersianDate(session.date).split(' ')[1] ?? formatPersianDate(session.date),
       score: getScore(session.id, session.finalScore),
-    }))
+    }));
 
   return (
     <Card>
@@ -56,5 +56,5 @@ export function ProgressChart({ sessions, title = 'نمودار پیشرفت' }:
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

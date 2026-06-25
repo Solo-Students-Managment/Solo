@@ -1,6 +1,6 @@
-import type { Session } from '@/types'
-import { getDefaultHomeworkTasks } from '@/lib/homework'
-import { DEMO_STUDENT_ID, DEMO_TEACHER_ID } from './users'
+import type { Session } from '@/types';
+import { getDefaultHomeworkTasks } from '@/lib/homework';
+import { DEMO_STUDENT_ID, DEMO_TEACHER_ID } from './users';
 
 function createSession(
   id: string,
@@ -9,18 +9,18 @@ function createSession(
   topic: string,
   attendanceStatus: Session['attendanceStatus'],
   scores: {
-    homework: number
-    participation: number
-    speaking: number
-    teacherNote: number
+    homework: number;
+    participation: number;
+    speaking: number;
+    teacherNote: number;
   },
-  overrides?: Partial<Session>,
+  overrides?: Partial<Session>
 ): Session {
   const finalScore =
     scores.homework * 0.4 +
     scores.participation * 0.2 +
     scores.speaking * 0.3 +
-    scores.teacherNote * 0.1
+    scores.teacherNote * 0.1;
 
   return {
     id,
@@ -61,7 +61,7 @@ function createSession(
     finalScore: Math.round(finalScore * 10) / 10,
     parentConfirmed: overrides?.parentConfirmed ?? Math.random() > 0.3,
     ...overrides,
-  }
+  };
 }
 
 export const mockSessions: Session[] = [
@@ -95,31 +95,39 @@ export const mockSessions: Session[] = [
     speaking: 18,
     teacherNote: 16,
   }),
-  createSession('session-6', DEMO_STUDENT_ID, '2025-04-05', 'Phrasal Verbs', 'absent', {
-    homework: 0,
-    participation: 0,
-    speaking: 0,
-    teacherNote: 0,
-  }, {
-    homework: {
-      title: 'تمرین گرامر و واژگان',
-      description: 'غایب — تکلیف ثبت نشده',
-      tasks: [],
-      status: 'not_done',
-      score: 0,
-      teacherNote: 'جلسه غیبت',
+  createSession(
+    'session-6',
+    DEMO_STUDENT_ID,
+    '2025-04-05',
+    'Phrasal Verbs',
+    'absent',
+    {
+      homework: 0,
+      participation: 0,
+      speaking: 0,
+      teacherNote: 0,
     },
-    participation: { participated: false, score: 0, teacherNote: 'غایب' },
-    speaking: { questions: [], score: 0, feedback: 'غایب' },
-    teacherEvaluation: {
-      strengths: [],
-      weaknesses: ['غیبت'],
-      nextSessionRecommendation: 'مرور مطالب جلسه قبل',
-      teacherNoteScore: 0,
-    },
-    finalScore: 0,
-    parentConfirmed: false,
-  }),
+    {
+      homework: {
+        title: 'تمرین گرامر و واژگان',
+        description: 'غایب — تکلیف ثبت نشده',
+        tasks: [],
+        status: 'not_done',
+        score: 0,
+        teacherNote: 'جلسه غیبت',
+      },
+      participation: { participated: false, score: 0, teacherNote: 'غایب' },
+      speaking: { questions: [], score: 0, feedback: 'غایب' },
+      teacherEvaluation: {
+        strengths: [],
+        weaknesses: ['غیبت'],
+        nextSessionRecommendation: 'مرور مطالب جلسه قبل',
+        teacherNoteScore: 0,
+      },
+      finalScore: 0,
+      parentConfirmed: false,
+    }
+  ),
   createSession('session-7', DEMO_STUDENT_ID, '2025-04-12', 'Speaking Practice', 'present', {
     homework: 16,
     participation: 17,
@@ -162,42 +170,58 @@ export const mockSessions: Session[] = [
     speaking: 15,
     teacherNote: 16,
   }),
-  createSession('session-14', 'user-student-7', '2025-04-12', 'Debate Skills', 'absent', {
-    homework: 0,
-    participation: 0,
-    speaking: 0,
-    teacherNote: 0,
-  }, {
-    homework: {
-      title: 'تمرین گرامر و واژگان',
-      description: 'غایب',
-      tasks: [],
-      status: 'not_done',
-      score: 0,
-      teacherNote: 'غایب',
+  createSession(
+    'session-14',
+    'user-student-7',
+    '2025-04-12',
+    'Debate Skills',
+    'absent',
+    {
+      homework: 0,
+      participation: 0,
+      speaking: 0,
+      teacherNote: 0,
     },
-    participation: { participated: false, score: 0, teacherNote: 'غایب' },
-    speaking: { questions: [], score: 0, feedback: 'غایب' },
-    teacherEvaluation: {
-      strengths: [],
-      weaknesses: ['غیبت مکرر'],
-      nextSessionRecommendation: 'پیگیری حضور',
-      teacherNoteScore: 0,
-    },
-    finalScore: 0,
-  }),
+    {
+      homework: {
+        title: 'تمرین گرامر و واژگان',
+        description: 'غایب',
+        tasks: [],
+        status: 'not_done',
+        score: 0,
+        teacherNote: 'غایب',
+      },
+      participation: { participated: false, score: 0, teacherNote: 'غایب' },
+      speaking: { questions: [], score: 0, feedback: 'غایب' },
+      teacherEvaluation: {
+        strengths: [],
+        weaknesses: ['غیبت مکرر'],
+        nextSessionRecommendation: 'پیگیری حضور',
+        teacherNoteScore: 0,
+      },
+      finalScore: 0,
+    }
+  ),
   createSession('session-15', 'user-student-8', '2025-04-12', 'Presentation Skills', 'present', {
     homework: 19,
     participation: 18,
     speaking: 19,
     teacherNote: 18,
   }),
-  createSession('session-16', DEMO_STUDENT_ID, '2025-04-26', 'Future Tenses', 'present', {
-    homework: 17,
-    participation: 16,
-    speaking: 16,
-    teacherNote: 17,
-  }, { parentConfirmed: false }),
+  createSession(
+    'session-16',
+    DEMO_STUDENT_ID,
+    '2025-04-26',
+    'Future Tenses',
+    'present',
+    {
+      homework: 17,
+      participation: 16,
+      speaking: 16,
+      teacherNote: 17,
+    },
+    { parentConfirmed: false }
+  ),
   createSession('session-17', 'user-student-2', '2025-04-19', 'Vocabulary Building', 'present', {
     homework: 15,
     participation: 14,
@@ -210,26 +234,26 @@ export const mockSessions: Session[] = [
     speaking: 17,
     teacherNote: 18,
   }),
-]
+];
 
 export function getSessionsByStudentId(studentId: string) {
   return mockSessions
     .filter((session) => session.studentId === studentId)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export function getSessionById(id: string) {
-  return mockSessions.find((session) => session.id === id)
+  return mockSessions.find((session) => session.id === id);
 }
 
 export function getSessionsByTeacherId(teacherId: string) {
   return mockSessions
     .filter((session) => session.teacherId === teacherId)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export function getRecentSessions(limit = 5) {
   return [...mockSessions]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, limit)
+    .slice(0, limit);
 }

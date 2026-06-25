@@ -1,37 +1,48 @@
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
-import { useSessionScore } from '@/contexts/SessionScoreContext'
-import { clampSessionScore } from '@/lib/sessionScore'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { formatScore } from '@/lib/formatters'
+import { useEffect, useState, useRef } from 'react';
+import { toast } from 'sonner';
+import { useSessionScore } from '@/contexts/SessionScoreContext';
+import { clampSessionScore } from '@/lib/sessionScore';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { formatScore } from '@/lib/formatters';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SessionScoreSectionProps {
-  sessionId: string
-  defaultScore: number
+  sessionId: string;
+  defaultScore: number;
 }
 
 export function SessionScoreSection({ sessionId, defaultScore }: SessionScoreSectionProps) {
-  const { user } = useAuth()
-  const { getScore, setScore, hasOverride } = useSessionScore()
-  const score = getScore(sessionId, defaultScore)
-  const isTeacher = user?.role === 'teacher'
+  const { user } = useAuth();
+  const { getScore, setScore, hasOverride } = useSessionScore();
 
-  const [draft, setDraft] = useState(String(score))
+  const score = getScore(sessionId, defaultScore);
+  const isTeacher = user?.role === 'teacher';
 
+  const [draft, setDraft] = useState(() => String(score));
+  const prevScoreRef = useRef(score);
+
+  // سینک کردن draft فقط وقتی score از بیرون تغییر کرد (نه از داخل کامپوننت)
   useEffect(() => {
-    setDraft(String(score))
-  }, [score])
+    if (score !== prevScoreRef.current) {
+      setDraft(String(score));
+      prevScoreRef.current = score;
+    }
+  }, [score]);
 
   const handleSave = () => {
-    const parsed = clampSessionScore(Number(draft))
-    setScore(sessionId, parsed)
-    setDraft(String(parsed))
-    toast.success('نمره جلسه ذخیره شد')
-  }
+    const parsed = clampSessionScore(Number(draft));
+    setScore(sessionId, parsed);
+    setDraft(String(parsed));
+    toast.success('نمره جلسه ذخیره شد');
+  };
+
+  // وقتی score تغییر کرد از context، draft رو بروز کنیم
+  useEffect(() => {
+    prevScoreRef.current = score;
+  }, [score]);
 
   return (
     <Card className="border-primary/20 bg-primary/5">
@@ -51,10 +62,10 @@ export function SessionScoreSection({ sessionId, defaultScore }: SessionScoreSec
                   onChange={(event) => setDraft(event.target.value)}
                   className="w-28"
                 />
-                <span className="text-sm text-muted-foreground">از ۲۰</span>
+                <span className="text-muted-foreground text-sm">از ۲۰</span>
               </div>
               {hasOverride(sessionId) && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   نمره پیش‌فرض: {formatScore(defaultScore)}
                 </p>
               )}
@@ -66,13 +77,13 @@ export function SessionScoreSection({ sessionId, defaultScore }: SessionScoreSec
         ) : (
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">نمره نهایی جلسه</p>
-              <p className="text-xs text-muted-foreground">ثبت‌شده توسط مدرس</p>
+              <p className="text-muted-foreground text-sm">نمره نهایی جلسه</p>
+              <p className="text-muted-foreground text-xs">ثبت‌شده توسط مدرس</p>
             </div>
             <p className="text-3xl font-bold">{formatScore(score)}</p>
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

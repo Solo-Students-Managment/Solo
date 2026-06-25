@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom'
-import type { Session } from '@/types'
-import { useSessionFinalScore } from '@/contexts/SessionScoreContext'
-import { useSessionParentConfirmed } from '@/contexts/SessionApprovalContext'
-import { formatPersianDate } from '@/lib/formatters'
-import { useStudentName, useTeacherName } from '@/hooks/useMockData'
-import { AttendanceBadge } from '@/components/shared/AttendanceBadge'
-import { ScoreBadge } from '@/components/shared/ScoreBadge'
+import { Link } from 'react-router-dom';
+import type { Session } from '@/types';
+import { useSessionFinalScore } from '@/contexts/SessionScoreContext';
+import { useSessionParentConfirmed } from '@/contexts/SessionApprovalContext';
+import { formatPersianDate } from '@/lib/formatters';
+import { useStudentName, useTeacherName } from '@/hooks/useMockData';
+import { AttendanceBadge } from '@/components/shared/AttendanceBadge';
+import { ScoreBadge } from '@/components/shared/ScoreBadge';
 import {
   Table,
   TableBody,
@@ -13,12 +13,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 
 interface SessionsTableProps {
-  sessions: Session[]
-  showStudent?: boolean
-  showConfirmation?: boolean
+  sessions: Session[];
+  showStudent?: boolean;
+  showConfirmation?: boolean;
 }
 
 export function SessionsTable({
@@ -53,7 +53,7 @@ export function SessionsTable({
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
 
 function SessionRow({
@@ -61,14 +61,14 @@ function SessionRow({
   showStudent,
   showConfirmation,
 }: {
-  session: Session
-  showStudent: boolean
-  showConfirmation: boolean
+  session: Session;
+  showStudent: boolean;
+  showConfirmation: boolean;
 }) {
-  const teacherName = useTeacherName(session.teacherId)
-  const studentName = useStudentName(session.studentId)
-  const finalScore = useSessionFinalScore(session.id, session.finalScore)
-  const parentConfirmed = useSessionParentConfirmed(session.id, session.parentConfirmed)
+  const teacherName = useTeacherName(session.teacherId);
+  const studentName = useStudentName(session.studentId);
+  const finalScore = useSessionFinalScore(session.id, session.finalScore);
+  const parentConfirmed = useSessionParentConfirmed(session.id, session.parentConfirmed);
 
   return (
     <TableRow>
@@ -83,18 +83,16 @@ function SessionRow({
         <ScoreBadge score={finalScore} />
       </TableCell>
       {showConfirmation && (
-        <TableCell>
-          {parentConfirmed ? 'تأیید شده' : 'در انتظار تأیید'}
-        </TableCell>
+        <TableCell>{parentConfirmed ? 'تأیید شده' : 'در انتظار تأیید'}</TableCell>
       )}
       <TableCell>
         <Link
           to={`/dashboard/sessions/${session.id}`}
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-primary text-sm font-medium hover:underline"
         >
           جزئیات
         </Link>
       </TableCell>
     </TableRow>
-  )
+  );
 }

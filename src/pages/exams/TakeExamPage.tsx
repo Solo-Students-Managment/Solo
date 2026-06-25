@@ -1,42 +1,35 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
-import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
-import { useExams } from '@/contexts/ExamContext'
-import { countAnsweredQuestions, isQuestionAnswered, normalizeQuestion } from '@/lib/exams'
-import { formatNumber, formatScore } from '@/lib/formatters'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
+import { useExams } from '@/contexts/ExamContext';
+import { countAnsweredQuestions, isQuestionAnswered, normalizeQuestion } from '@/lib/exams';
+import { formatNumber, formatScore } from '@/lib/formatters';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function TakeExamPage() {
-  const { assignmentId } = useParams()
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const {
-    getAssignment,
-    getExamById,
-    startExam,
-    saveChoiceAnswer,
-    saveTextAnswer,
-    submitExam,
-  } = useExams()
+  const { assignmentId } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { getAssignment, getExamById, startExam, saveChoiceAnswer, saveTextAnswer, submitExam } =
+    useExams();
 
-  const assignment = assignmentId ? getAssignment(assignmentId) : undefined
-  const exam = assignment ? getExamById(assignment.examId) : undefined
-  const [started, setStarted] = useState(false)
+  const assignment = assignmentId ? getAssignment(assignmentId) : undefined;
+  const exam = assignment ? getExamById(assignment.examId) : undefined;
 
-  useEffect(() => {
-    if (assignment && assignment.status !== 'completed' && assignment.status !== 'assigned') {
-      setStarted(true)
-    }
-  }, [assignment])
+  const isInProgress = assignment
+    ? assignment.status !== 'completed' && assignment.status !== 'assigned'
+    : false;
+
+  const [started, setStarted] = useState(isInProgress);
 
   if (!user || user.role !== 'student') {
-    return <p className="text-muted-foreground">فقط زبان‌آموزان می‌توانند آزمون بدهند.</p>
+    return <p className="text-muted-foreground">فقط زبان‌آموزان می‌توانند آزمون بدهند.</p>;
   }
 
   if (!assignment || !exam || assignment.studentId !== user.id) {
@@ -47,33 +40,33 @@ export function TakeExamPage() {
           <Link to="/dashboard/exams">بازگشت</Link>
         </Button>
       </div>
-    )
+    );
   }
 
-  const questions = exam.questions.map((question) => normalizeQuestion(question))
-  const isCompleted = assignment.status === 'completed'
-  const answeredCount = countAnsweredQuestions(exam, assignment.answers)
+  const questions = exam.questions.map((question) => normalizeQuestion(question));
+  const isCompleted = assignment.status === 'completed';
+  const answeredCount = countAnsweredQuestions(exam, assignment.answers);
   const allAnswered = questions.every((question) =>
-    isQuestionAnswered(question, assignment.answers),
-  )
+    isQuestionAnswered(question, assignment.answers)
+  );
 
   const handleStart = () => {
-    if (!assignmentId) return
-    startExam(assignmentId)
-    setStarted(true)
-  }
+    if (!assignmentId) return;
+    startExam(assignmentId);
+    setStarted(true);
+  };
 
   const handleSubmit = () => {
-    if (!assignmentId) return
+    if (!assignmentId) return;
     if (!allAnswered) {
-      toast.error('لطفاً به همه سوالات پاسخ دهید')
-      return
+      toast.error('لطفاً به همه سوالات پاسخ دهید');
+      return;
     }
-    const score = submitExam(assignmentId)
+    const score = submitExam(assignmentId);
     if (score !== null) {
-      toast.success(`آزمون ثبت شد — نمره: ${formatScore(score)}`)
+      toast.success(`آزمون ثبت شد — نمره: ${formatScore(score)}`);
     }
-  }
+  };
 
   if (!started && !isCompleted) {
     return (
@@ -87,21 +80,21 @@ export function TakeExamPage() {
         <Card>
           <CardHeader>
             <CardTitle>{exam.title}</CardTitle>
-            <p className="text-sm text-muted-foreground">{exam.description}</p>
+            <p className="text-muted-foreground text-sm">{exam.description}</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">{formatNumber(questions.length)} سوال</Badge>
               <Badge variant="outline">{formatNumber(exam.durationMinutes)} دقیقه</Badge>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               سوالات شامل چهارگزینه‌ای و پاسخ تشریحی است. پس از تکمیل، آزمون را ثبت کنید.
             </p>
             <Button onClick={handleStart}>شروع آزمون</Button>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -145,9 +138,9 @@ export function TakeExamPage() {
             {question.type === 'choice' ? (
               <div className="grid gap-2 sm:grid-cols-2">
                 {question.options.map((option, oIndex) => {
-                  const selected = assignment.answers.choices[question.id] === oIndex
-                  const showCorrect = isCompleted && oIndex === question.correctIndex
-                  const showWrong = isCompleted && selected && oIndex !== question.correctIndex
+                  const selected = assignment.answers.choices[question.id] === oIndex;
+                  const showCorrect = isCompleted && oIndex === question.correctIndex;
+                  const showWrong = isCompleted && selected && oIndex !== question.correctIndex;
 
                   return (
                     <button
@@ -155,20 +148,20 @@ export function TakeExamPage() {
                       type="button"
                       disabled={isCompleted}
                       onClick={() => {
-                        if (!assignmentId || isCompleted) return
-                        saveChoiceAnswer(assignmentId, question.id, oIndex)
+                        if (!assignmentId || isCompleted) return;
+                        saveChoiceAnswer(assignmentId, question.id, oIndex);
                       }}
                       className={cn(
                         'rounded-lg border p-3 text-start text-sm transition-colors',
                         selected && 'border-primary bg-primary/5',
                         showCorrect && 'border-emerald-500 bg-emerald-50',
                         showWrong && 'border-red-400 bg-red-50',
-                        !isCompleted && 'hover:bg-accent',
+                        !isCompleted && 'hover:bg-accent'
                       )}
                     >
                       {option}
                     </button>
-                  )
+                  );
                 })}
               </div>
             ) : (
@@ -177,13 +170,13 @@ export function TakeExamPage() {
                   value={assignment.answers.texts[question.id] ?? ''}
                   disabled={isCompleted}
                   onChange={(event) => {
-                    if (!assignmentId || isCompleted) return
-                    saveTextAnswer(assignmentId, question.id, event.target.value)
+                    if (!assignmentId || isCompleted) return;
+                    saveTextAnswer(assignmentId, question.id, event.target.value);
                   }}
                   placeholder="پاسخ خود را بنویسید..."
                 />
                 {isCompleted && question.sampleAnswer && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     پاسخ نمونه: {question.sampleAnswer}
                   </p>
                 )}
@@ -201,5 +194,5 @@ export function TakeExamPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

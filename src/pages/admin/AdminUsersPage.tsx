@@ -1,21 +1,21 @@
-import { useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
-import type { StudentProfile, User } from '@/types'
-import { useStudents } from '@/contexts/StudentContext'
-import { STUDENT_LEVELS } from '@/lib/studentStore'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useMemo, useState } from 'react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import type { StudentProfile, User } from '@/types';
+import { useStudents } from '@/contexts/StudentContext';
+import { STUDENT_LEVELS } from '@/lib/studentStore';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -23,19 +23,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-type TabRole = 'teacher' | 'student' | 'parent'
+type TabRole = 'teacher' | 'student' | 'parent';
 
 interface UserFormState {
-  id?: string
-  name: string
-  username: string
-  level: string
-  teacherId: string
-  parentId: string
-  sessionsRemaining: string
+  id?: string;
+  name: string;
+  username: string;
+  level: string;
+  teacherId: string;
+  parentId: string;
+  sessionsRemaining: string;
 }
 
 const emptyForm = (): UserFormState => ({
@@ -45,7 +45,7 @@ const emptyForm = (): UserFormState => ({
   teacherId: '',
   parentId: '',
   sessionsRemaining: '20',
-})
+});
 
 export function AdminUsersPage() {
   const {
@@ -60,14 +60,14 @@ export function AdminUsersPage() {
     deleteStudent,
     getStudentsByParentId,
     getStudentsByTeacherId,
-  } = useStudents()
+  } = useStudents();
 
-  const [tab, setTab] = useState<TabRole>('teacher')
-  const [form, setForm] = useState<UserFormState | null>(null)
+  const [tab, setTab] = useState<TabRole>('teacher');
+  const [form, setForm] = useState<UserFormState | null>(null);
 
-  const teachers = getUsersByRole('teacher')
-  const parents = getUsersByRole('parent')
-  const studentUsers = getUsersByRole('student')
+  const teachers = getUsersByRole('teacher');
+  const parents = getUsersByRole('parent');
+  const studentUsers = getUsersByRole('student');
 
   const studentRows = useMemo(
     () =>
@@ -75,10 +75,10 @@ export function AdminUsersPage() {
         user,
         profile: students.find((student) => student.userId === user.id),
       })),
-    [studentUsers, students],
-  )
+    [studentUsers, students]
+  );
 
-  const openCreate = () => setForm(emptyForm())
+  const openCreate = () => setForm(emptyForm());
   const openEdit = (user: User, profile?: StudentProfile) => {
     setForm({
       id: user.id,
@@ -88,39 +88,39 @@ export function AdminUsersPage() {
       teacherId: profile?.teacherId ?? teachers[0]?.id ?? '',
       parentId: profile?.parentId ?? parents[0]?.id ?? '',
       sessionsRemaining: String(profile?.sessionsRemaining ?? 20),
-    })
-  }
+    });
+  };
 
   const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
-    if (!form) return
+    event.preventDefault();
+    if (!form) return;
 
     try {
       if (tab === 'teacher') {
         if (form.id) {
-          updateUser(form.id, { name: form.name, username: form.username })
-          toast.success('مدرس به‌روزرسانی شد')
+          updateUser(form.id, { name: form.name, username: form.username });
+          toast.success('مدرس به‌روزرسانی شد');
         } else {
-          createTeacher({ name: form.name, username: form.username })
-          toast.success('مدرس جدید اضافه شد')
+          createTeacher({ name: form.name, username: form.username });
+          toast.success('مدرس جدید اضافه شد');
         }
       } else if (tab === 'parent') {
         if (form.id) {
-          updateUser(form.id, { name: form.name, username: form.username })
-          toast.success('ولی به‌روزرسانی شد')
+          updateUser(form.id, { name: form.name, username: form.username });
+          toast.success('ولی به‌روزرسانی شد');
         } else {
-          createParent({ name: form.name, username: form.username })
-          toast.success('ولی جدید اضافه شد')
+          createParent({ name: form.name, username: form.username });
+          toast.success('ولی جدید اضافه شد');
         }
       } else if (form.id) {
-        updateUser(form.id, { name: form.name, username: form.username })
+        updateUser(form.id, { name: form.name, username: form.username });
         updateStudent(form.id, {
           level: form.level,
           teacherId: form.teacherId,
           parentId: form.parentId,
           sessionsRemaining: Number(form.sessionsRemaining) || 20,
-        })
-        toast.success('زبان‌آموز به‌روزرسانی شد')
+        });
+        toast.success('زبان‌آموز به‌روزرسانی شد');
       } else {
         addStudent({
           name: form.name,
@@ -129,38 +129,40 @@ export function AdminUsersPage() {
           teacherId: form.teacherId,
           parentId: form.parentId,
           sessionsRemaining: Number(form.sessionsRemaining) || 20,
-        })
-        toast.success('زبان‌آموز جدید اضافه شد')
+        });
+        toast.success('زبان‌آموز جدید اضافه شد');
       }
-      setForm(null)
+      setForm(null);
     } catch (error) {
       if (error instanceof Error && error.message === 'duplicate_username') {
-        toast.error('نام کاربری تکراری است')
-        return
+        toast.error('نام کاربری تکراری است');
+        return;
       }
-      toast.error('خطا در ذخیره اطلاعات')
+      toast.error('خطا در ذخیره اطلاعات');
     }
-  }
+  };
 
   const handleDelete = (user: User) => {
     try {
       if (user.role === 'student') {
-        deleteStudent(user.id)
+        deleteStudent(user.id);
       } else {
-        deleteUser(user.id)
+        deleteUser(user.id);
       }
-      toast.success('حذف شد')
+      toast.success('حذف شد');
     } catch {
-      toast.error('امکان حذف این کاربر وجود ندارد')
+      toast.error('امکان حذف این کاربر وجود ندارد');
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">مدیریت کاربران</h2>
-          <p className="text-sm text-muted-foreground">افزودن، ویرایش و حذف مدرسان، زبان‌آموزان و اولیا</p>
+          <p className="text-muted-foreground text-sm">
+            افزودن، ویرایش و حذف مدرسان، زبان‌آموزان و اولیا
+          </p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="size-4" />
@@ -201,33 +203,54 @@ export function AdminUsersPage() {
                 <>
                   <div className="space-y-2">
                     <Label>سطح</Label>
-                    <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    <Select
+                      value={form.level}
+                      onValueChange={(v) => setForm({ ...form, level: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         {STUDENT_LEVELS.map((level) => (
-                          <SelectItem key={level} value={level}>{level}</SelectItem>
+                          <SelectItem key={level} value={level}>
+                            {level}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>مدرس</Label>
-                    <Select value={form.teacherId} onValueChange={(v) => setForm({ ...form, teacherId: v })}>
-                      <SelectTrigger><SelectValue placeholder="انتخاب مدرس" /></SelectTrigger>
+                    <Select
+                      value={form.teacherId}
+                      onValueChange={(v) => setForm({ ...form, teacherId: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="انتخاب مدرس" />
+                      </SelectTrigger>
                       <SelectContent>
                         {teachers.map((teacher) => (
-                          <SelectItem key={teacher.id} value={teacher.id}>{teacher.name}</SelectItem>
+                          <SelectItem key={teacher.id} value={teacher.id}>
+                            {teacher.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>ولی</Label>
-                    <Select value={form.parentId} onValueChange={(v) => setForm({ ...form, parentId: v })}>
-                      <SelectTrigger><SelectValue placeholder="انتخاب ولی" /></SelectTrigger>
+                    <Select
+                      value={form.parentId}
+                      onValueChange={(v) => setForm({ ...form, parentId: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="انتخاب ولی" />
+                      </SelectTrigger>
                       <SelectContent>
                         {parents.map((parent) => (
-                          <SelectItem key={parent.id} value={parent.id}>{parent.name}</SelectItem>
+                          <SelectItem key={parent.id} value={parent.id}>
+                            {parent.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -246,14 +269,22 @@ export function AdminUsersPage() {
               )}
               <div className="flex gap-2 sm:col-span-2">
                 <Button type="submit">ذخیره</Button>
-                <Button type="button" variant="outline" onClick={() => setForm(null)}>انصراف</Button>
+                <Button type="button" variant="outline" onClick={() => setForm(null)}>
+                  انصراف
+                </Button>
               </div>
             </form>
           </CardContent>
         </Card>
       )}
 
-      <Tabs value={tab} onValueChange={(v) => { setTab(v as TabRole); setForm(null) }}>
+      <Tabs
+        value={tab}
+        onValueChange={(v) => {
+          setTab(v as TabRole);
+          setForm(null);
+        }}
+      >
         <TabsList>
           <TabsTrigger value="teacher">مدرسان ({teachers.length})</TabsTrigger>
           <TabsTrigger value="student">زبان‌آموزان ({studentUsers.length})</TabsTrigger>
@@ -263,7 +294,9 @@ export function AdminUsersPage() {
         <TabsContent value="teacher" className="mt-4">
           <UserTable
             users={teachers}
-            extraColumn={(user) => formatNumber(getStudentsByTeacherId(user.id).length) + ' زبان‌آموز'}
+            extraColumn={(user) =>
+              formatNumber(getStudentsByTeacherId(user.id).length) + ' زبان‌آموز'
+            }
             extraLabel="کلاس"
             onEdit={(user) => openEdit(user)}
             onDelete={handleDelete}
@@ -288,7 +321,9 @@ export function AdminUsersPage() {
                     <TableCell>{user.name}</TableCell>
                     <TableCell dir="ltr">{user.username}</TableCell>
                     <TableCell>{profile?.level ?? '—'}</TableCell>
-                    <TableCell>{teachers.find((t) => t.id === profile?.teacherId)?.name ?? '—'}</TableCell>
+                    <TableCell>
+                      {teachers.find((t) => t.id === profile?.teacherId)?.name ?? '—'}
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
                         <Button size="icon" variant="ghost" onClick={() => openEdit(user, profile)}>
@@ -317,11 +352,11 @@ export function AdminUsersPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
 function formatNumber(n: number) {
-  return new Intl.NumberFormat('fa-IR').format(n)
+  return new Intl.NumberFormat('fa-IR').format(n);
 }
 
 function UserTable({
@@ -331,11 +366,11 @@ function UserTable({
   onEdit,
   onDelete,
 }: {
-  users: User[]
-  extraColumn: (user: User) => string
-  extraLabel: string
-  onEdit: (user: User) => void
-  onDelete: (user: User) => void
+  users: User[];
+  extraColumn: (user: User) => string;
+  extraLabel: string;
+  onEdit: (user: User) => void;
+  onDelete: (user: User) => void;
 }) {
   return (
     <div className="rounded-xl border">
@@ -353,7 +388,9 @@ function UserTable({
             <TableRow key={user.id}>
               <TableCell>{user.name}</TableCell>
               <TableCell dir="ltr">{user.username}</TableCell>
-              <TableCell><Badge variant="secondary">{extraColumn(user)}</Badge></TableCell>
+              <TableCell>
+                <Badge variant="secondary">{extraColumn(user)}</Badge>
+              </TableCell>
               <TableCell>
                 <div className="flex gap-1">
                   <Button size="icon" variant="ghost" onClick={() => onEdit(user)}>
@@ -369,5 +406,5 @@ function UserTable({
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

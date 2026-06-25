@@ -1,5 +1,5 @@
-import type { ParentMessage } from '@/types'
-import { DEMO_PARENT_ID, DEMO_TEACHER_ID } from './users'
+import type { ParentMessage } from '@/types';
+import { DEMO_PARENT_ID, DEMO_TEACHER_ID } from './users';
 
 export const mockMessages: ParentMessage[] = [
   {
@@ -51,19 +51,19 @@ export const mockMessages: ParentMessage[] = [
     message: 'گزارش اولین جلسه ثبت شد. علی عملکرد خوبی داشت.',
     sentAt: '2025-03-01T15:00:00',
   },
-]
+];
 
 export function getMessagesForParent(parentId: string, studentId: string) {
   const studentSessionIds = mockMessages
     .filter((msg) => msg.sessionId.startsWith('session'))
-    .map((msg) => msg.sessionId)
+    .map((msg) => msg.sessionId);
 
-  void parentId
-  void studentId
+  void parentId;
+  void studentId;
 
-  return mockMessages.filter((msg) => studentSessionIds.includes(msg.sessionId))
+  return mockMessages.filter((msg) => studentSessionIds.includes(msg.sessionId));
 }
 
 export function getMessagesBySessionId(sessionId: string) {
-  return mockMessages.filter((msg) => msg.sessionId === sessionId)
+  return mockMessages.filter((msg) => msg.sessionId === sessionId);
 }

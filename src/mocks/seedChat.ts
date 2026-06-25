@@ -1,12 +1,8 @@
-import type { ChatConversation, ChatMessage } from '@/types'
-import {
-  DEMO_PARENT_ID,
-  DEMO_STUDENT_ID,
-  DEMO_TEACHER_ID,
-} from '@/mocks/seedUsers'
+import type { ChatConversation, ChatMessage } from '@/types';
+import { DEMO_PARENT_ID, DEMO_STUDENT_ID, DEMO_TEACHER_ID } from '@/mocks/seedUsers';
 
 export function createConversationId(studentId: string) {
-  return `conv-${studentId}`
+  return `conv-${studentId}`;
 }
 
 export const seedConversations: ChatConversation[] = [
@@ -17,7 +13,7 @@ export const seedConversations: ChatConversation[] = [
     studentId: DEMO_STUDENT_ID,
     updatedAt: '2025-04-26T14:30:00',
   },
-]
+];
 
 export const seedMessages: ChatMessage[] = [
   {
@@ -76,4 +72,4 @@ export const seedMessages: ChatMessage[] = [
     body: 'گزارش اولین جلسه ثبت شد. علی عملکرد خوبی داشت.',
     sentAt: '2025-03-01T15:00:00',
   },
-]
+];

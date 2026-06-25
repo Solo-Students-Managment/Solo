@@ -1,42 +1,43 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
-import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
-import { useStudents } from '@/contexts/StudentContext'
-import { STUDENT_LEVELS } from '@/lib/studentStore'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
+
+import { useStudents } from '@/contexts/StudentContext';
+import { STUDENT_LEVELS } from '@/lib/studentStore';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function StudentCreatePage() {
-  const { user } = useAuth()
-  const { addStudent } = useStudents()
-  const navigate = useNavigate()
+  const { user } = useAuth();
+  const { addStudent } = useStudents();
+  const navigate = useNavigate();
 
-  const [name, setName] = useState('')
-  const [level, setLevel] = useState<string>(STUDENT_LEVELS[0])
-  const [username, setUsername] = useState('')
-  const [parentName, setParentName] = useState('')
-  const [parentUsername, setParentUsername] = useState('')
-  const [sessionsRemaining, setSessionsRemaining] = useState('20')
+  const [name, setName] = useState('');
+  const [level, setLevel] = useState<string>(STUDENT_LEVELS[0]);
+  const [username, setUsername] = useState('');
+  const [parentName, setParentName] = useState('');
+  const [parentUsername, setParentUsername] = useState('');
+  const [sessionsRemaining, setSessionsRemaining] = useState('20');
 
   const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    if (!user || user.role !== 'teacher') return
+    if (!user || user.role !== 'teacher') return;
 
     if (!name.trim() || !username.trim()) {
-      toast.error('نام و نام کاربری زبان‌آموز الزامی است')
-      return
+      toast.error('نام و نام کاربری زبان‌آموز الزامی است');
+      return;
     }
 
     try {
@@ -48,24 +49,24 @@ export function StudentCreatePage() {
         parentUsername: parentUsername.trim() || undefined,
         teacherId: user.id,
         sessionsRemaining: Number(sessionsRemaining) || 20,
-      })
+      });
 
       toast.success(
-        `زبان‌آموز «${result.user.name}» اضافه شد. رمز عبور: ${result.defaultPassword}`,
-      )
-      navigate('/dashboard/students')
+        `زبان‌آموز «${result.user.name}» اضافه شد. رمز عبور: ${result.defaultPassword}`
+      );
+      navigate('/dashboard/students');
     } catch (error) {
       if (error instanceof Error && error.message === 'duplicate_username') {
-        toast.error('این نام کاربری قبلاً ثبت شده است')
-        return
+        toast.error('این نام کاربری قبلاً ثبت شده است');
+        return;
       }
       if (error instanceof Error && error.message === 'duplicate_parent_username') {
-        toast.error('نام کاربری ولی تکراری است')
-        return
+        toast.error('نام کاربری ولی تکراری است');
+        return;
       }
-      toast.error('خطا در ثبت زبان‌آموز')
+      toast.error('خطا در ثبت زبان‌آموز');
     }
-  }
+  };
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -77,9 +78,7 @@ export function StudentCreatePage() {
         </Button>
         <div>
           <h2 className="text-xl font-semibold">افزودن زبان‌آموز</h2>
-          <p className="text-sm text-muted-foreground">
-            اطلاعات زبان‌آموز جدید را وارد کنید
-          </p>
+          <p className="text-muted-foreground text-sm">اطلاعات زبان‌آموز جدید را وارد کنید</p>
         </div>
       </div>
 
@@ -180,5 +179,5 @@ export function StudentCreatePage() {
         </div>
       </form>
     </div>
-  )
+  );
 }

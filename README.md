@@ -17,12 +17,12 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) and sign in with a demo account:
 
-| Role    | Username             | Password  |
-| ------- | -------------------- | --------- |
+| Role      | Username             | Password  |
+| --------- | -------------------- | --------- |
 | زبان‌آموز | `student@demo.local` | `demo123` |
-| ولی     | `parent@demo.local`  | `demo123` |
-| مدرس    | `teacher@demo.local` | `demo123` |
-| ادمین   | `admin@demo.local`   | `demo123` |
+| ولی       | `parent@demo.local`  | `demo123` |
+| مدرس      | `teacher@demo.local` | `demo123` |
+| ادمین     | `admin@demo.local`   | `demo123` |
 
 ## Scripts
 

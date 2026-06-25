@@ -1,5 +1,5 @@
-import type { StudentProfile } from '@/types'
-import { DEMO_PARENT_ID, DEMO_STUDENT_ID, DEMO_TEACHER_ID } from './seedUsers'
+import type { StudentProfile } from '@/types';
+import { DEMO_PARENT_ID, DEMO_STUDENT_ID, DEMO_TEACHER_ID } from './seedUsers';
 
 export const seedStudents: StudentProfile[] = [
   {
@@ -82,4 +82,4 @@ export const seedStudents: StudentProfile[] = [
     attendanceStats: { present: 10, absent: 0, late: 1 },
     averageScore: 18.2,
   },
-]
+];

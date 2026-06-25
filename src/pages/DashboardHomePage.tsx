@@ -1,27 +1,27 @@
-import { useAuth } from '@/contexts/AuthContext'
-import { AdminHomePage } from '@/pages/admin/AdminHomePage'
-import { ParentHomePage } from '@/pages/parent/ParentHomePage'
-import { StudentHomePage } from '@/pages/student/StudentHomePage'
-import { TeacherHomePage } from '@/pages/teacher/TeacherHomePage'
+import { useAuth } from '@/contexts/AuthContext';
+import { AdminHomePage } from '@/pages/admin/AdminHomePage';
+import { ParentHomePage } from '@/pages/parent/ParentHomePage';
+import { StudentHomePage } from '@/pages/student/StudentHomePage';
+import { TeacherHomePage } from '@/pages/teacher/TeacherHomePage';
 
 export function DashboardHomePage() {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
-  if (!user) return null
+  if (!user) return null;
 
   switch (user.role) {
     case 'student':
-      return <StudentHomePage />
+      return <StudentHomePage />;
     case 'parent':
-      return <ParentHomePage />
+      return <ParentHomePage />;
     case 'teacher':
-      return <TeacherHomePage />
+      return <TeacherHomePage />;
     case 'admin':
-      return <AdminHomePage />
+      return <AdminHomePage />;
     default: {
-      const _exhaustive: never = user.role
-      void _exhaustive
-      return null
+      const _exhaustive: never = user.role;
+      void _exhaustive;
+      return null;
     }
   }
 }

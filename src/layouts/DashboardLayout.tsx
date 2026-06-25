@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
   BookOpen,
@@ -14,14 +14,15 @@ import {
   Users,
   Wallet,
   X,
-} from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
-import { getNavItemsForRole, ROLE_LABELS } from '@/lib/routes'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { cn } from '@/lib/utils'
+} from 'lucide-react';
+
+import { getNavItemsForRole, ROLE_LABELS } from '@/lib/routes';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 const iconMap = {
   '/dashboard': LayoutDashboard,
@@ -34,41 +35,41 @@ const iconMap = {
   '/dashboard/admin/users': Users,
   '/dashboard/admin/analytics': BarChart3,
   '/dashboard/admin/revenue': Wallet,
-} as const
+} as const;
 
 export function DashboardLayout() {
-  const { user, logout } = useAuth()
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  if (!user) return null
+  if (!user) return null;
 
-  const navItems = getNavItemsForRole(user.role)
+  const navItems = getNavItemsForRole(user.role);
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+    logout();
+    navigate('/login');
+  };
 
   const sidebar = (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 px-4 py-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <div className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-lg">
           <GraduationCap className="h-5 w-5" />
         </div>
         <div>
           <p className="text-sm font-semibold">پنل آموزشی</p>
-          <p className="text-xs text-muted-foreground">مدیریت زبان‌آموز</p>
+          <p className="text-muted-foreground text-xs">مدیریت زبان‌آموز</p>
         </div>
       </div>
       <Separator />
       <nav className="flex-1 space-y-1 p-3">
         {navItems.map((item) => {
-          const Icon = iconMap[item.href as keyof typeof iconMap] ?? LayoutDashboard
+          const Icon = iconMap[item.href as keyof typeof iconMap] ?? LayoutDashboard;
           const active =
             location.pathname === item.href ||
-            (item.href !== '/dashboard' && location.pathname.startsWith(item.href))
+            (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
 
           return (
             <Link
@@ -79,13 +80,13 @@ export function DashboardLayout() {
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 active
                   ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
               )}
             >
               <Icon className="h-4 w-4" />
               {item.label}
             </Link>
-          )
+          );
         })}
       </nav>
       <Separator />
@@ -107,12 +108,12 @@ export function DashboardLayout() {
         </Button>
       </div>
     </div>
-  )
+  );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="flex min-h-screen">
-        <aside className="hidden w-64 shrink-0 border-e bg-sidebar lg:block">{sidebar}</aside>
+        <aside className="bg-sidebar hidden w-64 shrink-0 border-e lg:block">{sidebar}</aside>
 
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
@@ -122,7 +123,7 @@ export function DashboardLayout() {
               aria-label="بستن منو"
               onClick={() => setMobileOpen(false)}
             />
-            <aside className="absolute inset-y-0 start-0 w-64 border-e bg-sidebar shadow-xl">
+            <aside className="bg-sidebar absolute inset-y-0 inset-s-0 w-64 border-e shadow-xl">
               <div className="flex justify-end p-2">
                 <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
                   <X className="h-5 w-5" />
@@ -134,7 +135,7 @@ export function DashboardLayout() {
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-14 items-center gap-3 border-b bg-card px-4 lg:px-6">
+          <header className="bg-card flex h-14 items-center gap-3 border-b px-4 lg:px-6">
             <Button
               variant="ghost"
               size="icon"
@@ -148,7 +149,7 @@ export function DashboardLayout() {
                 {navItems.find(
                   (item) =>
                     location.pathname === item.href ||
-                    (item.href !== '/dashboard' && location.pathname.startsWith(item.href)),
+                    (item.href !== '/dashboard' && location.pathname.startsWith(item.href))
                 )?.label ?? 'داشبورد'}
               </h1>
             </div>
@@ -160,5 +161,5 @@ export function DashboardLayout() {
         </div>
       </div>
     </div>
-  )
+  );
 }

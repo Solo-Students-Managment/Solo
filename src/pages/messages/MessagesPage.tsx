@@ -1,43 +1,42 @@
-import { useMemo, useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { useChat } from '@/contexts/ChatContext'
-import { ChatThread } from '@/components/messages/ChatThread'
-import { ConversationList } from '@/components/messages/ConversationList'
+import { useMemo, useState } from 'react';
+
+import { useChat } from '@/contexts/ChatContext';
+import { ChatThread } from '@/components/messages/ChatThread';
+import { ConversationList } from '@/components/messages/ConversationList';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function MessagesPage() {
-  const { user } = useAuth()
-  const { getConversationsForParent, getConversationsForTeacher } = useChat()
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [mobileShowThread, setMobileShowThread] = useState(false)
+  const { user } = useAuth();
+  const { getConversationsForParent, getConversationsForTeacher } = useChat();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mobileShowThread, setMobileShowThread] = useState(false);
 
   const conversations = useMemo(() => {
-    if (!user) return []
-    if (user.role === 'parent') return getConversationsForParent(user.id)
-    if (user.role === 'teacher') return getConversationsForTeacher(user.id)
-    return []
-  }, [user, getConversationsForParent, getConversationsForTeacher])
+    if (!user) return [];
+    if (user.role === 'parent') return getConversationsForParent(user.id);
+    if (user.role === 'teacher') return getConversationsForTeacher(user.id);
+    return [];
+  }, [user, getConversationsForParent, getConversationsForTeacher]);
 
-  const activeId = selectedId ?? conversations[0]?.id ?? null
+  const activeId = selectedId ?? conversations[0]?.id ?? null;
   const activeConversation =
-    conversations.find((conversation) => conversation.id === activeId) ?? null
+    conversations.find((conversation) => conversation.id === activeId) ?? null;
 
   const handleSelect = (conversationId: string) => {
-    setSelectedId(conversationId)
-    setMobileShowThread(true)
-  }
+    setSelectedId(conversationId);
+    setMobileShowThread(true);
+  };
 
   if (!user || (user.role !== 'parent' && user.role !== 'teacher')) {
-    return <p className="text-muted-foreground">دسترسی به پیام‌ها مجاز نیست.</p>
+    return <p className="text-muted-foreground">دسترسی به پیام‌ها مجاز نیست.</p>;
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold">پیام‌ها</h2>
-        <p className="text-sm text-muted-foreground">
-          {user.role === 'teacher'
-            ? 'گفتگو با اولیای زبان‌آموزان'
-            : 'گفتگو با مدرس فرزند'}
+        <p className="text-muted-foreground text-sm">
+          {user.role === 'teacher' ? 'گفتگو با اولیای زبان‌آموزان' : 'گفتگو با مدرس فرزند'}
         </p>
       </div>
 
@@ -57,12 +56,12 @@ export function MessagesPage() {
               onBack={mobileShowThread ? () => setMobileShowThread(false) : undefined}
             />
           ) : (
-            <div className="flex min-h-[420px] items-center justify-center rounded-xl border bg-card p-6 text-sm text-muted-foreground">
+            <div className="bg-card text-muted-foreground flex min-h-[420px] items-center justify-center rounded-xl border p-6 text-sm">
               یک گفتگو را انتخاب کنید
             </div>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

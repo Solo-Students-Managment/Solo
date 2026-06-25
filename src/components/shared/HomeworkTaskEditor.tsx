@@ -1,40 +1,40 @@
-import { Plus, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
-import type { HomeworkTask } from '@/types'
-import { createTaskId } from '@/lib/homework'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Plus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import type { HomeworkTask } from '@/types';
+import { createTaskId } from '@/lib/homework';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface HomeworkTaskEditorProps {
-  tasks: HomeworkTask[]
-  onChange: (tasks: HomeworkTask[]) => void
-  onSave?: (tasks: HomeworkTask[]) => void
+  tasks: HomeworkTask[];
+  onChange: (tasks: HomeworkTask[]) => void;
+  onSave?: (tasks: HomeworkTask[]) => void;
 }
 
 export function HomeworkTaskEditor({ tasks, onChange, onSave }: HomeworkTaskEditorProps) {
   const addTask = () => {
-    onChange([...tasks, { id: createTaskId(), title: '' }])
-  }
+    onChange([...tasks, { id: createTaskId(), title: '' }]);
+  };
 
   const updateTask = (taskId: string, title: string) => {
-    onChange(tasks.map((task) => (task.id === taskId ? { ...task, title } : task)))
-  }
+    onChange(tasks.map((task) => (task.id === taskId ? { ...task, title } : task)));
+  };
 
   const removeTask = (taskId: string) => {
-    onChange(tasks.filter((task) => task.id !== taskId))
-  }
+    onChange(tasks.filter((task) => task.id !== taskId));
+  };
 
   const handleSave = () => {
-    const validTasks = tasks.filter((task) => task.title.trim())
+    const validTasks = tasks.filter((task) => task.title.trim());
     if (validTasks.length === 0) {
-      toast.error('حداقل یک مورد تکلیف وارد کنید')
-      return
+      toast.error('حداقل یک مورد تکلیف وارد کنید');
+      return;
     }
-    onChange(validTasks)
-    onSave?.(validTasks)
-  }
+    onChange(validTasks);
+    onSave?.(validTasks);
+  };
 
   return (
     <div className="space-y-4">
@@ -47,7 +47,7 @@ export function HomeworkTaskEditor({ tasks, onChange, onSave }: HomeworkTaskEdit
       </div>
 
       {tasks.length === 0 ? (
-        <p className="text-sm text-muted-foreground">هنوز مورد تکلیفی تعریف نشده است.</p>
+        <p className="text-muted-foreground text-sm">هنوز مورد تکلیفی تعریف نشده است.</p>
       ) : (
         <ul className="space-y-3">
           {tasks.map((task, index) => (
@@ -65,7 +65,7 @@ export function HomeworkTaskEditor({ tasks, onChange, onSave }: HomeworkTaskEdit
                 onClick={() => removeTask(task.id)}
                 aria-label="حذف مورد"
               >
-                <Trash2 className="h-4 w-4 text-destructive" />
+                <Trash2 className="text-destructive h-4 w-4" />
               </Button>
             </li>
           ))}
@@ -78,5 +78,5 @@ export function HomeworkTaskEditor({ tasks, onChange, onSave }: HomeworkTaskEdit
         </Button>
       )}
     </div>
-  )
+  );
 }

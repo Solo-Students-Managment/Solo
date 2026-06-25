@@ -1,50 +1,51 @@
-import { AlertCircle, Award, CalendarCheck, MessageSquare } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
-import { useSessionApproval } from '@/contexts/SessionApprovalContext'
-import { useChat } from '@/contexts/ChatContext'
-import { getAttendanceRate, useMockData, useStudentName } from '@/hooks/useMockData'
-import { ProgressChart } from '@/components/shared/ProgressChart'
-import { SessionCard } from '@/components/shared/SessionCard'
-import { StatCard } from '@/components/shared/StatCard'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatNumber, formatPercent, formatScore } from '@/lib/formatters'
+import { AlertCircle, Award, CalendarCheck, MessageSquare } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+
+import { useSessionApproval } from '@/contexts/SessionApprovalContext';
+import { useChat } from '@/contexts/ChatContext';
+import { getAttendanceRate, useMockData, useStudentName } from '@/hooks/useMockData';
+import { ProgressChart } from '@/components/shared/ProgressChart';
+import { SessionCard } from '@/components/shared/SessionCard';
+import { StatCard } from '@/components/shared/StatCard';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatNumber, formatPercent, formatScore } from '@/lib/formatters';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function ParentHomePage() {
-  const { user } = useAuth()
-  const { currentStudent, parentChildren, sessions } = useMockData()
-  const { isConfirmed, approveSession } = useSessionApproval()
-  const { getConversationsForParent, getLastMessage } = useChat()
-  const childName = useStudentName(currentStudent?.userId ?? '')
+  const { user } = useAuth();
+  const { currentStudent, parentChildren, sessions } = useMockData();
+  const { isConfirmed, approveSession } = useSessionApproval();
+  const { getConversationsForParent, getLastMessage } = useChat();
+  const childName = useStudentName(currentStudent?.userId ?? '');
 
-  const conversations = user ? getConversationsForParent(user.id) : []
+  const conversations = user ? getConversationsForParent(user.id) : [];
   const unreadHint = conversations.filter((conversation) => {
-    const lastMessage = getLastMessage(conversation.id)
-    return lastMessage?.senderRole === 'teacher'
-  }).length
+    const lastMessage = getLastMessage(conversation.id);
+    return lastMessage?.senderRole === 'teacher';
+  }).length;
 
   if (!user || !currentStudent) {
-    return <p className="text-muted-foreground">اطلاعات فرزند یافت نشد.</p>
+    return <p className="text-muted-foreground">اطلاعات فرزند یافت نشد.</p>;
   }
 
-  const attendanceRate = getAttendanceRate(currentStudent.attendanceStats)
-  const latestSession = sessions[0]
+  const attendanceRate = getAttendanceRate(currentStudent.attendanceStats);
+  const latestSession = sessions[0];
   const unconfirmedCount = sessions.filter(
-    (session) => !isConfirmed(session.id, session.parentConfirmed),
-  ).length
+    (session) => !isConfirmed(session.id, session.parentConfirmed)
+  ).length;
 
   const handleConfirmLatest = () => {
-    if (!latestSession) return
-    approveSession(latestSession.id, user.id)
-    toast.success('گزارش جلسه با موفقیت تأیید شد')
-  }
+    if (!latestSession) return;
+    approveSession(latestSession.id, user.id);
+    toast.success('گزارش جلسه با موفقیت تأیید شد');
+  };
 
   const latestConfirmed = latestSession
     ? isConfirmed(latestSession.id, latestSession.parentConfirmed)
-    : true
+    : true;
 
   return (
     <div className="space-y-6">
@@ -53,33 +54,37 @@ export function ParentHomePage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <CardTitle>گزارش {childName}</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 {parentChildren.length > 1
                   ? `${formatNumber(parentChildren.length)} فرزند`
                   : 'نمای کلی پیشرفت تحصیلی'}
               </p>
             </div>
             {unconfirmedCount > 0 && (
-              <Badge variant="warning">{formatNumber(unconfirmedCount)} گزارش در انتظار تأیید</Badge>
+              <Badge variant="warning">
+                {formatNumber(unconfirmedCount)} گزارش در انتظار تأیید
+              </Badge>
             )}
           </div>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p className="text-sm text-muted-foreground">سطح</p>
+            <p className="text-muted-foreground text-sm">سطح</p>
             <p className="text-lg font-semibold">{currentStudent.level}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">میانگین نمرات</p>
+            <p className="text-muted-foreground text-sm">میانگین نمرات</p>
             <p className="text-lg font-semibold">{formatScore(currentStudent.averageScore)}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">نرخ حضور</p>
+            <p className="text-muted-foreground text-sm">نرخ حضور</p>
             <p className="text-lg font-semibold">{formatPercent(attendanceRate)}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">جلسات برگزار شده</p>
-            <p className="text-lg font-semibold">{formatNumber(currentStudent.sessionsCompleted)}</p>
+            <p className="text-muted-foreground text-sm">جلسات برگزار شده</p>
+            <p className="text-lg font-semibold">
+              {formatNumber(currentStudent.sessionsCompleted)}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -98,12 +103,12 @@ export function ParentHomePage() {
         <StatCard
           title="میانگین نمرات"
           value={formatScore(currentStudent.averageScore)}
-          icon={<Award className="h-4 w-4 text-primary" />}
+          icon={<Award className="text-primary h-4 w-4" />}
         />
         <StatCard
           title="پیام‌های مدرس"
           value={formatNumber(unreadHint)}
-          icon={<MessageSquare className="h-4 w-4 text-primary" />}
+          icon={<MessageSquare className="text-primary h-4 w-4" />}
         />
       </div>
 
@@ -161,5 +166,5 @@ export function ParentHomePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

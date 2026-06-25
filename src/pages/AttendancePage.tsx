@@ -1,8 +1,7 @@
-import { useAuth } from '@/contexts/AuthContext'
-import { getAttendanceRate, useMockData } from '@/hooks/useMockData'
-import { AttendanceBadge } from '@/components/shared/AttendanceBadge'
-import { StatCard } from '@/components/shared/StatCard'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getAttendanceRate, useMockData } from '@/hooks/useMockData';
+import { AttendanceBadge } from '@/components/shared/AttendanceBadge';
+import { StatCard } from '@/components/shared/StatCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -10,31 +9,37 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { formatNumber, formatPercent, formatPersianDate } from '@/lib/formatters'
+} from '@/components/ui/table';
+import { formatNumber, formatPercent, formatPersianDate } from '@/lib/formatters';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function AttendancePage() {
-  const { user } = useAuth()
-  const { currentStudent, sessions } = useMockData()
+  const { user } = useAuth();
+  const { currentStudent, sessions } = useMockData();
 
   if (!currentStudent) {
-    return <p className="text-muted-foreground">اطلاعات حضور و غیاب یافت نشد.</p>
+    return <p className="text-muted-foreground">اطلاعات حضور و غیاب یافت نشد.</p>;
   }
 
-  const stats = currentStudent.attendanceStats
-  const total = stats.present + stats.absent + stats.late
-  const rate = getAttendanceRate(stats)
+  const stats = currentStudent.attendanceStats;
+  const total = stats.present + stats.absent + stats.late;
+  const rate = getAttendanceRate(stats);
 
   const monthlySummary = [
     { month: 'فروردین', present: 3, absent: 1, late: 0 },
-    { month: 'اردیبهشت', present: stats.present - 3, absent: stats.absent - 1, late: stats.late },
-  ]
+    {
+      month: 'اردیبهشت',
+      present: stats.present - 3,
+      absent: stats.absent - 1,
+      late: stats.late,
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold">حضور و غیاب</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {user?.role === 'parent' ? 'گزارش حضور فرزند' : 'وضعیت حضور شما'}
         </p>
       </div>
@@ -106,5 +111,5 @@ export function AttendancePage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

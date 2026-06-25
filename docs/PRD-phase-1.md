@@ -252,17 +252,17 @@ student-managment/
 
 ## 9. Routing Map
 
-| Path                      | Role                     | Page                |
-| ------------------------- | ------------------------ | ------------------- |
-| `/login`                  | public                   | Login               |
-| `/dashboard`              | all                      | Role-specific home  |
-| `/dashboard/sessions`     | student, parent, teacher | Sessions list       |
-| `/dashboard/sessions/:id` | student, parent, teacher | Session detail      |
-| `/dashboard/attendance`   | student, parent          | Attendance summary  |
-| `/dashboard/messages`     | parent                   | Messages preview    |
-| `/dashboard/students`     | teacher                  | Students list       |
-| `/dashboard/students/:id` | teacher                  | Student detail      |
-| `/dashboard/sessions/new` | teacher                  | Mock session form   |
+| Path                      | Role                     | Page               |
+| ------------------------- | ------------------------ | ------------------ |
+| `/login`                  | public                   | Login              |
+| `/dashboard`              | all                      | Role-specific home |
+| `/dashboard/sessions`     | student, parent, teacher | Sessions list      |
+| `/dashboard/sessions/:id` | student, parent, teacher | Session detail     |
+| `/dashboard/attendance`   | student, parent          | Attendance summary |
+| `/dashboard/messages`     | parent                   | Messages preview   |
+| `/dashboard/students`     | teacher                  | Students list      |
+| `/dashboard/students/:id` | teacher                  | Student detail     |
+| `/dashboard/sessions/new` | teacher                  | Mock session form  |
 
 Admin uses `/dashboard` only (single-page analytics).
 
