@@ -1,35 +1,80 @@
-# پنل مدیریت زبان‌آموز و اولیا
+# Student Management System
 
-Phase 1: role-based dashboard with mock data (Persian RTL).
+A lightweight Student Management System built with modern React and TypeScript tooling.
 
-## Stack
+## English / فارسی (English first, Persian summary below)
 
-- Vite + React + TypeScript
-- shadcn/ui + Tailwind CSS v4
-- React Router + Recharts
+### Tech stack
 
-## Quick start
+- React 19 + React DOM 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router v7
+- Formik & Yup
+- Recharts, Framer Motion, Lucide React, Sonner
+
+### Folder structure overview
+
+- `src/` — application source
+  - `app/` — app shell, providers, and router
+  - `components/` — UI primitives and layout components
+  - `features/` — feature modules (auth, sessions, exams, etc.)
+  - `lib/` — lightweight service and helper modules
+  - `hooks/` — local hooks
+  - `mocks/` — mock data for development
+  - `styles/` — global styles
+  - `types/` — shared TypeScript types
+
+### How to run
+
+Install dependencies and start the dev server:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) and sign in with a demo account:
+Build for production:
 
-| Role      | Username             | Password  |
-| --------- | -------------------- | --------- |
-| زبان‌آموز | `student@demo.local` | `demo123` |
-| ولی       | `parent@demo.local`  | `demo123` |
-| مدرس      | `teacher@demo.local` | `demo123` |
-| ادمین     | `admin@demo.local`   | `demo123` |
+```bash
+npm run build
+npm run preview
+```
 
-## Scripts
+### Available scripts
 
-- `npm run dev` — start dev server
-- `npm run build` — production build
-- `npm run preview` — preview production build
+- `dev` — Start Vite dev server
+- `build` — Build production bundles
+- `preview` — Preview built app
+- `lint` — Run linter
+- `test` — Run tests (if configured)
 
-## Documentation
+### Key features
 
-See [docs/PRD-phase-1.md](docs/PRD-phase-1.md) for the full Phase 1 product requirements.
+- Authentication and role-based routes
+- Session management and attendance
+- Exam creation and participation
+- Messaging between users
+- Admin analytics and revenue views
+
+### Architecture (brief)
+
+This project follows a pragmatic feature-sliced approach:
+
+- `app/` contains the application shell, global providers, and router.
+- `features/` groups feature-specific pages and components.
+- `components/` holds UI primitives and layout components shared across features.
+- `lib/` contains domain helpers and lightweight services.
+
+This structure keeps features isolated and makes the codebase easier to scale and maintain.
+
+---
+
+خلاصه فارسی
+
+این پروژه یک سامانه‌ی مدیریت دانش‌آموزان است که با React و TypeScript و ابزارهای مدرن ساخته شده است. ساختار پروژه مبتنی بر جداسازی بر مبنای ویژگی (feature-sliced) است تا مقیاس‌پذیری و نگهداری کد ساده‌تر شود. برای اجرای پروژه از `npm run dev` استفاده کنید و برای تولید بسته‌ی نهایی `npm run build` را اجرا کنید.
+
+ویژگی‌های کلیدی شامل تأیید هویت، مدیریت جلسات و حضور و غیاب، آزمون‌سازی، پیام‌رسانی و داشبوردهای آماری برای مدیران است.
+
+---

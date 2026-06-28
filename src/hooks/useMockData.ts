@@ -9,7 +9,7 @@ import {
   mockStudents,
 } from '@/mocks/students';
 import { DEMO_STUDENT_ID, getUserById } from '@/mocks/users';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/app/providers/AuthContext';
 
 export function useMockData() {
   const { user } = useAuth();
