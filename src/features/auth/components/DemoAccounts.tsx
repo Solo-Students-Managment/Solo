@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-import { demoAccounts } from '../constants/demoAccounts';
 import { DEMO_PASSWORD } from '@/mocks/users';
+import { demoAccounts } from '../constants/demoAccounts';
 
 type Props = {
   onFill: (username: string, password: string) => void;
@@ -18,7 +18,7 @@ export function DemoAccounts({ onFill }: Props) {
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger asChild>
-        <Button variant="ghost" className="w-full justify-between">
+        <Button variant="ghost" className="rounded-2xs w-full justify-between">
           حساب‌های آزمایشی
           <ChevronDown size={18} />
         </Button>
@@ -32,7 +32,7 @@ export function DemoAccounts({ onFill }: Props) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onFill(acc.username, DEMO_PASSWORD)}
-            className="flex w-full justify-between rounded-xl border bg-white/60 px-3 py-3 text-sm hover:bg-white"
+            className="rounded-2xs flex w-full justify-between border bg-white/60 px-3 py-3 text-sm hover:bg-white"
           >
             <span>{acc.role}</span>
             <span className="text-xs text-gray-400">{acc.username}</span>

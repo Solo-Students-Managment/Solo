@@ -1,5 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+
 import type { AuthSession, UserRole } from '@/types';
+
 import { getUserByCredentials } from '@/mocks/users';
 
 const STORAGE_KEY = 'student-mgmt-auth';

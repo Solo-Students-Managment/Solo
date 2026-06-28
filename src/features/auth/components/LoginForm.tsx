@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Form, Formik } from 'formik';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
-import { DemoAccounts } from './DemoAccounts';
 import { hasPersian, toEnglishNumbers } from '@/lib/helper/helper';
+import { DemoAccounts } from './DemoAccounts';
 
 type Props = {
   onSubmit: (username: string, password: string) => boolean;
@@ -43,7 +43,7 @@ export function LoginForm({ onSubmit }: Props) {
       >
         {({ values, setFieldValue, isSubmitting }) => (
           <Form>
-            <Card className="rounded-3xl border-white/40 bg-white/80 shadow-2xl backdrop-blur-md">
+            <Card className="rounded-2xs border-white/40 bg-white/80 shadow-xl backdrop-blur-md">
               <CardHeader className="space-y-2 pt-8 text-center">
                 <div className="text-4xl">🎓</div>
                 <h1 className="text-xl font-bold">پنل آموزش زبان‌آموز</h1>
@@ -64,7 +64,7 @@ export function LoginForm({ onSubmit }: Props) {
                     setFieldValue('username', val);
                   }}
                   placeholder="نام کاربری"
-                  className="h-12 rounded-md"
+                  className="rounded-2xs h-12"
                 />
 
                 {/* PASSWORD */}
@@ -79,14 +79,14 @@ export function LoginForm({ onSubmit }: Props) {
                     setFieldValue('password', val);
                   }}
                   placeholder="رمز عبور"
-                  className="h-12 rounded-md"
+                  className="rounded-2xs h-12"
                 />
 
                 <motion.div whileTap={{ scale: 0.97 }}>
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="h-12 w-full rounded-md bg-linear-to-r from-sky-400 to-blue-500"
+                    className="text-md rounded-2xs w-full bg-linear-to-r from-sky-400 to-blue-500 pt-5 pb-6"
                   >
                     ورود
                   </Button>
