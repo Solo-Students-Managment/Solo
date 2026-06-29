@@ -1,34 +1,34 @@
-# Student Management System
+# Solo Frontend
 
-A lightweight Student Management System built with modern React and TypeScript tooling.
+A production-ready frontend for Solo, a Persian-first student management platform for private tutors.
 
-## English / فارسی (English first, Persian summary below)
+## Overview
 
-### Tech stack
+This project is the React + TypeScript + Vite dashboard for Teacher, Student, Parent, and Admin roles. It is built with RTL support, reusable UI components, mock data, and role-based route protection.
+
+## Tech stack
 
 - React 19 + React DOM 19
-- TypeScript
+- TypeScript 6
 - Vite
-- Tailwind CSS
+- Tailwind CSS v4
 - React Router v7
 - Formik & Yup
-- Recharts, Framer Motion, Lucide React, Sonner
+- Recharts, Lucide React, Sonner
 
-### Folder structure overview
+## Structure
 
-- `src/` — application source
-  - `app/` — app shell, providers, and router
-  - `components/` — UI primitives and layout components
-  - `features/` — feature modules (auth, sessions, exams, etc.)
-  - `lib/` — lightweight service and helper modules
-  - `hooks/` — local hooks
-  - `mocks/` — mock data for development
-  - `styles/` — global styles
-  - `types/` — shared TypeScript types
+- `src/app/` — app shell, providers, and router
+- `src/components/layout/` — dashboard shell and navigation
+- `src/components/ui/` — reusable UI primitives
+- `src/features/` — feature-specific pages and components
+- `src/lib/` — domain utilities and formatters
+- `src/hooks/` — shared hooks
+- `src/mocks/` — mock data and seed helpers
+- `src/styles/` — global Tailwind and theme styles
+- `src/types/` — shared TypeScript definitions
 
-### How to run
-
-Install dependencies and start the dev server:
+## How to run
 
 ```bash
 npm install
@@ -42,39 +42,31 @@ npm run build
 npm run preview
 ```
 
-### Available scripts
+## Available scripts
 
-- `dev` — Start Vite dev server
+- `dev` — Start the Vite development server
 - `build` — Build production bundles
-- `preview` — Preview built app
-- `lint` — Run linter
-- `test` — Run tests (if configured)
+- `preview` — Preview the production build
+- `lint` — Run ESLint
+- `lint:fix` — Fix lint issues
+- `format` — Run Prettier formatting
+- `format:check` — Check formatting
+- `knip` — Identify unused exports
 
-### Key features
+## Key features
 
-- Authentication and role-based routes
-- Session management and attendance
-- Exam creation and participation
-- Messaging between users
-- Admin analytics and revenue views
+- RTL Persian dashboard layout
+- Role-based authentication and routing
+- Teacher, Student, Parent, and Admin dashboards
+- Session, attendance, exam, and messaging views
+- Mock service layer for rapid frontend validation
+- Professional project structure and documentation
 
-### Architecture (brief)
+## Docs
 
-This project follows a pragmatic feature-sliced approach:
+- `docs/PRD/PRD-Frontend-Complete-en.md`
+- `docs/PRD/PRD-Frontend-Complete-fa.md`
 
-- `app/` contains the application shell, global providers, and router.
-- `features/` groups feature-specific pages and components.
-- `components/` holds UI primitives and layout components shared across features.
-- `lib/` contains domain helpers and lightweight services.
+## Notes
 
-This structure keeps features isolated and makes the codebase easier to scale and maintain.
-
----
-
-خلاصه فارسی
-
-این پروژه یک سامانه‌ی مدیریت دانش‌آموزان است که با React و TypeScript و ابزارهای مدرن ساخته شده است. ساختار پروژه مبتنی بر جداسازی بر مبنای ویژگی (feature-sliced) است تا مقیاس‌پذیری و نگهداری کد ساده‌تر شود. برای اجرای پروژه از `npm run dev` استفاده کنید و برای تولید بسته‌ی نهایی `npm run build` را اجرا کنید.
-
-ویژگی‌های کلیدی شامل تأیید هویت، مدیریت جلسات و حضور و غیاب، آزمون‌سازی، پیام‌رسانی و داشبوردهای آماری برای مدیران است.
-
----
+This frontend is intentionally isolated from backend implementation. It uses mock data and role-based route guard logic to simulate the full application experience.

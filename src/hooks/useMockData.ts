@@ -78,11 +78,11 @@ export function useMockData() {
   }, [user]);
 }
 
-export function useStudentName(studentId: string) {
+export function getStudentName(studentId: string) {
   return getUserById(studentId)?.name ?? 'نامشخص';
 }
 
-export function useTeacherName(teacherId: string) {
+export function getTeacherName(teacherId: string) {
   return getUserById(teacherId)?.name ?? 'نامشخص';
 }
 
