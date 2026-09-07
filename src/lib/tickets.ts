@@ -77,7 +77,7 @@ export interface CreateTicketInput {
   description: string;
   priority: TicketPriority;
   createdById: string;
-  createdByRole: 'teacher' | 'admin' | 'parent';
+  createdByRole: 'teacher' | 'admin' | 'parent' | 'support';
   studentId?: string;
 }
 

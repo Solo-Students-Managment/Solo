@@ -47,7 +47,7 @@ export function TicketsPage() {
 
   const visibleTickets = useMemo(() => {
     if (!user) return [];
-    if (user.role === 'admin') return tickets;
+    if (user.role === 'admin' || user.role === 'support') return tickets;
     return tickets.filter((ticket) => ticket.createdById === user.id);
   }, [user, tickets]);
 
@@ -66,7 +66,8 @@ export function TicketsPage() {
         description: newTicket.description,
         priority: newTicket.priority,
         createdById: user.id,
-        createdByRole: user.role === 'admin' ? 'admin' : 'teacher',
+        createdByRole:
+          user.role === 'admin' ? 'admin' : user.role === 'support' ? 'support' : 'teacher',
         studentId: newTicket.studentId || undefined,
       });
       setSelectedId(ticket.id);
@@ -96,7 +97,7 @@ export function TicketsPage() {
     toast.success('پاسخ ثبت شد');
   };
 
-  if (!user || (user.role !== 'admin' && user.role !== 'teacher')) {
+  if (!user || (user.role !== 'admin' && user.role !== 'teacher' && user.role !== 'support')) {
     return <p className="text-muted-foreground">دسترسی مجاز نیست.</p>;
   }
 
@@ -106,7 +107,9 @@ export function TicketsPage() {
         <div>
           <h2 className="text-xl font-semibold">تیکت‌ها</h2>
           <p className="text-muted-foreground text-sm">
-            {user.role === 'admin' ? 'مدیریت درخواست‌های پشتیبانی' : 'ارسال درخواست به مدیریت'}
+            {user.role === 'admin' || user.role === 'support'
+              ? 'مدیریت درخواست‌های پشتیبانی'
+              : 'ارسال درخواست به مدیریت'}
           </p>
         </div>
         <Button onClick={() => setShowCreate(true)}>
@@ -234,7 +237,7 @@ export function TicketsPage() {
             <CardContent className="space-y-4">
               <p className="text-sm">{activeTicket.description}</p>
 
-              {user.role === 'admin' && (
+              {(user.role === 'admin' || user.role === 'support') && (
                 <div className="flex flex-wrap gap-2">
                   {TICKET_STATUSES.map((item) => (
                     <Button

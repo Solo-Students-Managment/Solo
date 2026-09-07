@@ -3,4 +3,5 @@ export const demoAccounts = [
   { username: 'teacher@demo.local', role: 'Teacher' },
   { username: 'parent@demo.local', role: 'Parent' },
   { username: 'admin@demo.local', role: 'Admin' },
+  { username: 'support@demo.local', role: 'Support' },
 ];

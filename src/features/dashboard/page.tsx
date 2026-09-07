@@ -18,6 +18,8 @@ export function DashboardHomePage() {
       return <TeacherHomePage />;
     case 'admin':
       return <AdminHomePage />;
+    case 'support':
+      return <AdminHomePage />;
     default: {
       const _exhaustive: never = user.role;
       void _exhaustive;

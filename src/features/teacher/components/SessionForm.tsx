@@ -32,6 +32,9 @@ export function SessionForm() {
   const [studentId, setStudentId] = useState(teacherStudents[0]?.userId ?? '');
   const [homeworkTasks, setHomeworkTasks] = useState<HomeworkTask[]>(DEFAULT_HOMEWORK_TASKS);
   const [sessionScore, setSessionScore] = useState('16');
+  const [meetingLink, setMeetingLink] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [lessonPlan, setLessonPlan] = useState('');
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -44,7 +47,9 @@ export function SessionForm() {
     const draftSessionId = `session-draft-${Date.now()}`;
     saveTasks(draftSessionId, validTasks);
     setScore(draftSessionId, clampSessionScore(Number(sessionScore)));
-    toast.success('جلسه با موفقیت ثبت شد (نمایشی — تکلیف و نمره ذخیره شد)');
+    toast.success(
+      `جلسه با موفقیت ثبت شد (ماک)${meetingLink ? ' — لینک جلسه آماده ارسال است' : ''}`
+    );
   };
 
   return (
@@ -76,6 +81,34 @@ export function SessionForm() {
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="topic">موضوع جلسه</Label>
             <Input id="topic" placeholder="مثال: Future Tenses" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="meeting-link">لینک جلسه آنلاین</Label>
+            <Input
+              id="meeting-link"
+              dir="ltr"
+              value={meetingLink}
+              onChange={(event) => setMeetingLink(event.target.value)}
+              placeholder="https://meet.example/solo"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="session-file">فایل جلسه / نام فایل</Label>
+            <Input
+              id="session-file"
+              value={fileName}
+              onChange={(event) => setFileName(event.target.value)}
+              placeholder="lesson-plan.pdf"
+            />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="lesson-plan">طرح درس جلسه</Label>
+            <Input
+              id="lesson-plan"
+              value={lessonPlan}
+              onChange={(event) => setLessonPlan(event.target.value)}
+              placeholder="Warm-up، آموزش، تمرین، تکلیف"
+            />
           </div>
           <div className="space-y-2">
             <Label>وضعیت حضور</Label>

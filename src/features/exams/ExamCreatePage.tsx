@@ -24,6 +24,7 @@ const emptyChoiceQuestion = (): ChoiceExamQuestion => ({
   id: createQuestionId(),
   type: 'choice',
   text: '',
+  scoreWeight: 1,
   options: ['', '', '', ''],
   correctIndex: 0,
 });
@@ -32,6 +33,7 @@ const emptyTextQuestion = (): TextExamQuestion => ({
   id: createQuestionId(),
   type: 'text',
   text: '',
+  scoreWeight: 1,
   sampleAnswer: '',
 });
 
@@ -67,8 +69,18 @@ export function ExamCreatePage() {
         if (i !== index) return question;
         if (type === question.type) return question;
         return type === 'choice'
-          ? { ...emptyChoiceQuestion(), id: question.id, text: question.text }
-          : { ...emptyTextQuestion(), id: question.id, text: question.text };
+          ? {
+              ...emptyChoiceQuestion(),
+              id: question.id,
+              text: question.text,
+              scoreWeight: question.scoreWeight ?? 1,
+            }
+          : {
+              ...emptyTextQuestion(),
+              id: question.id,
+              text: question.text,
+              scoreWeight: question.scoreWeight ?? 1,
+            };
       })
     );
   };
@@ -193,13 +205,26 @@ export function ExamCreatePage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label>وزن نمره</Label>
+                  <Input
+                    type="number"
+                    min={0.25}
+                    step={0.25}
+                    value={question.scoreWeight ?? 1}
+                    onChange={(e) =>
+                      updateQuestion(qIndex, { scoreWeight: Number(e.target.value) || 1 })
+                    }
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label>متن سوال</Label>
-                <Input
+                <Label>متن سوال / محتوای rich text ماک</Label>
+                <Textarea
                   value={question.text}
                   onChange={(e) => updateQuestion(qIndex, { text: e.target.value })}
+                  placeholder="متن سؤال، فرمول، توضیح یا محتوای چندخطی را وارد کنید"
                 />
               </div>
 

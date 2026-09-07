@@ -86,6 +86,14 @@ export function getTeacherName(teacherId: string) {
   return getUserById(teacherId)?.name ?? 'نامشخص';
 }
 
+export function useStudentName(studentId: string) {
+  return getStudentName(studentId);
+}
+
+export function useTeacherName(teacherId: string) {
+  return getTeacherName(teacherId);
+}
+
 export function useSession(sessionId: string | undefined) {
   if (!sessionId) return null;
   return getSessionById(sessionId) ?? null;

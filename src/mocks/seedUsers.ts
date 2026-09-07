@@ -36,6 +36,13 @@ export const seedUsers: User[] = [
     password: DEMO_PASSWORD,
   },
   {
+    id: 'user-support-1',
+    name: 'پشتیبان Solo',
+    role: 'support',
+    username: 'support@demo.local',
+    password: DEMO_PASSWORD,
+  },
+  {
     id: 'user-student-2',
     name: 'نرگس محمدی',
     role: 'student',

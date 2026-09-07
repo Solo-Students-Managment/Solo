@@ -1,4 +1,4 @@
-export type UserRole = 'student' | 'parent' | 'teacher' | 'admin';
+export type UserRole = 'student' | 'parent' | 'teacher' | 'admin' | 'support';
 
 export interface User {
   id: string;
@@ -136,7 +136,7 @@ export interface Ticket {
   status: TicketStatus;
   priority: TicketPriority;
   createdById: string;
-  createdByRole: 'teacher' | 'admin' | 'parent';
+  createdByRole: 'teacher' | 'admin' | 'parent' | 'support';
   assignedToId?: string;
   studentId?: string;
   createdAt: string;
@@ -184,6 +184,7 @@ export interface ChoiceExamQuestion {
   id: string;
   type: 'choice';
   text: string;
+  scoreWeight?: number;
   options: [string, string, string, string];
   correctIndex: number;
 }
@@ -192,6 +193,7 @@ export interface TextExamQuestion {
   id: string;
   type: 'text';
   text: string;
+  scoreWeight?: number;
   sampleAnswer?: string;
 }
 

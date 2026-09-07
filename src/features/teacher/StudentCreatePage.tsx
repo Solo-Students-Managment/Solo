@@ -26,8 +26,10 @@ export function StudentCreatePage() {
   const [name, setName] = useState('');
   const [level, setLevel] = useState<string>(STUDENT_LEVELS[0]);
   const [username, setUsername] = useState('');
+  const [studentPhone, setStudentPhone] = useState('');
   const [parentName, setParentName] = useState('');
   const [parentUsername, setParentUsername] = useState('');
+  const [parentPhone, setParentPhone] = useState('');
   const [sessionsRemaining, setSessionsRemaining] = useState('20');
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -52,7 +54,7 @@ export function StudentCreatePage() {
       });
 
       toast.success(
-        `زبان‌آموز «${result.user.name}» اضافه شد. رمز عبور: ${result.defaultPassword}`
+        `زبان‌آموز «${result.user.name}» اضافه شد. لینک ورود ماک برای ${studentPhone || username} آماده است. رمز: ${result.defaultPassword}`
       );
       navigate('/dashboard/students');
     } catch (error) {
@@ -129,6 +131,17 @@ export function StudentCreatePage() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="studentPhone">شماره موبایل زبان‌آموز</Label>
+              <Input
+                id="studentPhone"
+                dir="ltr"
+                value={studentPhone}
+                onChange={(event) => setStudentPhone(event.target.value)}
+                placeholder="09xxxxxxxxx"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="sessionsRemaining">تعداد جلسات باقی‌مانده</Label>
               <Input
                 id="sessionsRemaining"
@@ -165,6 +178,18 @@ export function StudentCreatePage() {
                 value={parentUsername}
                 onChange={(event) => setParentUsername(event.target.value)}
                 placeholder="parent@example.com"
+                disabled={!parentName.trim()}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="parentPhone">شماره موبایل ولی</Label>
+              <Input
+                id="parentPhone"
+                dir="ltr"
+                value={parentPhone}
+                onChange={(event) => setParentPhone(event.target.value)}
+                placeholder="09xxxxxxxxx"
                 disabled={!parentName.trim()}
               />
             </div>

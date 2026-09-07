@@ -64,6 +64,7 @@ export function normalizeQuestion(question: ExamQuestion | LegacyQuestion): Exam
     id: question.id,
     type: 'choice',
     text: question.text,
+    scoreWeight: 1,
     options: question.options,
     correctIndex: question.correctIndex,
   };
@@ -125,21 +126,30 @@ export function calculateExamScore(exam: Exam, answers: ExamAnswers): number {
   const questions = exam.questions.map((question) => normalizeQuestion(question));
   if (questions.length === 0) return 0;
 
-  const correct = questions.filter((question) => {
+  const totalWeight = questions.reduce((sum, question) => sum + (question.scoreWeight ?? 1), 0);
+  if (totalWeight <= 0) return 0;
+
+  const earnedWeight = questions.reduce((sum, question) => {
+    const weight = question.scoreWeight ?? 1;
     switch (question.type) {
       case 'choice':
-        return normalizedAnswers.choices[question.id] === question.correctIndex;
+        return (
+          sum + (normalizedAnswers.choices[question.id] === question.correctIndex ? weight : 0)
+        );
       case 'text':
-        return isTextAnswerCorrect(question, normalizedAnswers.texts[question.id] ?? '');
+        return (
+          sum +
+          (isTextAnswerCorrect(question, normalizedAnswers.texts[question.id] ?? '') ? weight : 0)
+        );
       default: {
         const _exhaustive: never = question;
         void _exhaustive;
-        return false;
+        return sum;
       }
     }
-  }).length;
+  }, 0);
 
-  return Math.round((correct / questions.length) * 20 * 10) / 10;
+  return Math.round((earnedWeight / totalWeight) * 20 * 10) / 10;
 }
 
 export const EXAM_STATUS_LABELS = {
