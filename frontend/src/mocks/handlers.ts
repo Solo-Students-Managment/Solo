@@ -185,6 +185,11 @@ import {
   selectFieldHasOptions,
   type CustomizationBundle,
 } from "@/services/customization";
+import {
+  automationRuleSchema,
+  requiresApprovalGate,
+  type AutomationRule,
+} from "@/services/automation";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -368,6 +373,7 @@ const mockSurveyForms = new Map<string, SurveyForm[]>();
 const mockFormSubmissions = new Map<string, FormSubmission[]>();
 const mockPublicForms = new Map<string, SurveyForm>();
 const mockCustomization = new Map<string, CustomizationBundle>();
+const mockAutomation = new Map<string, AutomationRule[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -593,6 +599,7 @@ function persistMswState() {
         mockFormSubmissions: [...mockFormSubmissions.entries()],
         mockPublicForms: [...mockPublicForms.entries()],
         mockCustomization: [...mockCustomization.entries()],
+        mockAutomation: [...mockAutomation.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -1034,6 +1041,17 @@ function hydrateMswState() {
         mockCustomization.set(
           entry[0],
           customizationBundleSchema.parse(entry[1]),
+        );
+      }
+    }
+    if (Array.isArray(data.mockAutomation)) {
+      mockAutomation.clear();
+      for (const entry of data.mockAutomation as Array<
+        [string, AutomationRule[]]
+      >) {
+        mockAutomation.set(
+          entry[0],
+          entry[1].map((row) => automationRuleSchema.parse(row)),
         );
       }
     }
@@ -6925,6 +6943,111 @@ export const handlers = [
       });
       persistMswState();
       return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/automation", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockAutomation.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/automation",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        triggerType?: string;
+        riskLevel?: string;
+        stepsSummary?: string;
+      };
+      if (
+        !body.name?.trim() ||
+        !body.triggerType ||
+        !body.riskLevel ||
+        !body.stepsSummary?.trim()
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "automation.validation.name"),
+          { status: 400 },
+        );
+      }
+      const row = automationRuleSchema.parse({
+        id: opaqueIdSchema.parse(
+          `aut_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        triggerType: body.triggerType,
+        riskLevel: body.riskLevel,
+        status: "draft",
+        stepsSummary: body.stepsSummary.trim(),
+      });
+      mockAutomation.set(orgId, [...(mockAutomation.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/automation/:ruleId/activate",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const ruleId = String(params.ruleId);
+      const body = (await request.json()) as { approvalGranted?: boolean };
+      const rows = mockAutomation.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === ruleId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          {
+            status: 404,
+          },
+        );
+      }
+      const current = rows[idx]!;
+      if (current.status === "active") {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "automation.validation.alreadyActive"),
+          { status: 400 },
+        );
+      }
+      if (requiresApprovalGate(current.riskLevel) && !body.approvalGranted) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "automation.approvalRequired"),
+          { status: 400 },
+        );
+      }
+      const updated = automationRuleSchema.parse({
+        ...current,
+        status: "active",
+      });
+      const next = [...rows];
+      next[idx] = updated;
+      mockAutomation.set(orgId, next);
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 ];

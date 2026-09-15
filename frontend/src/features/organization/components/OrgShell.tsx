@@ -30,6 +30,7 @@ type OrgNavKey =
   | "forms"
   | "formSubmissions"
   | "customization"
+  | "automation"
   | "subjects"
   | "students"
   | "courses"
@@ -162,6 +163,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "customization" as const,
       href: `${routes.organization.customization(orgId)}${langQuery}`,
       labelKey: "navCustomization",
+    },
+    {
+      key: "automation" as const,
+      href: `${routes.organization.automation(orgId)}${langQuery}`,
+      labelKey: "navAutomation",
     },
     {
       key: "subjects" as const,

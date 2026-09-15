@@ -40,6 +40,7 @@ import enKnowledgeBase from "./messages/en/knowledgeBase.json";
 import enForms from "./messages/en/forms.json";
 import enFormSubmissions from "./messages/en/formSubmissions.json";
 import enCustomization from "./messages/en/customization.json";
+import enAutomation from "./messages/en/automation.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -91,6 +92,7 @@ import faKnowledgeBase from "./messages/fa/knowledgeBase.json";
 import faForms from "./messages/fa/forms.json";
 import faFormSubmissions from "./messages/fa/formSubmissions.json";
 import faCustomization from "./messages/fa/customization.json";
+import faAutomation from "./messages/fa/automation.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -148,6 +150,7 @@ export type MessageNamespace =
   | "forms"
   | "formSubmissions"
   | "customization"
+  | "automation"
   | "messaging"
   | "chat"
   | "notifications"
@@ -207,6 +210,7 @@ const dictionaries: Dictionaries = {
     forms: enForms,
     formSubmissions: enFormSubmissions,
     customization: enCustomization,
+    automation: enAutomation,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -260,6 +264,7 @@ const dictionaries: Dictionaries = {
     forms: faForms,
     formSubmissions: faFormSubmissions,
     customization: faCustomization,
+    automation: faAutomation,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,
