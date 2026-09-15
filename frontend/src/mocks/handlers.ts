@@ -86,6 +86,7 @@ import {
   type QuestionType,
   type QuestionVisibility,
 } from "@/services/question-bank";
+import { examSchema, type Exam } from "@/services/exams";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -239,6 +240,7 @@ const mockGradeScales = new Map<string, GradeScale[]>();
 const mockEvaluationLevels = new Map<string, EvaluationLevel[]>();
 const mockProgressMetrics = new Map<string, ProgressMetric[]>();
 const mockQuestionBank = new Map<string, BankQuestion[]>();
+const mockExams = new Map<string, Exam[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -435,6 +437,7 @@ function persistMswState() {
         mockEvaluationLevels: [...mockEvaluationLevels.entries()],
         mockProgressMetrics: [...mockProgressMetrics.entries()],
         mockQuestionBank: [...mockQuestionBank.entries()],
+        mockExams: [...mockExams.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -576,6 +579,15 @@ function hydrateMswState() {
         mockQuestionBank.set(
           entry[0],
           entry[1].map((row) => bankQuestionSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockExams)) {
+      mockExams.clear();
+      for (const entry of data.mockExams as Array<[string, Exam[]]>) {
+        mockExams.set(
+          entry[0],
+          entry[1].map((row) => examSchema.parse(row)),
         );
       }
     }
@@ -3657,6 +3669,90 @@ export const handlers = [
       mockQuestionBank.set(orgId, [...rows, forked]);
       persistMswState();
       return HttpResponse.json(forked, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/exams", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockExams.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/exams", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      title?: string;
+      poolSize?: number;
+      randomize?: boolean;
+      maxAttempts?: number;
+      timeLimitMinutes?: number | null;
+    };
+    if (!body.title?.trim() || !body.poolSize || !body.maxAttempts) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "exams.validation.title"),
+        { status: 400 },
+      );
+    }
+    const row = examSchema.parse({
+      id: opaqueIdSchema.parse(
+        `exm_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      title: body.title.trim(),
+      poolSize: body.poolSize,
+      randomize: Boolean(body.randomize),
+      maxAttempts: body.maxAttempts,
+      timeLimitMinutes: body.timeLimitMinutes ?? null,
+      status: "draft",
+    });
+    mockExams.set(orgId, [...(mockExams.get(orgId) ?? []), row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/exams/:examId/publish",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const examId = String(params.examId);
+      const rows = mockExams.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === examId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const updated = examSchema.parse({
+        ...rows[idx]!,
+        status: "published",
+      });
+      mockExams.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 ];

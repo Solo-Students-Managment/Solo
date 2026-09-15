@@ -25,6 +25,7 @@ describe("typed routes", () => {
     expect(routes.organization.questionBank("org_1")).toBe(
       "/org/org_1/question-bank",
     );
+    expect(routes.organization.exams("org_1")).toBe("/org/org_1/exams");
     expect(routes.teacher.activate()).toBe("/teacher/activate");
     expect(routes.student.home()).toBe("/student");
     expect(routes.student.activate()).toBe("/student/activate");

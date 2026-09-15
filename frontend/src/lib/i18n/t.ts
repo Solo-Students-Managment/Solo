@@ -18,6 +18,7 @@ import enAssignments from "./messages/en/assignments.json";
 import enGradebook from "./messages/en/gradebook.json";
 import enEvaluations from "./messages/en/evaluations.json";
 import enQuestionBank from "./messages/en/questionBank.json";
+import enExams from "./messages/en/exams.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -47,6 +48,7 @@ import faAssignments from "./messages/fa/assignments.json";
 import faGradebook from "./messages/fa/gradebook.json";
 import faEvaluations from "./messages/fa/evaluations.json";
 import faQuestionBank from "./messages/fa/questionBank.json";
+import faExams from "./messages/fa/exams.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -82,6 +84,7 @@ export type MessageNamespace =
   | "gradebook"
   | "evaluations"
   | "questionBank"
+  | "exams"
   | "messaging"
   | "chat"
   | "notifications"
@@ -119,6 +122,7 @@ const dictionaries: Dictionaries = {
     gradebook: enGradebook,
     evaluations: enEvaluations,
     questionBank: enQuestionBank,
+    exams: enExams,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -150,6 +154,7 @@ const dictionaries: Dictionaries = {
     gradebook: faGradebook,
     evaluations: faEvaluations,
     questionBank: faQuestionBank,
+    exams: faExams,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,
