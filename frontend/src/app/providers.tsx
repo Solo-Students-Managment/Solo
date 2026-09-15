@@ -76,6 +76,10 @@ import {
   setPositionsClient,
 } from "@/services/positions";
 import {
+  createHttpPeopleDirectoryClient,
+  setPeopleDirectoryClient,
+} from "@/services/people-directory";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -140,6 +144,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setFacilitiesClient(createHttpFacilitiesClient());
           setDepartmentsClient(createHttpDepartmentsClient());
           setPositionsClient(createHttpPositionsClient());
+          setPeopleDirectoryClient(createHttpPeopleDirectoryClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

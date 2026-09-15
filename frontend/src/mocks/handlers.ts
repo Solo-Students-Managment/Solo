@@ -121,6 +121,11 @@ import {
   type Team,
 } from "@/services/departments";
 import { positionSchema, type Position } from "@/services/positions";
+import {
+  directoryPersonSchema,
+  presenceStatusSchema,
+  type DirectoryPerson,
+} from "@/services/people-directory";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -288,6 +293,7 @@ const mockEquipment = new Map<string, Equipment[]>();
 const mockDepartments = new Map<string, Department[]>();
 const mockTeams = new Map<string, Team[]>();
 const mockPositions = new Map<string, Position[]>();
+const mockDirectory = new Map<string, DirectoryPerson[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -497,6 +503,7 @@ function persistMswState() {
         mockDepartments: [...mockDepartments.entries()],
         mockTeams: [...mockTeams.entries()],
         mockPositions: [...mockPositions.entries()],
+        mockDirectory: [...mockDirectory.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -767,6 +774,17 @@ function hydrateMswState() {
         mockPositions.set(
           entry[0],
           entry[1].map((row) => positionSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockDirectory)) {
+      mockDirectory.clear();
+      for (const entry of data.mockDirectory as Array<
+        [string, DirectoryPerson[]]
+      >) {
+        mockDirectory.set(
+          entry[0],
+          entry[1].map((row) => directoryPersonSchema.parse(row)),
         );
       }
     }
@@ -5183,6 +5201,102 @@ export const handlers = [
       mockPositions.set(orgId, [...(mockPositions.get(orgId) ?? []), row]);
       persistMswState();
       return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/directory", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    let data = mockDirectory.get(orgId);
+    if (!data) {
+      data = [
+        directoryPersonSchema.parse({
+          id: opaqueIdSchema.parse("dir_owner1"),
+          organizationId: opaqueIdSchema.parse(orgId),
+          displayName: "Org Owner",
+          roleLabel: "Owner",
+          departmentName: "Academics",
+          teamNames: ["Leadership"],
+          presenceStatus: "available",
+          presenceVisible: true,
+        }),
+        directoryPersonSchema.parse({
+          id: opaqueIdSchema.parse("dir_staff1"),
+          organizationId: opaqueIdSchema.parse(orgId),
+          displayName: "Sam Staff",
+          roleLabel: "Teacher",
+          departmentName: "Academics",
+          teamNames: ["Curriculum Leads"],
+          presenceStatus: "in_class",
+          presenceVisible: true,
+        }),
+        directoryPersonSchema.parse({
+          id: opaqueIdSchema.parse("dir_priv1"),
+          organizationId: opaqueIdSchema.parse(orgId),
+          displayName: "Private Person",
+          roleLabel: "Support",
+          departmentName: null,
+          teamNames: [],
+          presenceStatus: "busy",
+          presenceVisible: false,
+        }),
+      ];
+      mockDirectory.set(orgId, data);
+      persistMswState();
+    }
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/directory/:personId/presence",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const personId = String(params.personId);
+      const body = (await request.json()) as { status?: string };
+      const parsed = presenceStatusSchema.safeParse(body.status);
+      if (!parsed.success) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "peopleDirectory.presence.busy"),
+          { status: 400 },
+        );
+      }
+      let rows = mockDirectory.get(orgId) ?? [];
+      if (rows.length === 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "peopleDirectory.empty"),
+          { status: 404 },
+        );
+      }
+      const idx = rows.findIndex((row) => String(row.id) === personId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "peopleDirectory.empty"),
+          { status: 404 },
+        );
+      }
+      const updated = directoryPersonSchema.parse({
+        ...rows[idx],
+        presenceStatus: parsed.data,
+      });
+      rows = rows.map((row, i) => (i === idx ? updated : row));
+      mockDirectory.set(orgId, rows);
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 ];

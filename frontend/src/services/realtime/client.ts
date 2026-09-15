@@ -49,3 +49,19 @@ export class SoloRealtimeClient {
     }
   }
 }
+
+let sharedClient: SoloRealtimeClient | null = null;
+
+export function getRealtimeClient(): SoloRealtimeClient {
+  if (!sharedClient) {
+    sharedClient = new SoloRealtimeClient();
+    sharedClient.connect();
+  }
+  return sharedClient;
+}
+
+export function setRealtimeClient(next: SoloRealtimeClient) {
+  sharedClient = next;
+}
+
+export type { RealtimeEvent, RealtimeStatus };
