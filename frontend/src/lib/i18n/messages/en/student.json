@@ -1,0 +1,19 @@
+{
+  "title": "Student dashboard",
+  "subtitle": "Your learning overview across subjects and teachers.",
+  "activateTitle": "Activate student persona",
+  "activateSubtitle": "Student persona activates only from a real enrollment or invite relationship.",
+  "acceptRelationship": "Accept relationship",
+  "activated": "Student persona is active.",
+  "noPending": "No pending student relationships",
+  "noPendingHint": "Ask your teacher or school to add you. Self-activation is not available.",
+  "statsSubjects": "Active subjects",
+  "statsSessions": "Upcoming sessions",
+  "statsAssignments": "Open assignments",
+  "relationshipsTitle": "Your subjects",
+  "empty": "No active subjects yet.",
+  "loadError": "Could not load student data.",
+  "retry": "Retry",
+  "offline": "You are offline.",
+  "forbidden": "Activate the student persona from a real relationship to open this dashboard."
+}

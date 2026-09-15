@@ -18,6 +18,8 @@ export type EffectiveCapability = {
 export type Capability =
   | "nav.personal"
   | "nav.teacher"
+  | "nav.student"
+  | "nav.guardian"
   | "nav.organization"
   | "nav.admin"
   | "account.security.manage"
@@ -31,8 +33,18 @@ export type Capability =
   | "org.roles.assign";
 
 const personaCapabilities: Record<Persona, Capability[]> = {
-  student: ["nav.personal", "account.security.manage", "account.phone.change"],
-  guardian: ["nav.personal", "account.security.manage", "account.phone.change"],
+  student: [
+    "nav.personal",
+    "nav.student",
+    "account.security.manage",
+    "account.phone.change",
+  ],
+  guardian: [
+    "nav.personal",
+    "nav.guardian",
+    "account.security.manage",
+    "account.phone.change",
+  ],
   teacher: [
     "nav.personal",
     "nav.teacher",
@@ -55,6 +67,8 @@ const personaCapabilities: Record<Persona, Capability[]> = {
   admin_solo: [
     "nav.personal",
     "nav.teacher",
+    "nav.student",
+    "nav.guardian",
     "nav.organization",
     "nav.admin",
     "account.security.manage",

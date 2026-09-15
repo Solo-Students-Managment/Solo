@@ -186,3 +186,15 @@ export function __addMockOrgContext(orgId: string, label: string): void {
     },
   ];
 }
+
+export function __activateMockStudentPersona(): void {
+  memoryPersonas = memoryPersonas.map((p) =>
+    p.persona === "student" ? { ...p, activated: true } : p,
+  );
+}
+
+export function __activateMockGuardianPersona(): void {
+  memoryPersonas = memoryPersonas.map((p) =>
+    p.persona === "guardian" ? { ...p, activated: true } : p,
+  );
+}

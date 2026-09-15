@@ -15,6 +15,7 @@ import {
   setOrganizationMembersClient,
 } from "@/services/organization";
 import { createHttpProfileClient, setProfileClient } from "@/services/profile";
+import { createHttpStudentClient, setStudentClient } from "@/services/student";
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -42,6 +43,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setHomeClient(createHttpHomeClient());
           setOrganizationClient(createHttpOrganizationClient());
           setOrganizationMembersClient(createHttpOrganizationMembersClient());
+          setStudentClient(createHttpStudentClient());
           setReady(true);
         }
       } catch {

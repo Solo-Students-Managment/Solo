@@ -4,7 +4,14 @@
  */
 
 export type RouteSurface =
-  "personal" | "teacher" | "organization" | "admin" | "public" | "auth";
+  | "personal"
+  | "teacher"
+  | "student"
+  | "guardian"
+  | "organization"
+  | "admin"
+  | "public"
+  | "auth";
 
 export type ListSearchParams = {
   tab?: string;
@@ -32,6 +39,14 @@ export const routes = {
   teacher: {
     home: () => "/teacher",
     activate: () => "/teacher/activate",
+  },
+  student: {
+    home: () => "/student",
+    activate: () => "/student/activate",
+  },
+  guardian: {
+    home: () => "/guardian",
+    activate: () => "/guardian/activate",
   },
   organization: {
     home: (orgId: string) => `/org/${encodeURIComponent(orgId)}`,

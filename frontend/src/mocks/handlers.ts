@@ -29,6 +29,11 @@ import {
   type OrgMember,
   type OrgRole,
 } from "@/services/organization/members";
+import {
+  studentDashboardSchema,
+  studentRelationshipSchema,
+  type StudentRelationship,
+} from "@/services/student";
 
 export type MockScenario =
   | "success"
@@ -99,6 +104,22 @@ let mockTeacherDash = {
   studentsCount: 2,
   classesCount: 1,
   upcomingSessionsCount: 1,
+};
+let mockPendingStudentRels: StudentRelationship[] = [
+  studentRelationshipSchema.parse({
+    id: opaqueIdSchema.parse("rel_stu_pending_1"),
+    organizationName: "Demo School",
+    subjectLabel: "Mathematics",
+    teacherDisplayName: "Ms. Rezaei",
+    status: "pending",
+  }),
+];
+let mockActiveStudentRels: StudentRelationship[] = [];
+let mockStudentDash = {
+  activeSubjectsCount: 0,
+  upcomingSessionsCount: 0,
+  openAssignmentsCount: 0,
+  relationships: [] as StudentRelationship[],
 };
 let pendingPhoneChange: {
   currentChallengeId: string;
@@ -831,6 +852,60 @@ export const handlers = [
     const unauthorized = requireAuth();
     if (unauthorized) return unauthorized;
     return HttpResponse.json(teacherDashboardSchema.parse(mockTeacherDash));
+  }),
+
+  http.get("/api/student/relationships/pending", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    if (scenario === "empty") {
+      return HttpResponse.json([]);
+    }
+    return HttpResponse.json(mockPendingStudentRels);
+  }),
+
+  http.post("/api/auth/personas/student/activate", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { relationshipId?: string };
+    const found = mockPendingStudentRels.find(
+      (r) => String(r.id) === body.relationshipId,
+    );
+    if (!found) {
+      return HttpResponse.json(
+        errorBody(404, "NOT_FOUND", "student.relationship.notFound"),
+        { status: 404 },
+      );
+    }
+    const activated = studentRelationshipSchema.parse({
+      ...found,
+      status: "active",
+    });
+    mockPendingStudentRels = mockPendingStudentRels.filter(
+      (r) => String(r.id) !== body.relationshipId,
+    );
+    mockActiveStudentRels = [...mockActiveStudentRels, activated];
+    mockStudentDash = {
+      activeSubjectsCount: mockActiveStudentRels.length,
+      upcomingSessionsCount: 1,
+      openAssignmentsCount: 2,
+      relationships: mockActiveStudentRels,
+    };
+    mockPersonas = mockPersonas.map((p) =>
+      p.persona === "student" ? { ...p, activated: true } : p,
+    );
+    return HttpResponse.json({ persona: "student" });
+  }),
+
+  http.get("/api/student/dashboard", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json(studentDashboardSchema.parse(mockStudentDash));
   }),
 
   http.post("/api/organizations", async ({ request }) => {
