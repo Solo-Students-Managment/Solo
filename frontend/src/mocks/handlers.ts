@@ -107,6 +107,7 @@ import {
   type CurriculumUnit,
 } from "@/services/curriculum";
 import { lessonPlanSchema, type LessonPlan } from "@/services/lesson-plans";
+import { branchSchema, type Branch } from "@/services/branches";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -268,6 +269,7 @@ const mockCurriculumModules = new Map<string, CurriculumModule[]>();
 const mockCurriculumUnits = new Map<string, CurriculumUnit[]>();
 const mockCurriculumLessons = new Map<string, CurriculumLesson[]>();
 const mockLessonPlans = new Map<string, LessonPlan[]>();
+const mockBranches = new Map<string, Branch[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -471,6 +473,7 @@ function persistMswState() {
         mockCurriculumUnits: [...mockCurriculumUnits.entries()],
         mockCurriculumLessons: [...mockCurriculumLessons.entries()],
         mockLessonPlans: [...mockLessonPlans.entries()],
+        mockBranches: [...mockBranches.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -685,6 +688,15 @@ function hydrateMswState() {
         mockLessonPlans.set(
           entry[0],
           entry[1].map((row) => lessonPlanSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockBranches)) {
+      mockBranches.clear();
+      for (const entry of data.mockBranches as Array<[string, Branch[]]>) {
+        mockBranches.set(
+          entry[0],
+          entry[1].map((row) => branchSchema.parse(row)),
         );
       }
     }
@@ -1549,6 +1561,19 @@ export const handlers = [
       publicProfilePublished: false,
     });
     mockOrgs.set(id, org);
+    mockBranches.set(id, [
+      branchSchema.parse({
+        id: mainBranchId,
+        organizationId: id,
+        name: "Main Branch",
+        code: "MAIN",
+        isMain: true,
+        status: "active",
+        effectiveFrom: new Date().toISOString().slice(0, 10),
+        effectiveTo: null,
+        address: "",
+      }),
+    ]);
     seedOwnerMembership({
       organizationId: id,
       userId: currentSession!.userId,
@@ -4636,6 +4661,169 @@ export const handlers = [
       mockLessonPlans.set(orgId, [...rows, snap]);
       persistMswState();
       return HttpResponse.json(snap, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/branches", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    let data = mockBranches.get(orgId) ?? [];
+    if (data.length === 0) {
+      const org = mockOrgs.get(orgId);
+      if (org) {
+        data = [
+          branchSchema.parse({
+            id: org.mainBranchId,
+            organizationId: org.id,
+            name: org.mainBranchName,
+            code: "MAIN",
+            isMain: true,
+            status: "active",
+            effectiveFrom: new Date().toISOString().slice(0, 10),
+            effectiveTo: null,
+            address: "",
+          }),
+        ];
+        mockBranches.set(orgId, data);
+        persistMswState();
+      }
+    }
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/branches",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        code?: string;
+        effectiveFrom?: string;
+        address?: string;
+      };
+      if (!body.name?.trim() || !body.code?.trim() || !body.effectiveFrom) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "branches.validation.name"),
+          { status: 400 },
+        );
+      }
+      const row = branchSchema.parse({
+        id: opaqueIdSchema.parse(
+          `br_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        code: body.code.trim().toUpperCase(),
+        isMain: false,
+        status: "active",
+        effectiveFrom: body.effectiveFrom,
+        effectiveTo: null,
+        address: String(body.address ?? "").trim(),
+      });
+      const next = [...(mockBranches.get(orgId) ?? []), row];
+      mockBranches.set(orgId, next);
+      const org = mockOrgs.get(orgId);
+      if (org) {
+        mockOrgs.set(orgId, {
+          ...org,
+          branchesCount: next.length,
+        });
+      }
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/branches/:branchId/set-main",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const branchId = String(params.branchId);
+      const rows = mockBranches.get(orgId) ?? [];
+      const target = rows.find((row) => String(row.id) === branchId);
+      if (!target || target.status === "archived") {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const next = rows.map((row) =>
+        branchSchema.parse({
+          ...row,
+          isMain: String(row.id) === branchId,
+        }),
+      );
+      mockBranches.set(orgId, next);
+      const org = mockOrgs.get(orgId);
+      if (org) {
+        mockOrgs.set(orgId, {
+          ...org,
+          mainBranchId: target.id,
+          mainBranchName: target.name,
+        });
+      }
+      persistMswState();
+      return HttpResponse.json(
+        next.find((row) => String(row.id) === branchId)!,
+      );
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/branches/:branchId/archive",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const branchId = String(params.branchId);
+      const rows = mockBranches.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === branchId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (current.isMain) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "branches.archiveBlocked"),
+          { status: 400 },
+        );
+      }
+      const updated = branchSchema.parse({
+        ...current,
+        status: "archived",
+        effectiveTo: new Date().toISOString().slice(0, 10),
+        isMain: false,
+      });
+      mockBranches.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 ];

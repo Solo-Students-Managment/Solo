@@ -52,6 +52,7 @@ export const routes = {
     home: (orgId: string) => `/org/${encodeURIComponent(orgId)}`,
     create: () => "/org/new",
     members: (orgId: string) => `/org/${encodeURIComponent(orgId)}/members`,
+    branches: (orgId: string) => `/org/${encodeURIComponent(orgId)}/branches`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

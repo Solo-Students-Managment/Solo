@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils/cn";
 type OrgNavKey =
   | "home"
   | "members"
+  | "branches"
   | "subjects"
   | "students"
   | "courses"
@@ -48,6 +49,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "members" as const,
       href: `${routes.organization.members(orgId)}${langQuery}`,
       labelKey: "navMembers",
+    },
+    {
+      key: "branches" as const,
+      href: `${routes.organization.branches(orgId)}${langQuery}`,
+      labelKey: "navBranches",
     },
     {
       key: "subjects" as const,
