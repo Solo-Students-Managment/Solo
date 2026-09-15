@@ -1,0 +1,15 @@
+{
+  "title": "Upcoming calendar",
+  "subtitle": "Unified view of sessions, assignments, and reminders.",
+  "filterLabel": "Filter by kind",
+  "colTitle": "Title",
+  "colKind": "Kind",
+  "colStarts": "Starts",
+  "colEnds": "Ends",
+  "empty": "Nothing upcoming.",
+  "forbidden": "Sign in to view calendar.",
+  "kind.all": "All",
+  "kind.session": "Session",
+  "kind.assignment": "Assignment",
+  "kind.reminder": "Reminder"
+}

@@ -1,0 +1,15 @@
+{
+  "title": "تقویم پیش‌رو",
+  "subtitle": "نمای یکپارچه جلسات، تکالیف و یادآورها.",
+  "filterLabel": "فیلتر نوع",
+  "colTitle": "عنوان",
+  "colKind": "نوع",
+  "colStarts": "شروع",
+  "colEnds": "پایان",
+  "empty": "موردی پیش رو نیست.",
+  "forbidden": "برای تقویم وارد شوید.",
+  "kind.all": "همه",
+  "kind.session": "جلسه",
+  "kind.assignment": "تکلیف",
+  "kind.reminder": "یادآور"
+}

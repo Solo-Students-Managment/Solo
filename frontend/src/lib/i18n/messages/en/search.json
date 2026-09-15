@@ -1,0 +1,15 @@
+{
+  "title": "Global search",
+  "subtitle": "Find students, courses, sessions, assignments, and messages you are allowed to see.",
+  "queryLabel": "Search",
+  "queryPlaceholder": "Type to search",
+  "empty": "No authorized results.",
+  "forbidden": "Sign in to search.",
+  "actionMessages": "Open messages",
+  "entity.student": "Student",
+  "entity.course": "Course",
+  "entity.session": "Session",
+  "entity.assignment": "Assignment",
+  "entity.message": "Message",
+  "entity.subject": "Subject"
+}

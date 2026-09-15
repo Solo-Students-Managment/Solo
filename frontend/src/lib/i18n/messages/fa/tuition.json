@@ -1,0 +1,23 @@
+{
+  "title": "پیگیری شهریه",
+  "subtitle": "پیگیری بدهی بدون پرداخت درون‌برنامه‌ای.",
+  "saveSubmit": "ذخیره رکورد",
+  "saveSuccess": "رکورد شهریه ذخیره شد.",
+  "studentLabel": "نام دانش‌آموز",
+  "amountLabel": "مبلغ (واحد خرد)",
+  "dueLabel": "سررسید",
+  "statusLabel": "وضعیت",
+  "colStudent": "دانش‌آموز",
+  "colAmount": "مبلغ",
+  "colStatus": "وضعیت",
+  "colDue": "سررسید",
+  "empty": "رکورد شهریه‌ای نیست.",
+  "loadError": "بارگذاری شهریه ناموفق بود.",
+  "forbidden": "اجازه مدیریت شهریه را ندارید.",
+  "validation.student": "دانش‌آموز الزامی است.",
+  "validation.dueAt": "سررسید الزامی است.",
+  "status.due": "بدهکار",
+  "status.partial": "جزئی",
+  "status.paid": "پرداخت‌شده",
+  "status.waived": "بخشیده‌شده"
+}

@@ -65,5 +65,8 @@
   "role.support_staff": "پشتیبانی",
   "status.active": "فعال",
   "status.invited": "دعوت‌شده",
-  "status.suspended": "معلق"
+  "status.suspended": "معلق",
+  "navTuition": "شهریه",
+  "navResources": "منابع",
+  "navReports": "گزارش‌ها"
 }

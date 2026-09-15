@@ -67,6 +67,9 @@ export const routes = {
     assignments: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/assignments`,
     gradebook: (orgId: string) => `/org/${encodeURIComponent(orgId)}/gradebook`,
+    tuition: (orgId: string) => `/org/${encodeURIComponent(orgId)}/tuition`,
+    resources: (orgId: string) => `/org/${encodeURIComponent(orgId)}/resources`,
+    reports: (orgId: string) => `/org/${encodeURIComponent(orgId)}/reports`,
   },
   messaging: {
     home: () => "/personal/messages",
@@ -79,6 +82,9 @@ export const routes = {
   },
   calendar: {
     home: () => "/personal/calendar",
+  },
+  search: {
+    home: () => "/personal/search",
   },
   admin: {
     home: () => "/admin",

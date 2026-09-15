@@ -43,6 +43,27 @@ import {
   setGradebookClient,
 } from "@/services/gradebook";
 
+import {
+  createHttpMessagingClient,
+  setMessagingClient,
+} from "@/services/messaging";
+import { createHttpChatClient, setChatClient } from "@/services/chat";
+import {
+  createHttpNotificationsClient,
+  setNotificationsClient,
+} from "@/services/notifications";
+import {
+  createHttpCalendarClient,
+  setCalendarClient,
+} from "@/services/calendar";
+import { createHttpTuitionClient, setTuitionClient } from "@/services/tuition";
+import {
+  createHttpResourcesClient,
+  setResourcesClient,
+} from "@/services/resources";
+import { createHttpReportsClient, setReportsClient } from "@/services/reports";
+import { createHttpSearchClient, setSearchClient } from "@/services/search";
+
 type AppProvidersProps = {
   children: ReactNode;
 };
@@ -78,6 +99,14 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setSessionsClient(createHttpSessionsClient());
           setAssignmentsClient(createHttpAssignmentsClient());
           setGradebookClient(createHttpGradebookClient());
+          setMessagingClient(createHttpMessagingClient());
+          setChatClient(createHttpChatClient());
+          setNotificationsClient(createHttpNotificationsClient());
+          setCalendarClient(createHttpCalendarClient());
+          setTuitionClient(createHttpTuitionClient());
+          setResourcesClient(createHttpResourcesClient());
+          setReportsClient(createHttpReportsClient());
+          setSearchClient(createHttpSearchClient());
           setReady(true);
         }
       } catch {

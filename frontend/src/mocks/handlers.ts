@@ -63,6 +63,25 @@ import {
 import { assignmentSchema, type Assignment } from "@/services/assignments";
 import { gradeEntrySchema, type GradeEntry } from "@/services/gradebook";
 
+import { messageThreadSchema, type MessageThread } from "@/services/messaging";
+import {
+  chatMessageSchema,
+  chatRoomSchema,
+  type ChatMessage,
+  type ChatRoom,
+} from "@/services/chat";
+import {
+  notificationPreferencesSchema,
+  notificationSchema,
+  type AppNotification,
+  type NotificationPreferences,
+} from "@/services/notifications";
+import { type CalendarEvent } from "@/services/calendar";
+import { tuitionRecordSchema, type TuitionRecord } from "@/services/tuition";
+import { resourceFileSchema, type ResourceFile } from "@/services/resources";
+import { reportViewSchema, type ReportView } from "@/services/reports";
+import { type SearchHit } from "@/services/search";
+
 export type MockScenario =
   | "success"
   | "empty"
@@ -190,6 +209,67 @@ const mockSessions = new Map<string, SessionDetail>();
 const mockAttendance = new Map<string, AttendanceRecord[]>();
 const mockAssignments = new Map<string, Assignment[]>();
 const mockGradebook = new Map<string, GradeEntry[]>();
+
+const mockMessageThreads: MessageThread[] = [];
+const mockChatRooms: ChatRoom[] = [];
+const mockChatMessages = new Map<string, ChatMessage[]>();
+let mockNotificationPrefs: NotificationPreferences = {
+  inApp: true,
+  sms: true,
+  webPush: false,
+  quietHoursEnabled: false,
+};
+const mockNotifications: AppNotification[] = [
+  {
+    id: opaqueIdSchema.parse("ntf_demo1"),
+    category: "homework",
+    title: "New homework published",
+    unread: true,
+    href: "/personal/messages",
+  },
+];
+const mockCalendarEvents: CalendarEvent[] = [
+  {
+    id: opaqueIdSchema.parse("cal_demo1"),
+    title: "Math session",
+    startsAt: new Date(Date.now() + 86400000).toISOString(),
+    endsAt: new Date(Date.now() + 90000000).toISOString(),
+    kind: "session",
+  },
+];
+const mockTuition = new Map<string, TuitionRecord[]>();
+const mockResources = new Map<string, ResourceFile[]>();
+const mockReports = new Map<string, ReportView[]>();
+const mockSearchCatalog: SearchHit[] = [
+  {
+    id: opaqueIdSchema.parse("sr_stu1"),
+    entityType: "student",
+    title: "Sara Student",
+    href: "/org/demo/students",
+    allowed: true,
+  },
+  {
+    id: opaqueIdSchema.parse("sr_crs1"),
+    entityType: "course",
+    title: "Algebra course",
+    href: "/org/demo/courses",
+    allowed: true,
+  },
+  {
+    id: opaqueIdSchema.parse("sr_asg1"),
+    entityType: "assignment",
+    title: "Homework 1",
+    href: "/org/demo/assignments",
+    allowed: true,
+  },
+  {
+    id: opaqueIdSchema.parse("sr_msg1"),
+    entityType: "message",
+    title: "Private message",
+    href: "/personal/messages",
+    allowed: false,
+  },
+];
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -2196,4 +2276,456 @@ export const handlers = [
       return HttpResponse.json(item, { status: existing >= 0 ? 200 : 201 });
     },
   ),
+
+  http.get("/api/messaging/threads", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json({
+      data: mockMessageThreads,
+      meta: {
+        page: 1,
+        pageSize: Math.max(mockMessageThreads.length, 1),
+        totalItems: mockMessageThreads.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/messaging/direct", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      subjectScope?: string;
+      participantLabel?: string;
+      body?: string;
+    };
+    if (!body.subjectScope || !body.participantLabel || !body.body) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "errors.validation"),
+        { status: 400 },
+      );
+    }
+    const item = messageThreadSchema.parse({
+      id: opaqueIdSchema.parse(
+        `msg_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      subjectScope: body.subjectScope.trim(),
+      participantLabel: body.participantLabel.trim(),
+      lastPreview: body.body.trim().slice(0, 120),
+      unreadCount: 0,
+      kind: "direct",
+    });
+    mockMessageThreads.unshift(item);
+    return HttpResponse.json(item, { status: 201 });
+  }),
+
+  http.post("/api/messaging/broadcast", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      subjectScope?: string;
+      body?: string;
+    };
+    if (!body.subjectScope || !body.body) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "errors.validation"),
+        { status: 400 },
+      );
+    }
+    const item = messageThreadSchema.parse({
+      id: opaqueIdSchema.parse(
+        `msg_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      subjectScope: body.subjectScope.trim(),
+      participantLabel: "Broadcast",
+      lastPreview: body.body.trim().slice(0, 120),
+      unreadCount: 0,
+      kind: "broadcast",
+    });
+    mockMessageThreads.unshift(item);
+    return HttpResponse.json(item, { status: 201 });
+  }),
+
+  http.get("/api/chat/rooms", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json({
+      data: mockChatRooms,
+      meta: {
+        page: 1,
+        pageSize: Math.max(mockChatRooms.length, 1),
+        totalItems: mockChatRooms.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/chat/rooms", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      name?: string;
+      scope?: ChatRoom["scope"];
+    };
+    if (!body.name || !body.scope) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "errors.validation"),
+        { status: 400 },
+      );
+    }
+    const item = chatRoomSchema.parse({
+      id: opaqueIdSchema.parse(
+        `room_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      name: body.name.trim(),
+      scope: body.scope,
+      visibility: body.scope === "organization" ? "organization" : "private",
+      memberCount: 1,
+    });
+    mockChatRooms.unshift(item);
+    mockChatMessages.set(String(item.id), []);
+    return HttpResponse.json(item, { status: 201 });
+  }),
+
+  http.get("/api/chat/rooms/:roomId/messages", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const data = mockChatMessages.get(String(params.roomId)) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/chat/rooms/:roomId/messages", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { body?: string };
+    if (!body.body) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "errors.validation"),
+        { status: 400 },
+      );
+    }
+    const roomId = String(params.roomId);
+    const item = chatMessageSchema.parse({
+      id: opaqueIdSchema.parse(
+        `cmsg_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      roomId: opaqueIdSchema.parse(roomId),
+      authorLabel: "You",
+      body: body.body.trim(),
+      createdAt: new Date().toISOString(),
+    });
+    mockChatMessages.set(roomId, [
+      ...(mockChatMessages.get(roomId) ?? []),
+      item,
+    ]);
+    return HttpResponse.json(item, { status: 201 });
+  }),
+
+  http.get("/api/notifications", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json({
+      data: mockNotifications,
+      meta: {
+        page: 1,
+        pageSize: Math.max(mockNotifications.length, 1),
+        totalItems: mockNotifications.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.get("/api/notifications/preferences", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json(
+      notificationPreferencesSchema.parse(mockNotificationPrefs),
+    );
+  }),
+
+  http.put("/api/notifications/preferences", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    mockNotificationPrefs = notificationPreferencesSchema.parse(
+      await request.json(),
+    );
+    return HttpResponse.json(mockNotificationPrefs);
+  }),
+
+  http.post("/api/notifications/:id/read", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const idx = mockNotifications.findIndex(
+      (n) => String(n.id) === String(params.id),
+    );
+    if (idx < 0) {
+      return HttpResponse.json(
+        errorBody(404, "NOT_FOUND", "errors.not_found"),
+        { status: 404 },
+      );
+    }
+    mockNotifications[idx] = { ...mockNotifications[idx]!, unread: false };
+    return HttpResponse.json(notificationSchema.parse(mockNotifications[idx]));
+  }),
+
+  http.get("/api/calendar/upcoming", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json({
+      data: mockCalendarEvents,
+      meta: {
+        page: 1,
+        pageSize: Math.max(mockCalendarEvents.length, 1),
+        totalItems: mockCalendarEvents.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.get("/api/organizations/:orgId/tuition", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const data = mockTuition.get(String(params.orgId)) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/tuition",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        studentDisplayName?: string;
+        amountMinor?: number;
+        dueAt?: string;
+        status?: TuitionRecord["status"];
+      };
+      if (
+        !body.studentDisplayName ||
+        typeof body.amountMinor !== "number" ||
+        !body.dueAt ||
+        !body.status
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const item = tuitionRecordSchema.parse({
+        id: opaqueIdSchema.parse(
+          `tui_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        studentDisplayName: body.studentDisplayName.trim(),
+        amountMinor: body.amountMinor,
+        currency: "IRR",
+        status: body.status,
+        dueAt: body.dueAt,
+      });
+      mockTuition.set(orgId, [...(mockTuition.get(orgId) ?? []), item]);
+      return HttpResponse.json(item, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/resources", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const data = mockResources.get(String(params.orgId)) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/resources",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        subjectName?: string;
+        title?: string;
+        mimeHint?: ResourceFile["mimeHint"];
+      };
+      if (!body.subjectName || !body.title || !body.mimeHint) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const existing = (mockResources.get(orgId) ?? []).filter(
+        (row) =>
+          row.subjectName === body.subjectName!.trim() &&
+          row.title === body.title!.trim(),
+      );
+      const item = resourceFileSchema.parse({
+        id: opaqueIdSchema.parse(
+          `res_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        subjectName: body.subjectName.trim(),
+        title: body.title.trim(),
+        version: existing.length + 1,
+        securityState: "safe",
+        mimeHint: body.mimeHint,
+      });
+      mockResources.set(orgId, [...(mockResources.get(orgId) ?? []), item]);
+      return HttpResponse.json(item, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/reports", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const data = mockReports.get(String(params.orgId)) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/reports",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        kind?: ReportView["kind"];
+        format?: ReportView["format"];
+      };
+      if (!body.name || !body.kind || !body.format) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const item = reportViewSchema.parse({
+        id: opaqueIdSchema.parse(
+          `rpt_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        kind: body.kind,
+        format: body.format,
+      });
+      mockReports.set(orgId, [...(mockReports.get(orgId) ?? []), item]);
+      return HttpResponse.json(item, { status: 201 });
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/reports/:viewId/export",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const view = (mockReports.get(String(params.orgId)) ?? []).find(
+        (row) => String(row.id) === String(params.viewId),
+      );
+      if (!view) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      if (view.format === "json") {
+        return HttpResponse.json({
+          content: JSON.stringify({ kind: view.kind, rows: [] }),
+          format: "json",
+        });
+      }
+      return HttpResponse.json({
+        content: `kind,value\n${view.kind},0\n`,
+        format: "csv",
+      });
+    },
+  ),
+
+  http.get("/api/search", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const url = new URL(request.url);
+    const q = (url.searchParams.get("q") ?? "").trim().toLowerCase();
+    const data = mockSearchCatalog.filter(
+      (hit) => !q || hit.title.toLowerCase().includes(q),
+    );
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
 ];

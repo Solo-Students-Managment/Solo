@@ -1,0 +1,21 @@
+{
+  "title": "پیام‌ها",
+  "subtitle": "پیام مستقیم و اعلامیه در محدوده موضوع. متن پیام در localStorage ذخیره نمی‌شود.",
+  "directTitle": "پیام مستقیم",
+  "broadcastTitle": "اعلامیه",
+  "sendDirect": "ارسال پیام",
+  "sendBroadcast": "ارسال اعلامیه",
+  "sendSuccess": "پیام ارسال شد.",
+  "subjectLabel": "محدوده موضوع",
+  "participantLabel": "مخاطب",
+  "bodyLabel": "متن",
+  "colKind": "نوع",
+  "colSubject": "موضوع",
+  "colParticipant": "مخاطب",
+  "colPreview": "پیش‌نمایش",
+  "empty": "هنوز گفتگویی نیست.",
+  "forbidden": "برای مشاهده پیام‌ها وارد شوید.",
+  "validation.subject": "موضوع الزامی است.",
+  "validation.participant": "مخاطب الزامی است.",
+  "validation.body": "متن الزامی است."
+}

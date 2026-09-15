@@ -16,6 +16,14 @@ import enSessions from "./messages/en/sessions.json";
 import enAttendance from "./messages/en/attendance.json";
 import enAssignments from "./messages/en/assignments.json";
 import enGradebook from "./messages/en/gradebook.json";
+import enMessaging from "./messages/en/messaging.json";
+import enChat from "./messages/en/chat.json";
+import enNotifications from "./messages/en/notifications.json";
+import enCalendar from "./messages/en/calendar.json";
+import enTuition from "./messages/en/tuition.json";
+import enResources from "./messages/en/resources.json";
+import enReports from "./messages/en/reports.json";
+import enSearch from "./messages/en/search.json";
 import enAuth from "./messages/en/auth.json";
 import enCommon from "./messages/en/common.json";
 import enFoundation from "./messages/en/foundation.json";
@@ -35,6 +43,14 @@ import faSessions from "./messages/fa/sessions.json";
 import faAttendance from "./messages/fa/attendance.json";
 import faAssignments from "./messages/fa/assignments.json";
 import faGradebook from "./messages/fa/gradebook.json";
+import faMessaging from "./messages/fa/messaging.json";
+import faChat from "./messages/fa/chat.json";
+import faNotifications from "./messages/fa/notifications.json";
+import faCalendar from "./messages/fa/calendar.json";
+import faTuition from "./messages/fa/tuition.json";
+import faResources from "./messages/fa/resources.json";
+import faReports from "./messages/fa/reports.json";
+import faSearch from "./messages/fa/search.json";
 import faAuth from "./messages/fa/auth.json";
 import faCommon from "./messages/fa/common.json";
 import faFoundation from "./messages/fa/foundation.json";
@@ -59,7 +75,15 @@ export type MessageNamespace =
   | "sessions"
   | "attendance"
   | "assignments"
-  | "gradebook";
+  | "gradebook"
+  | "messaging"
+  | "chat"
+  | "notifications"
+  | "calendar"
+  | "tuition"
+  | "resources"
+  | "reports"
+  | "search";
 
 type Dictionaries = Record<
   Locale,
@@ -87,6 +111,14 @@ const dictionaries: Dictionaries = {
     attendance: enAttendance,
     assignments: enAssignments,
     gradebook: enGradebook,
+    messaging: enMessaging,
+    chat: enChat,
+    notifications: enNotifications,
+    calendar: enCalendar,
+    tuition: enTuition,
+    resources: enResources,
+    reports: enReports,
+    search: enSearch,
   },
   fa: {
     common: faCommon,
@@ -108,6 +140,14 @@ const dictionaries: Dictionaries = {
     attendance: faAttendance,
     assignments: faAssignments,
     gradebook: faGradebook,
+    messaging: faMessaging,
+    chat: faChat,
+    notifications: faNotifications,
+    calendar: faCalendar,
+    tuition: faTuition,
+    resources: faResources,
+    reports: faReports,
+    search: faSearch,
   },
 };
 

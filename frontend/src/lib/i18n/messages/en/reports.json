@@ -1,0 +1,23 @@
+{
+  "title": "Educational reports",
+  "subtitle": "Save views and export attendance, grades, and enrollment summaries.",
+  "saveSubmit": "Save view",
+  "saveSuccess": "Report view saved.",
+  "exportAction": "Export",
+  "exportSuccess": "Export ready.",
+  "exportPreview": "Export preview",
+  "nameLabel": "View name",
+  "kindLabel": "Report kind",
+  "formatLabel": "Format",
+  "colName": "Name",
+  "colKind": "Kind",
+  "colFormat": "Format",
+  "colExport": "Export",
+  "empty": "No saved views.",
+  "loadError": "Could not load reports.",
+  "forbidden": "You do not have permission to manage reports.",
+  "validation.name": "Name is required.",
+  "kind.attendance": "Attendance",
+  "kind.grades": "Grades",
+  "kind.enrollment": "Enrollment"
+}

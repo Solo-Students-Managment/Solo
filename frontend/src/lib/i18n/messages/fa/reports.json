@@ -1,0 +1,23 @@
+{
+  "title": "گزارش‌های آموزشی",
+  "subtitle": "ذخیره نما و خروجی حضور، نمرات و ثبت‌نام.",
+  "saveSubmit": "ذخیره نما",
+  "saveSuccess": "نمای گزارش ذخیره شد.",
+  "exportAction": "خروجی",
+  "exportSuccess": "خروجی آماده است.",
+  "exportPreview": "پیش‌نمایش خروجی",
+  "nameLabel": "نام نما",
+  "kindLabel": "نوع گزارش",
+  "formatLabel": "قالب",
+  "colName": "نام",
+  "colKind": "نوع",
+  "colFormat": "قالب",
+  "colExport": "خروجی",
+  "empty": "نمای ذخیره‌شده‌ای نیست.",
+  "loadError": "بارگذاری گزارش‌ها ناموفق بود.",
+  "forbidden": "اجازه مدیریت گزارش را ندارید.",
+  "validation.name": "نام الزامی است.",
+  "kind.attendance": "حضور",
+  "kind.grades": "نمرات",
+  "kind.enrollment": "ثبت‌نام"
+}

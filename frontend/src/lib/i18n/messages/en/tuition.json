@@ -1,0 +1,23 @@
+{
+  "title": "Tuition tracking",
+  "subtitle": "Track dues without in-app payment processing.",
+  "saveSubmit": "Save record",
+  "saveSuccess": "Tuition record saved.",
+  "studentLabel": "Student name",
+  "amountLabel": "Amount (minor units)",
+  "dueLabel": "Due date",
+  "statusLabel": "Status",
+  "colStudent": "Student",
+  "colAmount": "Amount",
+  "colStatus": "Status",
+  "colDue": "Due",
+  "empty": "No tuition records.",
+  "loadError": "Could not load tuition.",
+  "forbidden": "You do not have permission to manage tuition.",
+  "validation.student": "Student is required.",
+  "validation.dueAt": "Due date is required.",
+  "status.due": "Due",
+  "status.partial": "Partial",
+  "status.paid": "Paid",
+  "status.waived": "Waived"
+}

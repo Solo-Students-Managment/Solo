@@ -18,7 +18,10 @@ type OrgNavKey =
   | "sessions"
   | "attendance"
   | "assignments"
-  | "gradebook";
+  | "gradebook"
+  | "tuition"
+  | "resources"
+  | "reports";
 
 type OrgShellProps = {
   locale: Locale;
@@ -80,6 +83,21 @@ function navItems(orgId: string, langQuery: string) {
       key: "gradebook" as const,
       href: `${routes.organization.gradebook(orgId)}${langQuery}`,
       labelKey: "navGradebook",
+    },
+    {
+      key: "tuition" as const,
+      href: `${routes.organization.tuition(orgId)}${langQuery}`,
+      labelKey: "navTuition",
+    },
+    {
+      key: "resources" as const,
+      href: `${routes.organization.resources(orgId)}${langQuery}`,
+      labelKey: "navResources",
+    },
+    {
+      key: "reports" as const,
+      href: `${routes.organization.reports(orgId)}${langQuery}`,
+      labelKey: "navReports",
     },
   ];
 }

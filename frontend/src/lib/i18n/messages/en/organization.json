@@ -65,5 +65,8 @@
   "role.support_staff": "Support staff",
   "status.active": "Active",
   "status.invited": "Invited",
-  "status.suspended": "Suspended"
+  "status.suspended": "Suspended",
+  "navTuition": "Tuition",
+  "navResources": "Resources",
+  "navReports": "Reports"
 }

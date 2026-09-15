@@ -1,0 +1,21 @@
+{
+  "title": "Messages",
+  "subtitle": "Subject-scoped direct messages and broadcasts. Message bodies are never stored in localStorage.",
+  "directTitle": "Direct message",
+  "broadcastTitle": "Broadcast",
+  "sendDirect": "Send message",
+  "sendBroadcast": "Send broadcast",
+  "sendSuccess": "Message sent.",
+  "subjectLabel": "Subject scope",
+  "participantLabel": "Participant",
+  "bodyLabel": "Message",
+  "colKind": "Kind",
+  "colSubject": "Subject",
+  "colParticipant": "Participant",
+  "colPreview": "Preview",
+  "empty": "No threads yet.",
+  "forbidden": "Sign in to view messages.",
+  "validation.subject": "Subject is required.",
+  "validation.participant": "Participant is required.",
+  "validation.body": "Message is required."
+}

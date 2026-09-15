@@ -29,6 +29,36 @@ export default function PersonalHomePage() {
         >
           Change phone
         </Link>
+        <Link
+          href={routes.messaging.home()}
+          className="text-brand text-sm underline-offset-2 hover:underline"
+        >
+          Messages
+        </Link>
+        <Link
+          href={routes.chat.home()}
+          className="text-brand text-sm underline-offset-2 hover:underline"
+        >
+          Chat
+        </Link>
+        <Link
+          href={routes.notifications.home()}
+          className="text-brand text-sm underline-offset-2 hover:underline"
+        >
+          Notifications
+        </Link>
+        <Link
+          href={routes.calendar.home()}
+          className="text-brand text-sm underline-offset-2 hover:underline"
+        >
+          Calendar
+        </Link>
+        <Link
+          href={routes.search.home()}
+          className="text-brand text-sm underline-offset-2 hover:underline"
+        >
+          Search
+        </Link>
       </p>
     </AppShell>
   );

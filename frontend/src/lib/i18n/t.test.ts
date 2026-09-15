@@ -33,6 +33,14 @@ describe("i18n translator", () => {
     expect(assertNamespaceParity("attendance")).toEqual([]);
     expect(assertNamespaceParity("assignments")).toEqual([]);
     expect(assertNamespaceParity("gradebook")).toEqual([]);
+    expect(assertNamespaceParity("search")).toEqual([]);
+    expect(assertNamespaceParity("reports")).toEqual([]);
+    expect(assertNamespaceParity("resources")).toEqual([]);
+    expect(assertNamespaceParity("tuition")).toEqual([]);
+    expect(assertNamespaceParity("calendar")).toEqual([]);
+    expect(assertNamespaceParity("notifications")).toEqual([]);
+    expect(assertNamespaceParity("chat")).toEqual([]);
+    expect(assertNamespaceParity("messaging")).toEqual([]);
     expect(assertNamespaceParity("home")).toEqual([]);
   });
 });

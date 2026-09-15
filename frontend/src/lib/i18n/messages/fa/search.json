@@ -1,0 +1,15 @@
+{
+  "title": "جستجوی سراسری",
+  "subtitle": "دانش‌آموز، دوره، جلسه، تکلیف و پیام‌هایی که اجازه دیدن دارید.",
+  "queryLabel": "جستجو",
+  "queryPlaceholder": "برای جستجو بنویسید",
+  "empty": "نتیجه مجازی نیست.",
+  "forbidden": "برای جستجو وارد شوید.",
+  "actionMessages": "باز کردن پیام‌ها",
+  "entity.student": "دانش‌آموز",
+  "entity.course": "دوره",
+  "entity.session": "جلسه",
+  "entity.assignment": "تکلیف",
+  "entity.message": "پیام",
+  "entity.subject": "موضوع"
+}
