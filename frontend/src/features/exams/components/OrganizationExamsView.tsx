@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useFormContext } from "react-hook-form";
 import { useParams, useSearchParams } from "next/navigation";
@@ -29,7 +29,13 @@ import { getOrganizationClient } from "@/services/organization";
 import {
   createExamSchema,
   parseTimeLimitMinutes,
+  recordSignalSchema,
+  startAttemptSchema,
+  submitAttemptSchema,
   type CreateExamValues,
+  type RecordSignalValues,
+  type StartAttemptValues,
+  type SubmitAttemptValues,
 } from "../schemas";
 
 const keys = createQueryKeyFactory("exams");
@@ -94,6 +100,91 @@ function ExamFields({ locale }: { locale: ReturnType<typeof resolveLocale> }) {
   );
 }
 
+function StartAttemptFields({
+  locale,
+}: {
+  locale: ReturnType<typeof resolveLocale>;
+}) {
+  const { register } = useFormContext<StartAttemptValues>();
+  return (
+    <>
+      <div className="space-y-1.5">
+        <Label htmlFor="exam-take-title">
+          {t(locale, "exams", "examTitleLabel")}
+        </Label>
+        <Input id="exam-take-title" {...register("examTitle")} />
+        <SoloFieldError name="examTitle" />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="exam-take-student">
+          {t(locale, "exams", "studentLabel")}
+        </Label>
+        <Input id="exam-take-student" {...register("studentDisplayName")} />
+        <SoloFieldError name="studentDisplayName" />
+      </div>
+    </>
+  );
+}
+
+function SignalFields({
+  locale,
+}: {
+  locale: ReturnType<typeof resolveLocale>;
+}) {
+  const { register } = useFormContext<RecordSignalValues>();
+  return (
+    <>
+      <div className="space-y-1.5">
+        <Label htmlFor="exam-signal-attempt">
+          {t(locale, "exams", "attemptIdLabel")}
+        </Label>
+        <Input id="exam-signal-attempt" {...register("attemptId")} />
+        <SoloFieldError name="attemptId" />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="exam-signal-type">
+          {t(locale, "exams", "signalLabel")}
+        </Label>
+        <select
+          id="exam-signal-type"
+          className={selectClassName}
+          {...register("signal")}
+        >
+          {(
+            [
+              "tab_blur",
+              "fullscreen_exit",
+              "copy_paste",
+              "idle_timeout",
+            ] as const
+          ).map((signal) => (
+            <option key={signal} value={signal}>
+              {t(locale, "exams", `signal.${signal}`)}
+            </option>
+          ))}
+        </select>
+      </div>
+    </>
+  );
+}
+
+function SubmitAttemptFields({
+  locale,
+}: {
+  locale: ReturnType<typeof resolveLocale>;
+}) {
+  const { register } = useFormContext<SubmitAttemptValues>();
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor="exam-submit-attempt">
+        {t(locale, "exams", "attemptIdLabel")}
+      </Label>
+      <Input id="exam-submit-attempt" {...register("attemptId")} />
+      <SoloFieldError name="attemptId" />
+    </div>
+  );
+}
+
 export function OrganizationExamsView() {
   const params = useParams<{ orgId: string }>();
   const orgId = params.orgId;
@@ -101,6 +192,7 @@ export function OrganizationExamsView() {
   const locale = resolveLocale(searchParams.get("lang") ?? undefined);
   const dir = localeDirection(locale);
   const queryClient = useQueryClient();
+  const [lastAttemptId, setLastAttemptId] = useState("");
   const sessionQuery = useQuery({
     queryKey: ["auth", "session"],
     queryFn: () => getAuthClient().getSession(),
@@ -254,6 +346,106 @@ export function OrganizationExamsView() {
           />
         </div>
       )}
+
+      <section className="space-y-3" aria-labelledby="exam-take-heading">
+        <h2 id="exam-take-heading" className="text-lg font-medium">
+          {t(locale, "exams", "takeTitle")}
+        </h2>
+        <SoloForm
+          schema={startAttemptSchema}
+          defaultValues={{ examTitle: "", studentDisplayName: "" }}
+          submitLabel={t(locale, "exams", "startAttemptSubmit")}
+          onSubmit={async (values: StartAttemptValues) => {
+            const match = rows.find(
+              (row) =>
+                row.title.toLowerCase() ===
+                values.examTitle.trim().toLowerCase(),
+            );
+            if (!match) {
+              pushFeedback({
+                tone: "error",
+                title: t(locale, "exams", "examNotFound"),
+              });
+              return;
+            }
+            if (match.status !== "published") {
+              pushFeedback({
+                tone: "error",
+                title: t(locale, "exams", "examNotPublished"),
+              });
+              return;
+            }
+            const attempt = await getExamsClient().startAttempt(
+              orgId,
+              String(match.id),
+              { studentDisplayName: values.studentDisplayName },
+            );
+            setLastAttemptId(String(attempt.id));
+            pushFeedback({
+              tone: "success",
+              title: t(locale, "exams", "startAttemptSuccess", {
+                id: String(attempt.id),
+              }),
+            });
+          }}
+        >
+          <StartAttemptFields locale={locale} />
+        </SoloForm>
+        {lastAttemptId ? (
+          <p className="text-muted text-sm">
+            {t(locale, "exams", "lastAttempt", { id: lastAttemptId })}
+          </p>
+        ) : null}
+      </section>
+
+      <section className="space-y-3" aria-labelledby="exam-signal-heading">
+        <h2 id="exam-signal-heading" className="text-lg font-medium">
+          {t(locale, "exams", "signalTitle")}
+        </h2>
+        <SoloForm
+          key={`signal-${lastAttemptId}`}
+          schema={recordSignalSchema}
+          defaultValues={{
+            attemptId: lastAttemptId,
+            signal: "tab_blur",
+          }}
+          submitLabel={t(locale, "exams", "signalSubmit")}
+          onSubmit={async (values: RecordSignalValues) => {
+            await getExamsClient().recordSignal(
+              orgId,
+              values.attemptId,
+              values.signal,
+            );
+            pushFeedback({
+              tone: "success",
+              title: t(locale, "exams", "signalSuccess"),
+            });
+          }}
+        >
+          <SignalFields locale={locale} />
+        </SoloForm>
+      </section>
+
+      <section className="space-y-3" aria-labelledby="exam-submit-heading">
+        <h2 id="exam-submit-heading" className="text-lg font-medium">
+          {t(locale, "exams", "submitTitle")}
+        </h2>
+        <SoloForm
+          key={`submit-${lastAttemptId}`}
+          schema={submitAttemptSchema}
+          defaultValues={{ attemptId: lastAttemptId }}
+          submitLabel={t(locale, "exams", "submitAttemptSubmit")}
+          onSubmit={async (values: SubmitAttemptValues) => {
+            await getExamsClient().submitAttempt(orgId, values.attemptId);
+            pushFeedback({
+              tone: "success",
+              title: t(locale, "exams", "submitAttemptSuccess"),
+            });
+          }}
+        >
+          <SubmitAttemptFields locale={locale} />
+        </SoloForm>
+      </section>
     </OrgShell>
   );
 }

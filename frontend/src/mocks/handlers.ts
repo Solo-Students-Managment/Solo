@@ -86,7 +86,14 @@ import {
   type QuestionType,
   type QuestionVisibility,
 } from "@/services/question-bank";
-import { examSchema, type Exam } from "@/services/exams";
+import {
+  antiCheatSignalSchema,
+  examAttemptSchema,
+  examSchema,
+  type AntiCheatSignal,
+  type Exam,
+  type ExamAttempt,
+} from "@/services/exams";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -241,6 +248,7 @@ const mockEvaluationLevels = new Map<string, EvaluationLevel[]>();
 const mockProgressMetrics = new Map<string, ProgressMetric[]>();
 const mockQuestionBank = new Map<string, BankQuestion[]>();
 const mockExams = new Map<string, Exam[]>();
+const mockExamAttempts = new Map<string, ExamAttempt[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -438,6 +446,7 @@ function persistMswState() {
         mockProgressMetrics: [...mockProgressMetrics.entries()],
         mockQuestionBank: [...mockQuestionBank.entries()],
         mockExams: [...mockExams.entries()],
+        mockExamAttempts: [...mockExamAttempts.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -588,6 +597,17 @@ function hydrateMswState() {
         mockExams.set(
           entry[0],
           entry[1].map((row) => examSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockExamAttempts)) {
+      mockExamAttempts.clear();
+      for (const entry of data.mockExamAttempts as Array<
+        [string, ExamAttempt[]]
+      >) {
+        mockExamAttempts.set(
+          entry[0],
+          entry[1].map((row) => examAttemptSchema.parse(row)),
         );
       }
     }
@@ -3748,6 +3768,165 @@ export const handlers = [
         status: "published",
       });
       mockExams.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/exams/:examId/attempts",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const examId = String(params.examId);
+      const data = (mockExamAttempts.get(orgId) ?? []).filter(
+        (row) => String(row.examId) === examId,
+      );
+      return HttpResponse.json({
+        data,
+        meta: {
+          page: 1,
+          pageSize: Math.max(data.length, 1),
+          totalItems: data.length,
+          totalPages: 1,
+        },
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/exams/:examId/attempts",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const examId = String(params.examId);
+      const body = (await request.json()) as { studentDisplayName?: string };
+      const exams = mockExams.get(orgId) ?? [];
+      const exam = exams.find((row) => String(row.id) === examId);
+      if (!exam) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      if (exam.status !== "published") {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "exams.examNotPublished"),
+          { status: 400 },
+        );
+      }
+      if (!body.studentDisplayName?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "exams.validation.student"),
+          { status: 400 },
+        );
+      }
+      const studentDisplayName = body.studentDisplayName.trim();
+      const prior = (mockExamAttempts.get(orgId) ?? []).filter(
+        (row) =>
+          String(row.examId) === examId &&
+          row.studentDisplayName === studentDisplayName,
+      );
+      if (prior.length >= exam.maxAttempts) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "exams.attemptLimit"),
+          { status: 400 },
+        );
+      }
+      const attempt = examAttemptSchema.parse({
+        id: opaqueIdSchema.parse(
+          `exa_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        examId: exam.id,
+        organizationId: opaqueIdSchema.parse(orgId),
+        studentDisplayName,
+        startedAt: new Date().toISOString(),
+        submittedAt: null,
+        remainingSeconds:
+          exam.timeLimitMinutes == null ? null : exam.timeLimitMinutes * 60,
+        signals: [],
+        status: "in_progress",
+      });
+      mockExamAttempts.set(orgId, [
+        ...(mockExamAttempts.get(orgId) ?? []),
+        attempt,
+      ]);
+      persistMswState();
+      return HttpResponse.json(attempt, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/exam-attempts/:attemptId/signals",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const attemptId = String(params.attemptId);
+      const body = (await request.json()) as { signal?: AntiCheatSignal };
+      const parsed = antiCheatSignalSchema.safeParse(body.signal);
+      if (!parsed.success) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const rows = mockExamAttempts.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === attemptId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const updated = examAttemptSchema.parse({
+        ...rows[idx]!,
+        signals: [...rows[idx]!.signals, parsed.data],
+      });
+      mockExamAttempts.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/exam-attempts/:attemptId/submit",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const attemptId = String(params.attemptId);
+      const rows = mockExamAttempts.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === attemptId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const updated = examAttemptSchema.parse({
+        ...rows[idx]!,
+        submittedAt: new Date().toISOString(),
+        remainingSeconds: 0,
+        status: "submitted",
+      });
+      mockExamAttempts.set(
         orgId,
         rows.map((row, i) => (i === idx ? updated : row)),
       );
