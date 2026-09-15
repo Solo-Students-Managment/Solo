@@ -1,4 +1,6 @@
-import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/locales";
+import type { Locale } from "@/lib/i18n/locales";
+import { resolveLocale as resolveLocaleBase } from "@/lib/i18n/locales";
+import { t } from "@/lib/i18n/t";
 
 export type FoundationMessages = {
   brand: string;
@@ -13,43 +15,21 @@ export type FoundationMessages = {
   themeSystem: string;
 };
 
-const messages: Record<Locale, FoundationMessages> = {
-  fa: {
-    brand: "Solo",
-    title: "پایه‌گذاری فرانت‌اند",
-    description:
-      "اپلیکیشن Next.js سبزِ میدان در مسیر /frontend آماده است. نمونهٔ Vite فقط در /legacy به‌عنوان مرجع باقی مانده است.",
-    phase: "فاز ۰ — زیربنا",
-    layoutNote: "مرزهای مخزن: /frontend · /backend · /docs · /legacy",
-    languageLabel: "زبان",
-    themeLabel: "پوسته",
-    themeLight: "روشن",
-    themeDark: "تیره",
-    themeSystem: "سیستم",
-  },
-  en: {
-    brand: "Solo",
-    title: "Frontend foundation",
-    description:
-      "The greenfield Next.js app lives under /frontend. The Vite prototype remains reference-only in /legacy.",
-    phase: "Phase 0 — Foundation",
-    layoutNote: "Repository boundaries: /frontend · /backend · /docs · /legacy",
-    languageLabel: "Language",
-    themeLabel: "Theme",
-    themeLight: "Light",
-    themeDark: "Dark",
-    themeSystem: "System",
-  },
-};
-
 export function getFoundationMessages(locale: Locale): FoundationMessages {
-  return messages[locale];
+  return {
+    brand: t(locale, "foundation", "brand"),
+    title: t(locale, "foundation", "title"),
+    description: t(locale, "foundation", "description"),
+    phase: t(locale, "foundation", "phase"),
+    layoutNote: t(locale, "foundation", "layoutNote"),
+    languageLabel: t(locale, "foundation", "languageLabel"),
+    themeLabel: t(locale, "foundation", "themeLabel"),
+    themeLight: t(locale, "foundation", "themeLight"),
+    themeDark: t(locale, "foundation", "themeDark"),
+    themeSystem: t(locale, "foundation", "themeSystem"),
+  };
 }
 
 export function resolveLocale(raw: string | string[] | undefined): Locale {
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  if (value && isLocale(value)) {
-    return value;
-  }
-  return defaultLocale;
+  return resolveLocaleBase(raw);
 }

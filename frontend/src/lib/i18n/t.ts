@@ -1,0 +1,97 @@
+import type { Locale } from "@/lib/i18n/locales";
+import { defaultLocale } from "@/lib/i18n/locales";
+
+import enCommon from "./messages/en/common.json";
+import enFoundation from "./messages/en/foundation.json";
+import faCommon from "./messages/fa/common.json";
+import faFoundation from "./messages/fa/foundation.json";
+
+export type MessageNamespace = "common" | "foundation";
+
+type Dictionaries = Record<
+  Locale,
+  Record<MessageNamespace, Record<string, string>>
+>;
+
+const dictionaries: Dictionaries = {
+  en: {
+    common: enCommon,
+    foundation: enFoundation,
+  },
+  fa: {
+    common: faCommon,
+    foundation: faFoundation,
+  },
+};
+
+const missingKeys = new Set<string>();
+
+export type TranslateParams = Record<string, string | number>;
+
+function formatPlural(template: string, count: number): string {
+  const match = template.match(
+    /\{(\w+),\s*plural,\s*=0\s*\{([^}]*)\}\s*one\s*\{([^}]*)\}\s*other\s*\{([^}]*)\}\}/,
+  );
+  if (!match) {
+    return template.replaceAll("{count}", String(count));
+  }
+  const [, , zero, one, other] = match;
+  const branch = count === 0 ? zero : count === 1 ? one : other;
+  return (branch ?? other ?? "")
+    .replaceAll("#", String(count))
+    .replaceAll("{count}", String(count));
+}
+
+export function t(
+  locale: Locale,
+  namespace: MessageNamespace,
+  key: string,
+  params?: TranslateParams,
+): string {
+  const primary = dictionaries[locale][namespace][key];
+  const fallback = dictionaries[defaultLocale][namespace][key];
+  let value = primary ?? fallback;
+
+  if (!value) {
+    const miss = `${locale}.${namespace}.${key}`;
+    if (process.env.NODE_ENV !== "production" && !missingKeys.has(miss)) {
+      missingKeys.add(miss);
+      console.warn(`[i18n] Missing translation: ${miss}`);
+    }
+    return key;
+  }
+
+  if (params && "count" in params && typeof params.count === "number") {
+    value = formatPlural(value, params.count);
+  }
+
+  if (params) {
+    for (const [paramKey, paramValue] of Object.entries(params)) {
+      value = value.replaceAll(`{${paramKey}}`, String(paramValue));
+    }
+  }
+
+  return value;
+}
+
+export function getNamespaceKeys(
+  locale: Locale,
+  namespace: MessageNamespace,
+): string[] {
+  return Object.keys(dictionaries[locale][namespace]).sort();
+}
+
+export function assertNamespaceParity(namespace: MessageNamespace): string[] {
+  const enKeys = new Set(getNamespaceKeys("en", namespace));
+  const faKeys = new Set(getNamespaceKeys("fa", namespace));
+  const missingInFa = [...enKeys].filter((key) => !faKeys.has(key));
+  const missingInEn = [...faKeys].filter((key) => !enKeys.has(key));
+  return [
+    ...missingInFa.map((k) => `fa.${namespace}.${k}`),
+    ...missingInEn.map((k) => `en.${namespace}.${k}`),
+  ];
+}
+
+export function getMissingTranslationKeys(): string[] {
+  return [...missingKeys];
+}

@@ -1,0 +1,13 @@
+{
+  "brand": "Solo",
+  "title": "پایه‌گذاری فرانت‌اند",
+  "description": "اپلیکیشن Next.js سبزِ میدان در مسیر /frontend آماده است. نمونهٔ Vite فقط در /legacy به‌عنوان مرجع باقی مانده است.",
+  "phase": "فاز ۰ — زیربنا",
+  "layoutNote": "مرزهای مخزن: /frontend · /backend · /docs · /legacy",
+  "languageLabel": "زبان",
+  "themeLabel": "پوسته",
+  "themeLight": "روشن",
+  "themeDark": "تیره",
+  "themeSystem": "سیستم",
+  "itemCount": "{count, plural, =0 {موردی نیست} one {# مورد} other {# مورد}}"
+}

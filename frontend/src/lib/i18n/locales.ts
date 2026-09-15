@@ -15,3 +15,19 @@ export function localeDirection(locale: Locale): "rtl" | "ltr" {
 export function listLocales(): readonly Locale[] {
   return locales;
 }
+
+export function resolveLocale(raw: string | string[] | undefined): Locale {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (value && isLocale(value)) {
+    return value;
+  }
+  return defaultLocale;
+}
+
+/** Direction can be overridden independently from language. */
+export function resolveDirection(
+  locale: Locale,
+  override?: "rtl" | "ltr",
+): "rtl" | "ltr" {
+  return override ?? localeDirection(locale);
+}

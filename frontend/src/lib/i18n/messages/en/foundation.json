@@ -1,0 +1,13 @@
+{
+  "brand": "Solo",
+  "title": "Frontend foundation",
+  "description": "The greenfield Next.js app lives under /frontend. The Vite prototype remains reference-only in /legacy.",
+  "phase": "Phase 0 — Foundation",
+  "layoutNote": "Repository boundaries: /frontend · /backend · /docs · /legacy",
+  "languageLabel": "Language",
+  "themeLabel": "Theme",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System",
+  "itemCount": "{count, plural, =0 {No items} one {# item} other {# items}}"
+}
