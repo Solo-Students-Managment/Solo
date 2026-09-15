@@ -104,6 +104,7 @@ import {
   type CurriculumModule,
   type CurriculumUnit,
 } from "@/services/curriculum";
+import { lessonPlanSchema, type LessonPlan } from "@/services/lesson-plans";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -263,6 +264,7 @@ const mockExamGrades = new Map<string, ExamGrade[]>();
 const mockCurriculumModules = new Map<string, CurriculumModule[]>();
 const mockCurriculumUnits = new Map<string, CurriculumUnit[]>();
 const mockCurriculumLessons = new Map<string, CurriculumLesson[]>();
+const mockLessonPlans = new Map<string, LessonPlan[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -465,6 +467,7 @@ function persistMswState() {
         mockCurriculumModules: [...mockCurriculumModules.entries()],
         mockCurriculumUnits: [...mockCurriculumUnits.entries()],
         mockCurriculumLessons: [...mockCurriculumLessons.entries()],
+        mockLessonPlans: [...mockLessonPlans.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -668,6 +671,17 @@ function hydrateMswState() {
         mockCurriculumLessons.set(
           entry[0],
           entry[1].map((row) => curriculumLessonSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockLessonPlans)) {
+      mockLessonPlans.clear();
+      for (const entry of data.mockLessonPlans as Array<
+        [string, LessonPlan[]]
+      >) {
+        mockLessonPlans.set(
+          entry[0],
+          entry[1].map((row) => lessonPlanSchema.parse(row)),
         );
       }
     }
@@ -4331,6 +4345,128 @@ export const handlers = [
       ]);
       persistMswState();
       return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/lesson-plans", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockLessonPlans.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/lesson-plans",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        title?: string;
+        bodyHtml?: string;
+        visibility?: "personal" | "school" | "specific" | "public";
+        moduleRef?: string | null;
+      };
+      if (!body.title?.trim() || !body.bodyHtml?.trim() || !body.visibility) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "lessonPlans.validation.title"),
+          { status: 400 },
+        );
+      }
+      const row = lessonPlanSchema.parse({
+        id: opaqueIdSchema.parse(
+          `lplan_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        title: body.title.trim(),
+        bodyHtml: body.bodyHtml,
+        visibility: body.visibility,
+        moduleRef: body.moduleRef?.trim() || null,
+        version: 1,
+        snapshotOfId: null,
+        clonedFromId: null,
+      });
+      mockLessonPlans.set(orgId, [...(mockLessonPlans.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/lesson-plans/:planId/clone",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const planId = String(params.planId);
+      const rows = mockLessonPlans.get(orgId) ?? [];
+      const source = rows.find((row) => String(row.id) === planId);
+      if (!source) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const cloned = lessonPlanSchema.parse({
+        ...source,
+        id: opaqueIdSchema.parse(
+          `lplan_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        version: source.version + 1,
+        snapshotOfId: null,
+        clonedFromId: source.id,
+      });
+      mockLessonPlans.set(orgId, [...rows, cloned]);
+      persistMswState();
+      return HttpResponse.json(cloned, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/lesson-plans/:planId/snapshot",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const planId = String(params.planId);
+      const rows = mockLessonPlans.get(orgId) ?? [];
+      const source = rows.find((row) => String(row.id) === planId);
+      if (!source) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const snap = lessonPlanSchema.parse({
+        ...source,
+        id: opaqueIdSchema.parse(
+          `lplan_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        title: `${source.title} (snapshot)`,
+        version: source.version,
+        snapshotOfId: source.id,
+        clonedFromId: null,
+      });
+      mockLessonPlans.set(orgId, [...rows, snap]);
+      persistMswState();
+      return HttpResponse.json(snap, { status: 201 });
     },
   ),
 ];
