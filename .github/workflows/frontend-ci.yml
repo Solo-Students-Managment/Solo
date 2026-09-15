@@ -53,6 +53,8 @@ jobs:
           NEXT_PUBLIC_ENABLE_MSW: "true"
           NEXT_PUBLIC_ENABLE_DEV_TOOLS: "true"
           NEXT_PUBLIC_RELEASE_SHA: ${{ github.sha }}
+      - name: Bundle budget unit check
+        run: pnpm exec vitest run src/lib/performance/budgets.test.ts
 
   e2e-smoke:
     name: Playwright smoke
