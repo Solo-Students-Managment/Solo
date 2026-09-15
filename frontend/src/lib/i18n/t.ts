@@ -11,6 +11,9 @@ import enOrganization from "./messages/en/organization.json";
 import enSubjects from "./messages/en/subjects.json";
 import enStudents from "./messages/en/students.json";
 import enCourses from "./messages/en/courses.json";
+import enEnrollments from "./messages/en/enrollments.json";
+import enSessions from "./messages/en/sessions.json";
+import enAttendance from "./messages/en/attendance.json";
 import enAuth from "./messages/en/auth.json";
 import enCommon from "./messages/en/common.json";
 import enFoundation from "./messages/en/foundation.json";
@@ -25,6 +28,9 @@ import faOrganization from "./messages/fa/organization.json";
 import faSubjects from "./messages/fa/subjects.json";
 import faStudents from "./messages/fa/students.json";
 import faCourses from "./messages/fa/courses.json";
+import faEnrollments from "./messages/fa/enrollments.json";
+import faSessions from "./messages/fa/sessions.json";
+import faAttendance from "./messages/fa/attendance.json";
 import faAuth from "./messages/fa/auth.json";
 import faCommon from "./messages/fa/common.json";
 import faFoundation from "./messages/fa/foundation.json";
@@ -44,7 +50,10 @@ export type MessageNamespace =
   | "organization"
   | "subjects"
   | "students"
-  | "courses";
+  | "courses"
+  | "enrollments"
+  | "sessions"
+  | "attendance";
 
 type Dictionaries = Record<
   Locale,
@@ -67,6 +76,9 @@ const dictionaries: Dictionaries = {
     subjects: enSubjects,
     students: enStudents,
     courses: enCourses,
+    enrollments: enEnrollments,
+    sessions: enSessions,
+    attendance: enAttendance,
   },
   fa: {
     common: faCommon,
@@ -83,6 +95,9 @@ const dictionaries: Dictionaries = {
     subjects: faSubjects,
     students: faStudents,
     courses: faCourses,
+    enrollments: faEnrollments,
+    sessions: faSessions,
+    attendance: faAttendance,
   },
 };
 

@@ -8,14 +8,69 @@ import { t } from "@/lib/i18n/t";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils/cn";
 
+type OrgNavKey =
+  | "home"
+  | "members"
+  | "subjects"
+  | "students"
+  | "courses"
+  | "enrollments"
+  | "sessions"
+  | "attendance";
+
 type OrgShellProps = {
   locale: Locale;
   dir: "rtl" | "ltr";
   orgId: string;
   orgName: string;
-  active: "home" | "members" | "subjects" | "students" | "courses";
+  active: OrgNavKey;
   children: ReactNode;
 };
+
+function navItems(orgId: string, langQuery: string) {
+  return [
+    {
+      key: "home" as const,
+      href: `${routes.organization.home(orgId)}${langQuery}`,
+      labelKey: "navHome",
+    },
+    {
+      key: "members" as const,
+      href: `${routes.organization.members(orgId)}${langQuery}`,
+      labelKey: "navMembers",
+    },
+    {
+      key: "subjects" as const,
+      href: `${routes.organization.subjects(orgId)}${langQuery}`,
+      labelKey: "navSubjects",
+    },
+    {
+      key: "students" as const,
+      href: `${routes.organization.students(orgId)}${langQuery}`,
+      labelKey: "navStudents",
+    },
+    {
+      key: "courses" as const,
+      href: `${routes.organization.courses(orgId)}${langQuery}`,
+      labelKey: "navCourses",
+    },
+    {
+      key: "enrollments" as const,
+      href: `${routes.organization.enrollments(orgId)}${langQuery}`,
+      labelKey: "navEnrollments",
+    },
+    {
+      key: "sessions" as const,
+      href: `${routes.organization.sessions(orgId)}${langQuery}`,
+      labelKey: "navSessions",
+    },
+    {
+      key: "attendance" as const,
+      href: `${routes.organization.attendance(orgId)}${langQuery}`,
+      labelKey: "navAttendance",
+    },
+  ];
+}
 
 export function OrgShell({
   locale,
@@ -26,6 +81,7 @@ export function OrgShell({
   children,
 }: OrgShellProps) {
   const langQuery = locale === "en" ? "?lang=en" : "?lang=fa";
+  const items = navItems(orgId, langQuery);
 
   return (
     <div
@@ -39,51 +95,18 @@ export function OrgShell({
         </p>
         <p className="text-muted mb-6 text-xs">{orgName}</p>
         <nav className="flex flex-col gap-2" aria-label="Organization">
-          <Link
-            href={`${routes.organization.home(orgId)}${langQuery}`}
-            className={cn(
-              "hover:bg-sunken rounded-md px-3 py-2 text-sm",
-              active === "home" && "bg-sunken font-medium",
-            )}
-          >
-            {t(locale, "organization", "navHome")}
-          </Link>
-          <Link
-            href={`${routes.organization.members(orgId)}${langQuery}`}
-            className={cn(
-              "hover:bg-sunken rounded-md px-3 py-2 text-sm",
-              active === "members" && "bg-sunken font-medium",
-            )}
-          >
-            {t(locale, "organization", "navMembers")}
-          </Link>
-          <Link
-            href={`${routes.organization.subjects(orgId)}${langQuery}`}
-            className={cn(
-              "hover:bg-sunken rounded-md px-3 py-2 text-sm",
-              active === "subjects" && "bg-sunken font-medium",
-            )}
-          >
-            {t(locale, "organization", "navSubjects")}
-          </Link>
-          <Link
-            href={`${routes.organization.students(orgId)}${langQuery}`}
-            className={cn(
-              "hover:bg-sunken rounded-md px-3 py-2 text-sm",
-              active === "students" && "bg-sunken font-medium",
-            )}
-          >
-            {t(locale, "organization", "navStudents")}
-          </Link>
-          <Link
-            href={`${routes.organization.courses(orgId)}${langQuery}`}
-            className={cn(
-              "hover:bg-sunken rounded-md px-3 py-2 text-sm",
-              active === "courses" && "bg-sunken font-medium",
-            )}
-          >
-            {t(locale, "organization", "navCourses")}
-          </Link>
+          {items.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "hover:bg-sunken rounded-md px-3 py-2 text-sm",
+                active === item.key && "bg-sunken font-medium",
+              )}
+            >
+              {t(locale, "organization", item.labelKey)}
+            </Link>
+          ))}
           <span className="text-muted px-3 py-2 text-sm">
             {t(locale, "organization", "navSettings")}
           </span>
@@ -96,51 +119,18 @@ export function OrgShell({
         </nav>
       </aside>
       <div className="border-border flex gap-2 overflow-x-auto border-b px-4 py-3 md:hidden">
-        <Link
-          href={`${routes.organization.home(orgId)}${langQuery}`}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-            active === "home" && "bg-sunken font-medium",
-          )}
-        >
-          {t(locale, "organization", "navHome")}
-        </Link>
-        <Link
-          href={`${routes.organization.members(orgId)}${langQuery}`}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-            active === "members" && "bg-sunken font-medium",
-          )}
-        >
-          {t(locale, "organization", "navMembers")}
-        </Link>
-        <Link
-          href={`${routes.organization.subjects(orgId)}${langQuery}`}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-            active === "subjects" && "bg-sunken font-medium",
-          )}
-        >
-          {t(locale, "organization", "navSubjects")}
-        </Link>
-        <Link
-          href={`${routes.organization.students(orgId)}${langQuery}`}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-            active === "students" && "bg-sunken font-medium",
-          )}
-        >
-          {t(locale, "organization", "navStudents")}
-        </Link>
-        <Link
-          href={`${routes.organization.courses(orgId)}${langQuery}`}
-          className={cn(
-            "rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-            active === "courses" && "bg-sunken font-medium",
-          )}
-        >
-          {t(locale, "organization", "navCourses")}
-        </Link>
+        {items.map((item) => (
+          <Link
+            key={item.key}
+            href={item.href}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
+              active === item.key && "bg-sunken font-medium",
+            )}
+          >
+            {t(locale, "organization", item.labelKey)}
+          </Link>
+        ))}
       </div>
       <main className="flex-1 space-y-6 px-4 py-6">{children}</main>
     </div>

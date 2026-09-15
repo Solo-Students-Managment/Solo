@@ -52,6 +52,14 @@ import {
   type ClassRoom,
   type Course,
 } from "@/services/courses";
+import { enrollmentSchema, type Enrollment } from "@/services/enrollments";
+import {
+  attendanceReportSchema,
+  classSessionSchema,
+  sessionDetailSchema,
+  type SessionDetail,
+  type AttendanceRecord,
+} from "@/services/sessions";
 
 export type MockScenario =
   | "success"
@@ -175,6 +183,9 @@ const mockManagedStudents = new Map<
 >();
 const mockCourses = new Map<string, Course>();
 const mockClasses = new Map<string, ClassRoom[]>();
+const mockEnrollments = new Map<string, Enrollment>();
+const mockSessions = new Map<string, SessionDetail>();
+const mockAttendance = new Map<string, AttendanceRecord[]>();
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -1730,6 +1741,333 @@ export const handlers = [
         status: course.status === "draft" ? "active" : course.status,
       });
       return HttpResponse.json(room);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/enrollments", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = [...mockEnrollments.values()].filter(
+      (row) => String(row.organizationId) === orgId,
+    );
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/enrollments",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        studentId?: string;
+        studentDisplayName?: string;
+        classId?: string;
+        className?: string;
+        courseName?: string;
+      };
+      if (
+        !body.studentId ||
+        !body.studentDisplayName ||
+        !body.classId ||
+        !body.className ||
+        !body.courseName
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `enr_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const enrollment = enrollmentSchema.parse({
+        id,
+        organizationId: opaqueIdSchema.parse(String(params.orgId)),
+        studentId: opaqueIdSchema.parse(body.studentId),
+        studentDisplayName: body.studentDisplayName,
+        classId: opaqueIdSchema.parse(body.classId),
+        className: body.className,
+        courseName: body.courseName,
+        status: "active",
+        enrolledAt: new Date().toISOString(),
+      });
+      mockEnrollments.set(id, enrollment);
+      return HttpResponse.json(enrollment);
+    },
+  ),
+
+  http.patch(
+    "/api/organizations/:orgId/enrollments/:enrollmentId",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const current = mockEnrollments.get(String(params.enrollmentId));
+      if (!current) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const body = (await request.json()) as { status?: string };
+      const next = enrollmentSchema.parse({
+        ...current,
+        status: body.status ?? current.status,
+      });
+      mockEnrollments.set(String(params.enrollmentId), next);
+      return HttpResponse.json(next);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/sessions", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = [...mockSessions.values()]
+      .filter((row) => String(row.organizationId) === orgId)
+      .map((row) => classSessionSchema.parse(row));
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/sessions",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        classId?: string;
+        className?: string;
+        startsAt?: string;
+        endsAt?: string;
+        recurrenceLabel?: string;
+      };
+      if (!body.classId || !body.className || !body.startsAt || !body.endsAt) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `ses_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const starts = new Date(body.startsAt);
+      const ends = new Date(body.endsAt);
+      const detail = sessionDetailSchema.parse({
+        id,
+        organizationId: opaqueIdSchema.parse(String(params.orgId)),
+        classId: opaqueIdSchema.parse(body.classId),
+        className: body.className,
+        startsAt: body.startsAt,
+        endsAt: body.endsAt,
+        status: "scheduled",
+        recurrenceLabel: body.recurrenceLabel,
+        conflictWarning:
+          ends.getTime() <= starts.getTime()
+            ? "End time must be after start time"
+            : undefined,
+        reportStatus: "draft",
+        evaluations: [
+          {
+            studentId: opaqueIdSchema.parse("stu_demo_1"),
+            studentDisplayName: "Sara",
+            score: null,
+            comment: "",
+          },
+        ],
+      });
+      mockSessions.set(id, detail);
+      mockAttendance.set(id, []);
+      return HttpResponse.json(classSessionSchema.parse(detail));
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/sessions/:sessionId",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const detail = mockSessions.get(String(params.sessionId));
+      if (!detail) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      return HttpResponse.json(detail);
+    },
+  ),
+
+  http.put(
+    "/api/organizations/:orgId/sessions/:sessionId/evaluations",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const sessionId = String(params.sessionId);
+      const detail = mockSessions.get(sessionId);
+      if (!detail) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      if (detail.reportStatus === "published") {
+        return HttpResponse.json(
+          errorBody(409, "CONFLICT", "sessions.reportPublished"),
+          { status: 409 },
+        );
+      }
+      const body = (await request.json()) as {
+        studentId: string;
+        studentDisplayName: string;
+        score: number | null;
+        comment: string;
+      };
+      const evaluations = detail.evaluations.map((item) =>
+        String(item.studentId) === body.studentId ? body : item,
+      );
+      const next = sessionDetailSchema.parse({ ...detail, evaluations });
+      mockSessions.set(sessionId, next);
+      return HttpResponse.json(next);
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/sessions/:sessionId/publish",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const sessionId = String(params.sessionId);
+      const detail = mockSessions.get(sessionId);
+      if (!detail) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const next = sessionDetailSchema.parse({
+        ...detail,
+        reportStatus: "published",
+        status: "completed",
+      });
+      mockSessions.set(sessionId, next);
+      return HttpResponse.json(next);
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/sessions/:sessionId/attendance",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const sessionId = String(params.sessionId);
+      if (!mockSessions.has(sessionId)) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const records = mockAttendance.get(sessionId) ?? [];
+      return HttpResponse.json(
+        attendanceReportSchema.parse({
+          present: records.filter((r) => r.status === "present").length,
+          absent: records.filter((r) => r.status === "absent").length,
+          late: records.filter((r) => r.status === "late").length,
+          excused: records.filter((r) => r.status === "excused").length,
+          records,
+        }),
+      );
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/sessions/:sessionId/attendance",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const sessionId = String(params.sessionId);
+      if (!mockSessions.has(sessionId)) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const body = (await request.json()) as {
+        studentId?: string;
+        studentDisplayName?: string;
+        status?: "present" | "absent" | "late" | "excused";
+      };
+      if (!body.studentId || !body.studentDisplayName || !body.status) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const records = mockAttendance.get(sessionId) ?? [];
+      const existing = records.findIndex(
+        (row) => String(row.studentId) === body.studentId,
+      );
+      const record = {
+        id:
+          existing >= 0
+            ? records[existing]!.id
+            : opaqueIdSchema.parse(
+                `att_${Math.random().toString(36).slice(2, 10)}`,
+              ),
+        sessionId: opaqueIdSchema.parse(sessionId),
+        studentId: opaqueIdSchema.parse(body.studentId),
+        studentDisplayName: body.studentDisplayName,
+        status: body.status,
+      };
+      const next =
+        existing >= 0
+          ? records.map((row, index) => (index === existing ? record : row))
+          : [...records, record];
+      mockAttendance.set(sessionId, next);
+      return HttpResponse.json(
+        attendanceReportSchema.parse({
+          present: next.filter((r) => r.status === "present").length,
+          absent: next.filter((r) => r.status === "absent").length,
+          late: next.filter((r) => r.status === "late").length,
+          excused: next.filter((r) => r.status === "excused").length,
+          records: next,
+        }),
+      );
     },
   ),
 ];
