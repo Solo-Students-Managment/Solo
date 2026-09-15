@@ -52,6 +52,10 @@ import {
 } from "@/services/question-bank";
 import { createHttpExamsClient, setExamsClient } from "@/services/exams";
 import {
+  createHttpCurriculumClient,
+  setCurriculumClient,
+} from "@/services/curriculum";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -110,6 +114,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setEvaluationsClient(createHttpEvaluationsClient());
           setQuestionBankClient(createHttpQuestionBankClient());
           setExamsClient(createHttpExamsClient());
+          setCurriculumClient(createHttpCurriculumClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

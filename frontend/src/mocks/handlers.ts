@@ -96,6 +96,14 @@ import {
   type ExamAttempt,
   type ExamGrade,
 } from "@/services/exams";
+import {
+  curriculumLessonSchema,
+  curriculumModuleSchema,
+  curriculumUnitSchema,
+  type CurriculumLesson,
+  type CurriculumModule,
+  type CurriculumUnit,
+} from "@/services/curriculum";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -252,6 +260,9 @@ const mockQuestionBank = new Map<string, BankQuestion[]>();
 const mockExams = new Map<string, Exam[]>();
 const mockExamAttempts = new Map<string, ExamAttempt[]>();
 const mockExamGrades = new Map<string, ExamGrade[]>();
+const mockCurriculumModules = new Map<string, CurriculumModule[]>();
+const mockCurriculumUnits = new Map<string, CurriculumUnit[]>();
+const mockCurriculumLessons = new Map<string, CurriculumLesson[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -451,6 +462,9 @@ function persistMswState() {
         mockExams: [...mockExams.entries()],
         mockExamAttempts: [...mockExamAttempts.entries()],
         mockExamGrades: [...mockExamGrades.entries()],
+        mockCurriculumModules: [...mockCurriculumModules.entries()],
+        mockCurriculumUnits: [...mockCurriculumUnits.entries()],
+        mockCurriculumLessons: [...mockCurriculumLessons.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -621,6 +635,39 @@ function hydrateMswState() {
         mockExamGrades.set(
           entry[0],
           entry[1].map((row) => examGradeSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockCurriculumModules)) {
+      mockCurriculumModules.clear();
+      for (const entry of data.mockCurriculumModules as Array<
+        [string, CurriculumModule[]]
+      >) {
+        mockCurriculumModules.set(
+          entry[0],
+          entry[1].map((row) => curriculumModuleSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockCurriculumUnits)) {
+      mockCurriculumUnits.clear();
+      for (const entry of data.mockCurriculumUnits as Array<
+        [string, CurriculumUnit[]]
+      >) {
+        mockCurriculumUnits.set(
+          entry[0],
+          entry[1].map((row) => curriculumUnitSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockCurriculumLessons)) {
+      mockCurriculumLessons.clear();
+      for (const entry of data.mockCurriculumLessons as Array<
+        [string, CurriculumLesson[]]
+      >) {
+        mockCurriculumLessons.set(
+          entry[0],
+          entry[1].map((row) => curriculumLessonSchema.parse(row)),
         );
       }
     }
@@ -4078,6 +4125,212 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/curriculum-modules",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const data = mockCurriculumModules.get(orgId) ?? [];
+      return HttpResponse.json({
+        data,
+        meta: {
+          page: 1,
+          pageSize: Math.max(data.length, 1),
+          totalItems: data.length,
+          totalPages: 1,
+        },
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/curriculum-modules",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        title?: string;
+        description?: string;
+        sortOrder?: number;
+      };
+      if (!body.title?.trim() || body.sortOrder == null) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "curriculum.validation.title"),
+          { status: 400 },
+        );
+      }
+      const row = curriculumModuleSchema.parse({
+        id: opaqueIdSchema.parse(
+          `cmod_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        title: body.title.trim(),
+        description: String(body.description ?? "").trim(),
+        sortOrder: Number(body.sortOrder),
+      });
+      mockCurriculumModules.set(orgId, [
+        ...(mockCurriculumModules.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/curriculum-units", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockCurriculumUnits.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/curriculum-units",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        moduleId?: string;
+        title?: string;
+        description?: string;
+        sortOrder?: number;
+        prerequisiteUnitId?: string | null;
+      };
+      const moduleId = String(body.moduleId ?? "").trim();
+      const modules = mockCurriculumModules.get(orgId) ?? [];
+      const mod = modules.find((row) => String(row.id) === moduleId);
+      if (!mod || !body.title?.trim() || body.sortOrder == null) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "curriculum.validation.module"),
+          { status: 400 },
+        );
+      }
+      const row = curriculumUnitSchema.parse({
+        id: opaqueIdSchema.parse(
+          `cunit_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        moduleId: mod.id,
+        moduleTitle: mod.title,
+        title: body.title.trim(),
+        description: String(body.description ?? "").trim(),
+        sortOrder: Number(body.sortOrder),
+        prerequisiteUnitId: body.prerequisiteUnitId
+          ? opaqueIdSchema.parse(body.prerequisiteUnitId)
+          : null,
+      });
+      mockCurriculumUnits.set(orgId, [
+        ...(mockCurriculumUnits.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/curriculum-lessons",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const data = mockCurriculumLessons.get(orgId) ?? [];
+      return HttpResponse.json({
+        data,
+        meta: {
+          page: 1,
+          pageSize: Math.max(data.length, 1),
+          totalItems: data.length,
+          totalPages: 1,
+        },
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/curriculum-lessons",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        unitId?: string;
+        title?: string;
+        kind?: "lesson" | "topic";
+        objectives?: string;
+        resources?: string;
+        homework?: string;
+        examRef?: string | null;
+        durationMinutes?: number;
+        prerequisiteLessonId?: string | null;
+        progressPercent?: number;
+      };
+      const unitId = String(body.unitId ?? "").trim();
+      const units = mockCurriculumUnits.get(orgId) ?? [];
+      const unit = units.find((row) => String(row.id) === unitId);
+      if (
+        !unit ||
+        !body.title?.trim() ||
+        !body.kind ||
+        body.durationMinutes == null
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "curriculum.validation.unit"),
+          { status: 400 },
+        );
+      }
+      const row = curriculumLessonSchema.parse({
+        id: opaqueIdSchema.parse(
+          `cles_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        unitId: unit.id,
+        unitTitle: unit.title,
+        title: body.title.trim(),
+        kind: body.kind,
+        objectives: String(body.objectives ?? "").trim(),
+        resources: String(body.resources ?? "").trim(),
+        homework: String(body.homework ?? "").trim(),
+        examRef: body.examRef?.trim() || null,
+        durationMinutes: Number(body.durationMinutes),
+        prerequisiteLessonId: body.prerequisiteLessonId
+          ? opaqueIdSchema.parse(body.prerequisiteLessonId)
+          : null,
+        progressPercent: Number(body.progressPercent ?? 0),
+      });
+      mockCurriculumLessons.set(orgId, [
+        ...(mockCurriculumLessons.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
     },
   ),
 ];

@@ -22,6 +22,7 @@ type OrgNavKey =
   | "evaluations"
   | "questionBank"
   | "exams"
+  | "curriculum"
   | "tuition"
   | "resources"
   | "reports";
@@ -101,6 +102,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "exams" as const,
       href: `${routes.organization.exams(orgId)}${langQuery}`,
       labelKey: "navExams",
+    },
+    {
+      key: "curriculum" as const,
+      href: `${routes.organization.curriculum(orgId)}${langQuery}`,
+      labelKey: "navCurriculum",
     },
     {
       key: "tuition" as const,
