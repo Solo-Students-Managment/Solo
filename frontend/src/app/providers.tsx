@@ -64,6 +64,10 @@ import {
   setBranchesClient,
 } from "@/services/branches";
 import {
+  createHttpFacilitiesClient,
+  setFacilitiesClient,
+} from "@/services/facilities";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -125,6 +129,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setCurriculumClient(createHttpCurriculumClient());
           setLessonPlansClient(createHttpLessonPlansClient());
           setBranchesClient(createHttpBranchesClient());
+          setFacilitiesClient(createHttpFacilitiesClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

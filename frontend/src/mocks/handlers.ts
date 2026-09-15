@@ -108,6 +108,12 @@ import {
 } from "@/services/curriculum";
 import { lessonPlanSchema, type LessonPlan } from "@/services/lesson-plans";
 import { branchSchema, type Branch } from "@/services/branches";
+import {
+  equipmentSchema,
+  roomSchema,
+  type Equipment,
+  type Room,
+} from "@/services/facilities";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -270,6 +276,8 @@ const mockCurriculumUnits = new Map<string, CurriculumUnit[]>();
 const mockCurriculumLessons = new Map<string, CurriculumLesson[]>();
 const mockLessonPlans = new Map<string, LessonPlan[]>();
 const mockBranches = new Map<string, Branch[]>();
+const mockRooms = new Map<string, Room[]>();
+const mockEquipment = new Map<string, Equipment[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -474,6 +482,8 @@ function persistMswState() {
         mockCurriculumLessons: [...mockCurriculumLessons.entries()],
         mockLessonPlans: [...mockLessonPlans.entries()],
         mockBranches: [...mockBranches.entries()],
+        mockRooms: [...mockRooms.entries()],
+        mockEquipment: [...mockEquipment.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -697,6 +707,24 @@ function hydrateMswState() {
         mockBranches.set(
           entry[0],
           entry[1].map((row) => branchSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockRooms)) {
+      mockRooms.clear();
+      for (const entry of data.mockRooms as Array<[string, Room[]]>) {
+        mockRooms.set(
+          entry[0],
+          entry[1].map((row) => roomSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockEquipment)) {
+      mockEquipment.clear();
+      for (const entry of data.mockEquipment as Array<[string, Equipment[]]>) {
+        mockEquipment.set(
+          entry[0],
+          entry[1].map((row) => equipmentSchema.parse(row)),
         );
       }
     }
@@ -4824,6 +4852,117 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/rooms", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockRooms.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/rooms", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      branchId?: string;
+      name?: string;
+      capacity?: number;
+    };
+    const branch = (mockBranches.get(orgId) ?? []).find(
+      (row) => String(row.id) === String(body.branchId ?? ""),
+    );
+    if (!branch || !body.name?.trim() || !body.capacity) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "facilities.validation.branch"),
+        { status: 400 },
+      );
+    }
+    const row = roomSchema.parse({
+      id: opaqueIdSchema.parse(
+        `room_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      branchId: branch.id,
+      branchName: branch.name,
+      name: body.name.trim(),
+      capacity: Number(body.capacity),
+      status: "available",
+    });
+    mockRooms.set(orgId, [...(mockRooms.get(orgId) ?? []), row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
+
+  http.get("/api/organizations/:orgId/equipment", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockEquipment.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/equipment",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        branchId?: string;
+        name?: string;
+        assetTag?: string;
+      };
+      const branch = (mockBranches.get(orgId) ?? []).find(
+        (row) => String(row.id) === String(body.branchId ?? ""),
+      );
+      if (!branch || !body.name?.trim() || !body.assetTag?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "facilities.validation.branch"),
+          { status: 400 },
+        );
+      }
+      const row = equipmentSchema.parse({
+        id: opaqueIdSchema.parse(
+          `eq_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        branchId: branch.id,
+        branchName: branch.name,
+        name: body.name.trim(),
+        assetTag: body.assetTag.trim().toUpperCase(),
+        status: "available",
+      });
+      mockEquipment.set(orgId, [...(mockEquipment.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
     },
   ),
 ];
