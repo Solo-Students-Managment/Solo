@@ -67,6 +67,8 @@ export const routes = {
     assignments: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/assignments`,
     gradebook: (orgId: string) => `/org/${encodeURIComponent(orgId)}/gradebook`,
+    evaluations: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/evaluations`,
     tuition: (orgId: string) => `/org/${encodeURIComponent(orgId)}/tuition`,
     resources: (orgId: string) => `/org/${encodeURIComponent(orgId)}/resources`,
     reports: (orgId: string) => `/org/${encodeURIComponent(orgId)}/reports`,

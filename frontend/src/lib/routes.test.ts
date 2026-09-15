@@ -19,6 +19,9 @@ describe("typed routes", () => {
     expect(routes.organization.home("org_1")).toBe("/org/org_1");
     expect(routes.organization.create()).toBe("/org/new");
     expect(routes.organization.members("org_1")).toBe("/org/org_1/members");
+    expect(routes.organization.evaluations("org_1")).toBe(
+      "/org/org_1/evaluations",
+    );
     expect(routes.teacher.activate()).toBe("/teacher/activate");
     expect(routes.student.home()).toBe("/student");
     expect(routes.student.activate()).toBe("/student/activate");

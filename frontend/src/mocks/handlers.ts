@@ -62,6 +62,18 @@ import {
 } from "@/services/sessions";
 import { assignmentSchema, type Assignment } from "@/services/assignments";
 import { gradeEntrySchema, type GradeEntry } from "@/services/gradebook";
+import {
+  evaluationLevelSchema,
+  evaluationTemplateSchema,
+  gradeScaleSchema,
+  progressMetricSchema,
+  scaleBoundsForType,
+  type EvaluationLevel,
+  type EvaluationTemplate,
+  type GradeScale,
+  type GradeScaleType,
+  type ProgressMetric,
+} from "@/services/evaluations";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -209,6 +221,10 @@ const mockSessions = new Map<string, SessionDetail>();
 const mockAttendance = new Map<string, AttendanceRecord[]>();
 const mockAssignments = new Map<string, Assignment[]>();
 const mockGradebook = new Map<string, GradeEntry[]>();
+const mockEvaluationTemplates = new Map<string, EvaluationTemplate[]>();
+const mockGradeScales = new Map<string, GradeScale[]>();
+const mockEvaluationLevels = new Map<string, EvaluationLevel[]>();
+const mockProgressMetrics = new Map<string, ProgressMetric[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -399,6 +415,10 @@ function persistMswState() {
         mockMembersByOrg: [...mockMembersByOrg.entries()],
         mockAssignments: [...mockAssignments.entries()],
         mockGradebook: [...mockGradebook.entries()],
+        mockEvaluationTemplates: [...mockEvaluationTemplates.entries()],
+        mockGradeScales: [...mockGradeScales.entries()],
+        mockEvaluationLevels: [...mockEvaluationLevels.entries()],
+        mockProgressMetrics: [...mockProgressMetrics.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -474,6 +494,50 @@ function hydrateMswState() {
         mockGradebook.set(
           entry[0],
           entry[1].map((row) => gradeEntrySchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockEvaluationTemplates)) {
+      mockEvaluationTemplates.clear();
+      for (const entry of data.mockEvaluationTemplates as Array<
+        [string, EvaluationTemplate[]]
+      >) {
+        mockEvaluationTemplates.set(
+          entry[0],
+          entry[1].map((row) => evaluationTemplateSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockGradeScales)) {
+      mockGradeScales.clear();
+      for (const entry of data.mockGradeScales as Array<
+        [string, GradeScale[]]
+      >) {
+        mockGradeScales.set(
+          entry[0],
+          entry[1].map((row) => gradeScaleSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockEvaluationLevels)) {
+      mockEvaluationLevels.clear();
+      for (const entry of data.mockEvaluationLevels as Array<
+        [string, EvaluationLevel[]]
+      >) {
+        mockEvaluationLevels.set(
+          entry[0],
+          entry[1].map((row) => evaluationLevelSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockProgressMetrics)) {
+      mockProgressMetrics.clear();
+      for (const entry of data.mockProgressMetrics as Array<
+        [string, ProgressMetric[]]
+      >) {
+        mockProgressMetrics.set(
+          entry[0],
+          entry[1].map((row) => progressMetricSchema.parse(row)),
         );
       }
     }
@@ -2984,4 +3048,267 @@ export const handlers = [
       },
     });
   }),
+
+  http.get("/api/organizations/:orgId/grade-scales", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockGradeScales.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/grade-scales",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        type?: GradeScaleType;
+        minValue?: number | null;
+        maxValue?: number | null;
+        passLabel?: string | null;
+        failLabel?: string | null;
+      };
+      if (!body.name?.trim() || !body.type) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "evaluations.validation.name"),
+          { status: 400 },
+        );
+      }
+      const defaults = scaleBoundsForType(body.type);
+      const row = gradeScaleSchema.parse({
+        id: opaqueIdSchema.parse(
+          `esc_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        type: body.type,
+        minValue:
+          body.type === "custom" ? (body.minValue ?? 0) : defaults.minValue,
+        maxValue:
+          body.type === "custom" ? (body.maxValue ?? 100) : defaults.maxValue,
+        passLabel:
+          body.type === "pass_fail" ? body.passLabel?.trim() || "Pass" : null,
+        failLabel:
+          body.type === "pass_fail" ? body.failLabel?.trim() || "Fail" : null,
+      });
+      const rows = mockGradeScales.get(orgId) ?? [];
+      rows.push(row);
+      mockGradeScales.set(orgId, rows);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/evaluation-levels",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const data = [...(mockEvaluationLevels.get(orgId) ?? [])].sort(
+        (a, b) => a.rank - b.rank,
+      );
+      return HttpResponse.json({
+        data,
+        meta: {
+          page: 1,
+          pageSize: Math.max(data.length, 1),
+          totalItems: data.length,
+          totalPages: 1,
+        },
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/evaluation-levels",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        rank?: number;
+        description?: string;
+      };
+      if (!body.name?.trim() || body.rank == null) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "evaluations.validation.name"),
+          { status: 400 },
+        );
+      }
+      const row = evaluationLevelSchema.parse({
+        id: opaqueIdSchema.parse(
+          `elv_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        rank: body.rank,
+        description: (body.description ?? "").trim(),
+      });
+      const rows = mockEvaluationLevels.get(orgId) ?? [];
+      rows.push(row);
+      mockEvaluationLevels.set(orgId, rows);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/progress-metrics", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockProgressMetrics.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/progress-metrics",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        kind?: "core" | "custom";
+        unit?: string;
+      };
+      if (!body.name?.trim() || !body.kind || !body.unit?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "evaluations.validation.name"),
+          { status: 400 },
+        );
+      }
+      const row = progressMetricSchema.parse({
+        id: opaqueIdSchema.parse(
+          `epm_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        kind: body.kind,
+        unit: body.unit.trim(),
+      });
+      const rows = mockProgressMetrics.get(orgId) ?? [];
+      rows.push(row);
+      mockProgressMetrics.set(orgId, rows);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/evaluation-templates",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const data = mockEvaluationTemplates.get(orgId) ?? [];
+      return HttpResponse.json({
+        data,
+        meta: {
+          page: 1,
+          pageSize: Math.max(data.length, 1),
+          totalItems: data.length,
+          totalPages: 1,
+        },
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/evaluation-templates",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        domain?: string;
+        scaleId?: string;
+        levelId?: string | null;
+        progressMetricIds?: string[];
+        description?: string;
+      };
+      if (!body.name?.trim() || !body.domain?.trim() || !body.scaleId) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "evaluations.validation.name"),
+          { status: 400 },
+        );
+      }
+      const scale = (mockGradeScales.get(orgId) ?? []).find(
+        (row) => String(row.id) === body.scaleId,
+      );
+      if (!scale) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "evaluations.validation.scale"),
+          { status: 400 },
+        );
+      }
+      const level =
+        body.levelId != null && body.levelId !== ""
+          ? (mockEvaluationLevels.get(orgId) ?? []).find(
+              (row) => String(row.id) === body.levelId,
+            )
+          : null;
+      const metricIds = (body.progressMetricIds ?? []).filter((id) =>
+        (mockProgressMetrics.get(orgId) ?? []).some(
+          (row) => String(row.id) === id,
+        ),
+      );
+      const row = evaluationTemplateSchema.parse({
+        id: opaqueIdSchema.parse(
+          `evt_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        domain: body.domain.trim(),
+        scaleId: scale.id,
+        scaleName: scale.name,
+        levelId: level?.id ?? null,
+        levelName: level?.name ?? null,
+        progressMetricIds: metricIds,
+        description: (body.description ?? "").trim(),
+      });
+      const rows = mockEvaluationTemplates.get(orgId) ?? [];
+      rows.push(row);
+      mockEvaluationTemplates.set(orgId, rows);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
 ];

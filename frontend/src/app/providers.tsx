@@ -42,7 +42,10 @@ import {
   createHttpGradebookClient,
   setGradebookClient,
 } from "@/services/gradebook";
-
+import {
+  createHttpEvaluationsClient,
+  setEvaluationsClient,
+} from "@/services/evaluations";
 import {
   createHttpMessagingClient,
   setMessagingClient,
@@ -99,6 +102,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setSessionsClient(createHttpSessionsClient());
           setAssignmentsClient(createHttpAssignmentsClient());
           setGradebookClient(createHttpGradebookClient());
+          setEvaluationsClient(createHttpEvaluationsClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());
