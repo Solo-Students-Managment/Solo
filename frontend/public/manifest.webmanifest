@@ -1,0 +1,18 @@
+{
+  "name": "Solo",
+  "short_name": "Solo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F5F1",
+  "theme_color": "#0F766E",
+  "lang": "fa",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/brand/app-icon-light.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
