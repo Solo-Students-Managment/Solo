@@ -34,6 +34,11 @@ import {
   studentRelationshipSchema,
   type StudentRelationship,
 } from "@/services/student";
+import {
+  guardianDashboardSchema,
+  guardianRelationshipSchema,
+  type GuardianRelationship,
+} from "@/services/guardian";
 
 export type MockScenario =
   | "success"
@@ -120,6 +125,22 @@ let mockStudentDash = {
   upcomingSessionsCount: 0,
   openAssignmentsCount: 0,
   relationships: [] as StudentRelationship[],
+};
+let mockPendingGuardianRels: GuardianRelationship[] = [
+  guardianRelationshipSchema.parse({
+    id: opaqueIdSchema.parse("rel_grd_pending_1"),
+    studentDisplayName: "Sara",
+    relationshipLabel: "Parent",
+    organizationName: "Demo School",
+    status: "pending",
+  }),
+];
+let mockActiveGuardianRels: GuardianRelationship[] = [];
+let mockGuardianDash = {
+  linkedStudentsCount: 0,
+  upcomingSessionsCount: 0,
+  unreadUpdatesCount: 0,
+  relationships: [] as GuardianRelationship[],
 };
 let pendingPhoneChange: {
   currentChallengeId: string;
@@ -906,6 +927,60 @@ export const handlers = [
     const unauthorized = requireAuth();
     if (unauthorized) return unauthorized;
     return HttpResponse.json(studentDashboardSchema.parse(mockStudentDash));
+  }),
+
+  http.get("/api/guardian/relationships/pending", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    if (scenario === "empty") {
+      return HttpResponse.json([]);
+    }
+    return HttpResponse.json(mockPendingGuardianRels);
+  }),
+
+  http.post("/api/auth/personas/guardian/activate", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { relationshipId?: string };
+    const found = mockPendingGuardianRels.find(
+      (r) => String(r.id) === body.relationshipId,
+    );
+    if (!found) {
+      return HttpResponse.json(
+        errorBody(404, "NOT_FOUND", "guardian.relationship.notFound"),
+        { status: 404 },
+      );
+    }
+    const activated = guardianRelationshipSchema.parse({
+      ...found,
+      status: "active",
+    });
+    mockPendingGuardianRels = mockPendingGuardianRels.filter(
+      (r) => String(r.id) !== body.relationshipId,
+    );
+    mockActiveGuardianRels = [...mockActiveGuardianRels, activated];
+    mockGuardianDash = {
+      linkedStudentsCount: mockActiveGuardianRels.length,
+      upcomingSessionsCount: 1,
+      unreadUpdatesCount: 3,
+      relationships: mockActiveGuardianRels,
+    };
+    mockPersonas = mockPersonas.map((p) =>
+      p.persona === "guardian" ? { ...p, activated: true } : p,
+    );
+    return HttpResponse.json({ persona: "guardian" });
+  }),
+
+  http.get("/api/guardian/dashboard", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json(guardianDashboardSchema.parse(mockGuardianDash));
   }),
 
   http.post("/api/organizations", async ({ request }) => {

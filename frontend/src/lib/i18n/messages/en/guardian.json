@@ -1,0 +1,19 @@
+{
+  "title": "Guardian dashboard",
+  "subtitle": "Follow linked students without exposing private teacher messaging.",
+  "activateTitle": "Activate guardian persona",
+  "activateSubtitle": "Guardian persona activates only from a verified student relationship.",
+  "acceptRelationship": "Accept relationship",
+  "activated": "Guardian persona is active.",
+  "noPending": "No pending guardian relationships",
+  "noPendingHint": "A school or student must invite you. Self-activation is not available.",
+  "statsStudents": "Linked students",
+  "statsSessions": "Upcoming sessions",
+  "statsUpdates": "Unread updates",
+  "relationshipsTitle": "Linked students",
+  "empty": "No linked students yet.",
+  "loadError": "Could not load guardian data.",
+  "retry": "Retry",
+  "offline": "You are offline.",
+  "forbidden": "Activate the guardian persona from a real relationship to open this dashboard."
+}

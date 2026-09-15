@@ -22,6 +22,8 @@ describe("typed routes", () => {
     expect(routes.teacher.activate()).toBe("/teacher/activate");
     expect(routes.student.home()).toBe("/student");
     expect(routes.student.activate()).toBe("/student/activate");
+    expect(routes.guardian.home()).toBe("/guardian");
+    expect(routes.guardian.activate()).toBe("/guardian/activate");
     expect(routes.public.profile("ali-school")).toBe("/p/ali-school");
     expect(routes.home("fa")).not.toMatch(/token|password|otp|phone/i);
     expect(isAppHomeRoute(routes.home("en"))).toBe(true);

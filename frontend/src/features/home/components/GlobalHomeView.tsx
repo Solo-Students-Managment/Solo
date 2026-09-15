@@ -151,6 +151,15 @@ export function GlobalHomeView() {
             </Link>
           </Button>
         ) : null}
+        {(personasQuery.data ?? []).some(
+          (p) => p.persona === "guardian" && !p.activated,
+        ) ? (
+          <Button asChild variant="secondary">
+            <Link href={routes.guardian.activate()}>
+              {t(locale, "home", "activateGuardian")}
+            </Link>
+          </Button>
+        ) : null}
       </section>
 
       <section className="space-y-3" aria-labelledby="context-title">
@@ -204,6 +213,11 @@ export function GlobalHomeView() {
         <Button asChild variant="secondary">
           <Link href={routes.student.home()}>
             {t(locale, "home", "goStudent")}
+          </Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href={routes.guardian.home()}>
+            {t(locale, "home", "goGuardian")}
           </Link>
         </Button>
         <Button asChild>

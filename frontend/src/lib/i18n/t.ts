@@ -6,6 +6,7 @@ import enProfile from "./messages/en/profile.json";
 import enHome from "./messages/en/home.json";
 import enTeacher from "./messages/en/teacher.json";
 import enStudent from "./messages/en/student.json";
+import enGuardian from "./messages/en/guardian.json";
 import enOrganization from "./messages/en/organization.json";
 import enAuth from "./messages/en/auth.json";
 import enCommon from "./messages/en/common.json";
@@ -16,6 +17,7 @@ import faProfile from "./messages/fa/profile.json";
 import faHome from "./messages/fa/home.json";
 import faTeacher from "./messages/fa/teacher.json";
 import faStudent from "./messages/fa/student.json";
+import faGuardian from "./messages/fa/guardian.json";
 import faOrganization from "./messages/fa/organization.json";
 import faAuth from "./messages/fa/auth.json";
 import faCommon from "./messages/fa/common.json";
@@ -32,6 +34,7 @@ export type MessageNamespace =
   | "home"
   | "teacher"
   | "student"
+  | "guardian"
   | "organization";
 
 type Dictionaries = Record<
@@ -50,6 +53,7 @@ const dictionaries: Dictionaries = {
     home: enHome,
     teacher: enTeacher,
     student: enStudent,
+    guardian: enGuardian,
     organization: enOrganization,
   },
   fa: {
@@ -62,6 +66,7 @@ const dictionaries: Dictionaries = {
     home: faHome,
     teacher: faTeacher,
     student: faStudent,
+    guardian: faGuardian,
     organization: faOrganization,
   },
 };
