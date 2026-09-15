@@ -111,6 +111,7 @@ import {
   createHttpKnowledgeBaseClient,
   setKnowledgeBaseClient,
 } from "@/services/knowledge-base";
+import { createHttpFormsClient, setFormsClient } from "@/services/forms";
 import {
   createHttpMessagingClient,
   setMessagingClient,
@@ -188,6 +189,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setApprovalsClient(createHttpApprovalsClient());
           setTasksClient(createHttpTasksClient());
           setKnowledgeBaseClient(createHttpKnowledgeBaseClient());
+          setFormsClient(createHttpFormsClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

@@ -49,6 +49,8 @@ describe("typed routes", () => {
     expect(routes.organization.knowledgeBase("org_1")).toBe(
       "/org/org_1/knowledge-base",
     );
+    expect(routes.organization.forms("org_1")).toBe("/org/org_1/forms");
+    expect(routes.public.form("parent-feedback")).toBe("/f/parent-feedback");
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",
     );

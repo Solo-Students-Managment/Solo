@@ -27,6 +27,7 @@ type OrgNavKey =
   | "approvals"
   | "tasks"
   | "knowledgeBase"
+  | "forms"
   | "subjects"
   | "students"
   | "courses"
@@ -144,6 +145,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "knowledgeBase" as const,
       href: `${routes.organization.knowledgeBase(orgId)}${langQuery}`,
       labelKey: "navKnowledgeBase",
+    },
+    {
+      key: "forms" as const,
+      href: `${routes.organization.forms(orgId)}${langQuery}`,
+      labelKey: "navForms",
     },
     {
       key: "subjects" as const,

@@ -75,6 +75,7 @@ export const routes = {
     tasks: (orgId: string) => `/org/${encodeURIComponent(orgId)}/tasks`,
     knowledgeBase: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/knowledge-base`,
+    forms: (orgId: string) => `/org/${encodeURIComponent(orgId)}/forms`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>
@@ -123,6 +124,7 @@ export const routes = {
   },
   public: {
     profile: (slug: string) => `/p/${encodeURIComponent(slug)}`,
+    form: (slug: string) => `/f/${encodeURIComponent(slug)}`,
   },
   states: {
     notFound: () => "/state/not-found",

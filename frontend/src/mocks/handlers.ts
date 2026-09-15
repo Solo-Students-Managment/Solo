@@ -168,6 +168,14 @@ import {
   kbArticleSchema,
   type KbArticle,
 } from "@/services/knowledge-base";
+import {
+  buildConsentSnapshot,
+  formSubmissionSchema,
+  isValidPublicSlug,
+  surveyFormSchema,
+  type FormSubmission,
+  type SurveyForm,
+} from "@/services/forms";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -347,6 +355,9 @@ const mockOffboardingCases = new Map<string, OffboardingCase[]>();
 const mockApprovals = new Map<string, ApprovalRequest[]>();
 const mockTasks = new Map<string, OrgTask[]>();
 const mockKbArticles = new Map<string, KbArticle[]>();
+const mockSurveyForms = new Map<string, SurveyForm[]>();
+const mockFormSubmissions = new Map<string, FormSubmission[]>();
+const mockPublicForms = new Map<string, SurveyForm>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -568,6 +579,9 @@ function persistMswState() {
         mockApprovals: [...mockApprovals.entries()],
         mockTasks: [...mockTasks.entries()],
         mockKbArticles: [...mockKbArticles.entries()],
+        mockSurveyForms: [...mockSurveyForms.entries()],
+        mockFormSubmissions: [...mockFormSubmissions.entries()],
+        mockPublicForms: [...mockPublicForms.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -971,6 +985,34 @@ function hydrateMswState() {
           entry[0],
           entry[1].map((row) => kbArticleSchema.parse(row)),
         );
+      }
+    }
+    if (Array.isArray(data.mockSurveyForms)) {
+      mockSurveyForms.clear();
+      for (const entry of data.mockSurveyForms as Array<
+        [string, SurveyForm[]]
+      >) {
+        mockSurveyForms.set(
+          entry[0],
+          entry[1].map((row) => surveyFormSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockFormSubmissions)) {
+      mockFormSubmissions.clear();
+      for (const entry of data.mockFormSubmissions as Array<
+        [string, FormSubmission[]]
+      >) {
+        mockFormSubmissions.set(
+          entry[0],
+          entry[1].map((row) => formSubmissionSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockPublicForms)) {
+      mockPublicForms.clear();
+      for (const entry of data.mockPublicForms as Array<[string, SurveyForm]>) {
+        mockPublicForms.set(entry[0], surveyFormSchema.parse(entry[1]));
       }
     }
     if (Array.isArray(data.mockTuition)) {
@@ -6462,6 +6504,156 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/forms", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockSurveyForms.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/forms", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      title?: string;
+      description?: string;
+      questionText?: string;
+      slug?: string;
+    };
+    if (
+      !body.title?.trim() ||
+      !body.description?.trim() ||
+      !body.questionText?.trim() ||
+      !body.slug?.trim() ||
+      !isValidPublicSlug(body.slug)
+    ) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "forms.validation.slug"),
+        { status: 400 },
+      );
+    }
+    const row = surveyFormSchema.parse({
+      id: opaqueIdSchema.parse(
+        `frm_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      title: body.title.trim(),
+      description: body.description.trim(),
+      questionText: body.questionText.trim(),
+      slug: body.slug.trim(),
+      status: "draft",
+    });
+    mockSurveyForms.set(orgId, [...(mockSurveyForms.get(orgId) ?? []), row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/forms/:formId/publish",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const formId = String(params.formId);
+      const rows = mockSurveyForms.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === formId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "forms.loadError"),
+          { status: 404 },
+        );
+      }
+      const updated = surveyFormSchema.parse({
+        ...rows[idx]!,
+        status: "published",
+      });
+      mockSurveyForms.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      mockPublicForms.set(updated.slug, updated);
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/public/forms/:slug", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const slug = String(params.slug);
+    const form = mockPublicForms.get(slug);
+    if (!form || form.status !== "published") {
+      return HttpResponse.json(
+        errorBody(404, "NOT_FOUND", "forms.publicNotFound"),
+        { status: 404 },
+      );
+    }
+    return HttpResponse.json(form);
+  }),
+
+  http.post(
+    "/api/public/forms/:slug/submissions",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const slug = String(params.slug);
+      const form = mockPublicForms.get(slug);
+      if (!form || form.status !== "published") {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "forms.publicNotFound"),
+          { status: 404 },
+        );
+      }
+      const body = (await request.json()) as {
+        answerText?: string;
+        consentName?: string;
+        consentAccepted?: boolean;
+      };
+      if (
+        !body.answerText?.trim() ||
+        !body.consentName?.trim() ||
+        !body.consentAccepted
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "forms.validation.consent"),
+          { status: 400 },
+        );
+      }
+      const row = formSubmissionSchema.parse({
+        id: opaqueIdSchema.parse(
+          `sub_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        formId: form.id,
+        answerText: body.answerText.trim(),
+        consentName: body.consentName.trim(),
+        consentedAt: new Date().toISOString(),
+        consentSnapshot: buildConsentSnapshot(form),
+      });
+      mockFormSubmissions.set(slug, [
+        ...(mockFormSubmissions.get(slug) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
     },
   ),
 ];
