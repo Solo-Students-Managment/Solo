@@ -25,6 +25,7 @@ import {
   createHttpStudentsManageClient,
   setStudentsManageClient,
 } from "@/services/students";
+import { createHttpCoursesClient, setCoursesClient } from "@/services/courses";
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -56,6 +57,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setGuardianClient(createHttpGuardianClient());
           setSubjectClient(createHttpSubjectClient());
           setStudentsManageClient(createHttpStudentsManageClient());
+          setCoursesClient(createHttpCoursesClient());
           setReady(true);
         }
       } catch {

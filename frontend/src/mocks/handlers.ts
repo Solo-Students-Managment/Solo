@@ -46,6 +46,12 @@ import {
   studentGuardianSchema,
   type ManagedStudentDetail,
 } from "@/services/students";
+import {
+  classSchema,
+  courseSchema,
+  type ClassRoom,
+  type Course,
+} from "@/services/courses";
 
 export type MockScenario =
   | "success"
@@ -167,6 +173,8 @@ const mockManagedStudents = new Map<
   string,
   ManagedStudentDetail & { phoneE164: string }
 >();
+const mockCourses = new Map<string, Course>();
+const mockClasses = new Map<string, ClassRoom[]>();
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -1599,6 +1607,129 @@ export const handlers = [
         guardiansCount: row.guardians.length + 1,
       });
       return HttpResponse.json(guardian);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/courses", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = [...mockCourses.values()].filter(
+      (c) => String(c.organizationId) === orgId,
+    );
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/courses",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        name?: string;
+        subjectId?: string;
+        subjectName?: string;
+      };
+      if (!body.name || !body.subjectId || !body.subjectName) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `crs_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const course = courseSchema.parse({
+        id,
+        organizationId: opaqueIdSchema.parse(String(params.orgId)),
+        name: body.name,
+        subjectId: opaqueIdSchema.parse(body.subjectId),
+        subjectName: body.subjectName,
+        status: "draft",
+        classesCount: 0,
+      });
+      mockCourses.set(id, course);
+      mockClasses.set(id, []);
+      return HttpResponse.json(course);
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/courses/:courseId/classes",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const data = mockClasses.get(String(params.courseId)) ?? [];
+      return HttpResponse.json({
+        data,
+        meta: {
+          page: 1,
+          pageSize: Math.max(data.length, 1),
+          totalItems: data.length,
+          totalPages: 1,
+        },
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/courses/:courseId/classes",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const courseId = String(params.courseId);
+      const course = mockCourses.get(courseId);
+      if (!course) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const body = (await request.json()) as {
+        name?: string;
+        capacity?: number;
+      };
+      if (!body.name || !body.capacity) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `cls_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const room = classSchema.parse({
+        id,
+        courseId: opaqueIdSchema.parse(courseId),
+        name: body.name,
+        capacity: body.capacity,
+        enrolledCount: 0,
+        status: "planned",
+      });
+      const next = [...(mockClasses.get(courseId) ?? []), room];
+      mockClasses.set(courseId, next);
+      mockCourses.set(courseId, {
+        ...course,
+        classesCount: next.length,
+        status: course.status === "draft" ? "active" : course.status,
+      });
+      return HttpResponse.json(room);
     },
   ),
 ];

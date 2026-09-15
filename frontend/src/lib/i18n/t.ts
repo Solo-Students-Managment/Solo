@@ -10,6 +10,7 @@ import enGuardian from "./messages/en/guardian.json";
 import enOrganization from "./messages/en/organization.json";
 import enSubjects from "./messages/en/subjects.json";
 import enStudents from "./messages/en/students.json";
+import enCourses from "./messages/en/courses.json";
 import enAuth from "./messages/en/auth.json";
 import enCommon from "./messages/en/common.json";
 import enFoundation from "./messages/en/foundation.json";
@@ -23,6 +24,7 @@ import faGuardian from "./messages/fa/guardian.json";
 import faOrganization from "./messages/fa/organization.json";
 import faSubjects from "./messages/fa/subjects.json";
 import faStudents from "./messages/fa/students.json";
+import faCourses from "./messages/fa/courses.json";
 import faAuth from "./messages/fa/auth.json";
 import faCommon from "./messages/fa/common.json";
 import faFoundation from "./messages/fa/foundation.json";
@@ -41,7 +43,8 @@ export type MessageNamespace =
   | "guardian"
   | "organization"
   | "subjects"
-  | "students";
+  | "students"
+  | "courses";
 
 type Dictionaries = Record<
   Locale,
@@ -63,6 +66,7 @@ const dictionaries: Dictionaries = {
     organization: enOrganization,
     subjects: enSubjects,
     students: enStudents,
+    courses: enCourses,
   },
   fa: {
     common: faCommon,
@@ -78,6 +82,7 @@ const dictionaries: Dictionaries = {
     organization: faOrganization,
     subjects: faSubjects,
     students: faStudents,
+    courses: faCourses,
   },
 };
 

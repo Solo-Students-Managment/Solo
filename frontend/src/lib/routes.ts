@@ -56,6 +56,14 @@ export const routes = {
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>
       `/org/${encodeURIComponent(orgId)}/students/${encodeURIComponent(studentId)}`,
+    courses: (orgId: string) => `/org/${encodeURIComponent(orgId)}/courses`,
+    enrollments: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/enrollments`,
+    sessions: (orgId: string) => `/org/${encodeURIComponent(orgId)}/sessions`,
+    session: (orgId: string, sessionId: string) =>
+      `/org/${encodeURIComponent(orgId)}/sessions/${encodeURIComponent(sessionId)}`,
+    attendance: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/attendance`,
   },
   admin: {
     home: () => "/admin",
