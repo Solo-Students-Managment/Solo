@@ -375,7 +375,200 @@ function newChallengeId(prefix: string): string {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+const MSW_PERSIST_KEY = "solo:msw:v1";
+
+function canUseSessionStorage(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.sessionStorage !== "undefined"
+  );
+}
+
+function persistMswState() {
+  if (!canUseSessionStorage()) return;
+  try {
+    window.sessionStorage.setItem(
+      MSW_PERSIST_KEY,
+      JSON.stringify({
+        currentSession,
+        currentPhoneE164,
+        twoFactorStatus,
+        deviceSessions,
+        mockProfile,
+        mockOrgs: [...mockOrgs.entries()],
+        mockMembersByOrg: [...mockMembersByOrg.entries()],
+        mockAssignments: [...mockAssignments.entries()],
+        mockGradebook: [...mockGradebook.entries()],
+        mockTuition: [...mockTuition.entries()],
+        mockResources: [...mockResources.entries()],
+        mockReports: [...mockReports.entries()],
+        mockMessageThreads,
+        mockChatRooms,
+        mockChatMessages: [...mockChatMessages.entries()],
+        mockNotifications,
+        mockNotificationPrefs,
+        mockCalendarEvents,
+        mockPersonas,
+        mockContexts,
+      }),
+    );
+  } catch {
+    // Ignore quota/serialization failures in demo mocks.
+  }
+}
+
+function hydrateMswState() {
+  if (!canUseSessionStorage()) return;
+  const raw = window.sessionStorage.getItem(MSW_PERSIST_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw) as Record<string, unknown>;
+    if (data.currentSession) {
+      currentSession = sessionSchema.parse(data.currentSession);
+    }
+    if (typeof data.currentPhoneE164 === "string") {
+      currentPhoneE164 = data.currentPhoneE164;
+    }
+    if (data.twoFactorStatus) {
+      twoFactorStatus = twoFactorStatusSchema.parse(data.twoFactorStatus);
+    }
+    if (Array.isArray(data.deviceSessions)) {
+      deviceSessions = data.deviceSessions.map((row) =>
+        deviceSessionSchema.parse(row),
+      );
+    }
+    if (data.mockProfile) {
+      mockProfile = userProfileSchema.parse(data.mockProfile);
+    }
+    if (Array.isArray(data.mockOrgs)) {
+      mockOrgs.clear();
+      for (const entry of data.mockOrgs as Array<[string, Organization]>) {
+        mockOrgs.set(entry[0], organizationSchema.parse(entry[1]));
+      }
+    }
+    if (Array.isArray(data.mockMembersByOrg)) {
+      mockMembersByOrg.clear();
+      for (const entry of data.mockMembersByOrg as Array<
+        [
+          string,
+          Array<OrgMember & { phoneE164: string; userId: string | null }>,
+        ]
+      >) {
+        mockMembersByOrg.set(entry[0], entry[1]);
+      }
+    }
+    if (Array.isArray(data.mockAssignments)) {
+      mockAssignments.clear();
+      for (const entry of data.mockAssignments as Array<
+        [string, Assignment[]]
+      >) {
+        mockAssignments.set(
+          entry[0],
+          entry[1].map((row) => assignmentSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockGradebook)) {
+      mockGradebook.clear();
+      for (const entry of data.mockGradebook as Array<[string, GradeEntry[]]>) {
+        mockGradebook.set(
+          entry[0],
+          entry[1].map((row) => gradeEntrySchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockTuition)) {
+      mockTuition.clear();
+      for (const entry of data.mockTuition as Array<
+        [string, TuitionRecord[]]
+      >) {
+        mockTuition.set(
+          entry[0],
+          entry[1].map((row) => tuitionRecordSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockResources)) {
+      mockResources.clear();
+      for (const entry of data.mockResources as Array<
+        [string, ResourceFile[]]
+      >) {
+        mockResources.set(
+          entry[0],
+          entry[1].map((row) => resourceFileSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockReports)) {
+      mockReports.clear();
+      for (const entry of data.mockReports as Array<[string, ReportView[]]>) {
+        mockReports.set(
+          entry[0],
+          entry[1].map((row) => reportViewSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockMessageThreads)) {
+      mockMessageThreads.length = 0;
+      mockMessageThreads.push(
+        ...(data.mockMessageThreads as MessageThread[]).map((row) =>
+          messageThreadSchema.parse(row),
+        ),
+      );
+    }
+    if (Array.isArray(data.mockChatRooms)) {
+      mockChatRooms.length = 0;
+      mockChatRooms.push(
+        ...(data.mockChatRooms as ChatRoom[]).map((row) =>
+          chatRoomSchema.parse(row),
+        ),
+      );
+    }
+    if (Array.isArray(data.mockChatMessages)) {
+      mockChatMessages.clear();
+      for (const entry of data.mockChatMessages as Array<
+        [string, ChatMessage[]]
+      >) {
+        mockChatMessages.set(
+          entry[0],
+          entry[1].map((row) => chatMessageSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockNotifications)) {
+      mockNotifications.length = 0;
+      mockNotifications.push(
+        ...(data.mockNotifications as AppNotification[]).map((row) =>
+          notificationSchema.parse(row),
+        ),
+      );
+    }
+    if (data.mockNotificationPrefs) {
+      mockNotificationPrefs = notificationPreferencesSchema.parse(
+        data.mockNotificationPrefs,
+      );
+    }
+    if (Array.isArray(data.mockCalendarEvents)) {
+      mockCalendarEvents.length = 0;
+      mockCalendarEvents.push(...(data.mockCalendarEvents as CalendarEvent[]));
+    }
+    if (Array.isArray(data.mockPersonas)) {
+      mockPersonas = data.mockPersonas as typeof mockPersonas;
+    }
+    if (Array.isArray(data.mockContexts)) {
+      mockContexts = data.mockContexts as typeof mockContexts;
+    }
+  } catch {
+    // Ignore corrupt demo persistence.
+  }
+}
+
+hydrateMswState();
+
 function requireAuth() {
+  if (!currentSession) {
+    hydrateMswState();
+  }
   if (!currentSession) {
     return HttpResponse.json(
       errorBody(401, "UNAUTHORIZED", "errors.unauthorized"),
@@ -453,6 +646,9 @@ export const handlers = [
     const failed = await maybeFail();
     if (failed) return failed;
     if (!currentSession) {
+      hydrateMswState();
+    }
+    if (!currentSession) {
       return HttpResponse.json(
         errorBody(401, "UNAUTHORIZED", "errors.unauthorized"),
         { status: 401 },
@@ -479,6 +675,7 @@ export const handlers = [
     pendingPhoneChange = null;
     resetTwoFactor();
     seedSessions(currentSession.userId);
+    persistMswState();
     return HttpResponse.json(currentSession);
   }),
 
@@ -486,6 +683,7 @@ export const handlers = [
     const failed = await maybeFail();
     if (failed) return failed;
     currentSession = null;
+    persistMswState();
     deviceSessions = [];
     pendingPhoneChange = null;
     currentPhoneE164 = DEMO_PHONE;
@@ -1170,6 +1368,7 @@ export const handlers = [
         organizationId: id,
       },
     ];
+    persistMswState();
     return HttpResponse.json(org);
   }),
 
@@ -1425,6 +1624,7 @@ export const handlers = [
       ...currentSession,
       activePersona: body.persona,
     });
+    persistMswState();
     return HttpResponse.json(currentSession);
   }),
 
@@ -1461,6 +1661,7 @@ export const handlers = [
       subjectId: body.subjectId ?? null,
       orgRole,
     });
+    persistMswState();
     return HttpResponse.json(currentSession);
   }),
 
@@ -2204,7 +2405,55 @@ export const handlers = [
         submissionsCount: 0,
       });
       mockAssignments.set(orgId, [...(mockAssignments.get(orgId) ?? []), item]);
+      persistMswState();
       return HttpResponse.json(item, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/assignments/:assignmentId/submissions",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const assignmentId = String(params.assignmentId);
+      const body = (await request.json()) as {
+        studentDisplayName?: string;
+        mimeHint?: "pdf" | "word" | "image" | "audio";
+      };
+      if (!body.studentDisplayName || !body.mimeHint) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      if (body.mimeHint === ("video" as string)) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const rows = mockAssignments.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === assignmentId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      const updated = assignmentSchema.parse({
+        ...current,
+        submissionsCount: current.submissionsCount + 1,
+      });
+      mockAssignments.set(
+        orgId,
+        rows.map((row, index) => (index === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated, { status: 201 });
     },
   ),
 
@@ -2273,6 +2522,7 @@ export const handlers = [
           ? rows.map((row, index) => (index === existing ? item : row))
           : [...rows, item];
       mockGradebook.set(orgId, next);
+      persistMswState();
       return HttpResponse.json(item, { status: existing >= 0 ? 200 : 201 });
     },
   ),
@@ -2320,6 +2570,7 @@ export const handlers = [
       kind: "direct",
     });
     mockMessageThreads.unshift(item);
+    persistMswState();
     return HttpResponse.json(item, { status: 201 });
   }),
 
@@ -2349,6 +2600,7 @@ export const handlers = [
       kind: "broadcast",
     });
     mockMessageThreads.unshift(item);
+    persistMswState();
     return HttpResponse.json(item, { status: 201 });
   }),
 
@@ -2394,6 +2646,7 @@ export const handlers = [
     });
     mockChatRooms.unshift(item);
     mockChatMessages.set(String(item.id), []);
+    persistMswState();
     return HttpResponse.json(item, { status: 201 });
   }),
 
@@ -2568,6 +2821,7 @@ export const handlers = [
         dueAt: body.dueAt,
       });
       mockTuition.set(orgId, [...(mockTuition.get(orgId) ?? []), item]);
+      persistMswState();
       return HttpResponse.json(item, { status: 201 });
     },
   ),
@@ -2625,6 +2879,7 @@ export const handlers = [
         mimeHint: body.mimeHint,
       });
       mockResources.set(orgId, [...(mockResources.get(orgId) ?? []), item]);
+      persistMswState();
       return HttpResponse.json(item, { status: 201 });
     },
   ),
@@ -2675,6 +2930,7 @@ export const handlers = [
         format: body.format,
       });
       mockReports.set(orgId, [...(mockReports.get(orgId) ?? []), item]);
+      persistMswState();
       return HttpResponse.json(item, { status: 201 });
     },
   ),

@@ -26,7 +26,9 @@ import { getOrganizationClient } from "@/services/organization";
 import { getAssignmentsClient, type Assignment } from "@/services/assignments";
 import {
   createAssignmentSchema,
+  recordSubmissionSchema,
   type CreateAssignmentValues,
+  type RecordSubmissionValues,
 } from "../schemas";
 
 const keys = createQueryKeyFactory("assignments");
@@ -72,6 +74,49 @@ function Fields({ locale }: { locale: ReturnType<typeof resolveLocale> }) {
         <Label htmlFor="asg-due">{t(locale, "assignments", "dueLabel")}</Label>
         <Input id="asg-due" type="datetime-local" {...register("dueAt")} />
         <SoloFieldError name="dueAt" />
+      </div>
+    </>
+  );
+}
+
+function SubmissionFields({
+  locale,
+}: {
+  locale: ReturnType<typeof resolveLocale>;
+}) {
+  const { register } = useFormContext<RecordSubmissionValues>();
+  return (
+    <>
+      <div className="space-y-1.5">
+        <Label htmlFor="asg-sub-title">
+          {t(locale, "assignments", "assignmentTitleLabel")}
+        </Label>
+        <Input id="asg-sub-title" {...register("assignmentTitle")} />
+        <SoloFieldError name="assignmentTitle" />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="asg-sub-student">
+          {t(locale, "assignments", "studentLabel")}
+        </Label>
+        <Input id="asg-sub-student" {...register("studentDisplayName")} />
+        <SoloFieldError name="studentDisplayName" />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="asg-sub-mime">
+          {t(locale, "assignments", "mimeLabel")}
+        </Label>
+        <select
+          id="asg-sub-mime"
+          className="border-border bg-elevated h-10 w-full rounded-md border px-2 text-sm"
+          {...register("mimeHint")}
+        >
+          {(["pdf", "word", "image", "audio"] as const).map((mime) => (
+            <option key={mime} value={mime}>
+              {t(locale, "assignments", `mime.${mime}`)}
+            </option>
+          ))}
+        </select>
+        <SoloFieldError name="mimeHint" />
       </div>
     </>
   );
@@ -174,6 +219,45 @@ export function OrganizationAssignmentsView() {
       >
         <Fields locale={locale} />
       </SoloForm>
+      <section className="space-y-3" aria-labelledby="asg-submit-heading">
+        <h2 id="asg-submit-heading" className="text-lg font-medium">
+          {t(locale, "assignments", "submitTitle")}
+        </h2>
+        <SoloForm
+          schema={recordSubmissionSchema}
+          defaultValues={{
+            assignmentTitle: "",
+            studentDisplayName: "",
+            mimeHint: "pdf",
+          }}
+          submitLabel={t(locale, "assignments", "submitSubmit")}
+          onSubmit={async (values: RecordSubmissionValues) => {
+            const match = (listQuery.data?.data ?? []).find(
+              (row) =>
+                row.title.toLowerCase() ===
+                values.assignmentTitle.trim().toLowerCase(),
+            );
+            if (!match) {
+              pushFeedback({
+                tone: "error",
+                title: t(locale, "assignments", "submitNotFound"),
+              });
+              return;
+            }
+            await getAssignmentsClient().submit(orgId, String(match.id), {
+              studentDisplayName: values.studentDisplayName,
+              mimeHint: values.mimeHint,
+            });
+            pushFeedback({
+              tone: "success",
+              title: t(locale, "assignments", "submitSuccess"),
+            });
+            await queryClient.invalidateQueries({ queryKey: keys.all(ctx) });
+          }}
+        >
+          <SubmissionFields locale={locale} />
+        </SoloForm>
+      </section>
       {listQuery.isLoading ? <Skeleton className="h-24" /> : null}
       {!listQuery.isLoading && (listQuery.data?.data.length ?? 0) === 0 ? (
         <EmptyState title={t(locale, "assignments", "empty")} />

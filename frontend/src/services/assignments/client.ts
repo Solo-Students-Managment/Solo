@@ -22,6 +22,9 @@ export const assignmentSchema = z.object({
 export type Assignment = z.infer<typeof assignmentSchema>;
 export const assignmentsCollectionSchema = collectionSchema(assignmentSchema);
 
+export const submissionMimeSchema = z.enum(["pdf", "word", "image", "audio"]);
+export type SubmissionMime = z.infer<typeof submissionMimeSchema>;
+
 export type AssignmentsClient = {
   list(
     organizationId: string,
@@ -29,6 +32,11 @@ export type AssignmentsClient = {
   create(
     organizationId: string,
     input: { title: string; type: Assignment["type"]; dueAt: string },
+  ): Promise<Assignment>;
+  submit(
+    organizationId: string,
+    assignmentId: string,
+    input: { studentDisplayName: string; mimeHint: SubmissionMime },
   ): Promise<Assignment>;
 };
 
@@ -47,6 +55,16 @@ export function createHttpAssignmentsClient(): AssignmentsClient {
     async create(organizationId, input) {
       return apiRequest(
         `/organizations/${encodeURIComponent(organizationId)}/assignments`,
+        {
+          method: "POST",
+          body: JSON.stringify(input),
+          parse: (data) => assignmentSchema.parse(data),
+        },
+      );
+    },
+    async submit(organizationId, assignmentId, input) {
+      return apiRequest(
+        `/organizations/${encodeURIComponent(organizationId)}/assignments/${encodeURIComponent(assignmentId)}/submissions`,
         {
           method: "POST",
           body: JSON.stringify(input),
@@ -86,6 +104,24 @@ export function createMockAssignmentsClient(): AssignmentsClient {
       });
       memory.set(organizationId, [...(memory.get(organizationId) ?? []), item]);
       return item;
+    },
+    async submit(organizationId, assignmentId, input) {
+      submissionMimeSchema.parse(input.mimeHint);
+      const rows = memory.get(organizationId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === assignmentId);
+      if (idx < 0) {
+        throw new Error("NOT_FOUND");
+      }
+      const current = rows[idx]!;
+      const updated = assignmentSchema.parse({
+        ...current,
+        submissionsCount: current.submissionsCount + 1,
+      });
+      memory.set(
+        organizationId,
+        rows.map((row, index) => (index === idx ? updated : row)),
+      );
+      return updated;
     },
   };
 }

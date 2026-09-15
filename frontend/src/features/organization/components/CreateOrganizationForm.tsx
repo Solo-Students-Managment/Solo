@@ -99,7 +99,9 @@ export function CreateOrganizationForm() {
             tone: "success",
             title: t(locale, "organization", "createSuccess"),
           });
-          router.push(routes.organization.home(org.id));
+          router.push(
+            `${routes.organization.home(org.id)}${locale === "en" ? "?lang=en" : "?lang=fa"}`,
+          );
         }}
       >
         <Fields locale={locale} />
