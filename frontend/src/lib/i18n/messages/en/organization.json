@@ -26,6 +26,7 @@
   "navAssignments": "Assignments",
   "navGradebook": "Gradebook",
   "navEvaluations": "Evaluations",
+  "navQuestionBank": "Question bank",
   "navSettings": "Settings",
   "navGlobalHome": "Global Home",
   "loadError": "Could not load organization.",

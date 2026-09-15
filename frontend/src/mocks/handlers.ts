@@ -80,6 +80,12 @@ import {
   type GradeScaleType,
   type ProgressMetric,
 } from "@/services/evaluations";
+import {
+  bankQuestionSchema,
+  type BankQuestion,
+  type QuestionType,
+  type QuestionVisibility,
+} from "@/services/question-bank";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -232,6 +238,7 @@ const mockEvaluationTemplates = new Map<string, EvaluationTemplate[]>();
 const mockGradeScales = new Map<string, GradeScale[]>();
 const mockEvaluationLevels = new Map<string, EvaluationLevel[]>();
 const mockProgressMetrics = new Map<string, ProgressMetric[]>();
+const mockQuestionBank = new Map<string, BankQuestion[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -427,6 +434,7 @@ function persistMswState() {
         mockGradeScales: [...mockGradeScales.entries()],
         mockEvaluationLevels: [...mockEvaluationLevels.entries()],
         mockProgressMetrics: [...mockProgressMetrics.entries()],
+        mockQuestionBank: [...mockQuestionBank.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -557,6 +565,17 @@ function hydrateMswState() {
         mockProgressMetrics.set(
           entry[0],
           entry[1].map((row) => progressMetricSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockQuestionBank)) {
+      mockQuestionBank.clear();
+      for (const entry of data.mockQuestionBank as Array<
+        [string, BankQuestion[]]
+      >) {
+        mockQuestionBank.set(
+          entry[0],
+          entry[1].map((row) => bankQuestionSchema.parse(row)),
         );
       }
     }
@@ -3547,6 +3566,97 @@ export const handlers = [
       mockEvaluationTemplates.set(orgId, rows);
       persistMswState();
       return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/question-bank", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockQuestionBank.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/question-bank",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        promptHtml?: string;
+        type?: QuestionType;
+        visibility?: QuestionVisibility;
+        tags?: string[];
+      };
+      if (!body.promptHtml?.trim() || !body.type || !body.visibility) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "questionBank.validation.prompt"),
+          { status: 400 },
+        );
+      }
+      const row = bankQuestionSchema.parse({
+        id: opaqueIdSchema.parse(
+          `qbq_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        promptHtml: body.promptHtml,
+        type: body.type,
+        visibility: body.visibility,
+        tags: body.tags ?? [],
+        version: 1,
+        forkedFromId: null,
+      });
+      mockQuestionBank.set(orgId, [
+        ...(mockQuestionBank.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/question-bank/:questionId/fork",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const questionId = String(params.questionId);
+      const rows = mockQuestionBank.get(orgId) ?? [];
+      const source = rows.find((row) => String(row.id) === questionId);
+      if (!source) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const forked = bankQuestionSchema.parse({
+        ...source,
+        id: opaqueIdSchema.parse(
+          `qbq_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        version: 1,
+        forkedFromId: source.id,
+        visibility: "private",
+      });
+      mockQuestionBank.set(orgId, [...rows, forked]);
+      persistMswState();
+      return HttpResponse.json(forked, { status: 201 });
     },
   ),
 ];
