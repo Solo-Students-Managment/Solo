@@ -91,9 +91,9 @@ export function AppShell({ children, title = "Solo" }: AppShellProps) {
           </div>
         </header>
 
-        <div className="flex-1 px-4 py-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6">
+        <main className="flex-1 px-4 py-6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6">
           {children}
-        </div>
+        </main>
 
         <nav
           className="border-border bg-elevated fixed inset-x-0 bottom-0 z-20 flex items-stretch justify-around border-t px-2 pt-2 pb-[env(safe-area-inset-bottom)] md:hidden"
