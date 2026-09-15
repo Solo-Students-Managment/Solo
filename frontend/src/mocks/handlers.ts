@@ -49,8 +49,10 @@ import {
 import {
   classSchema,
   courseSchema,
+  termSchema,
   type ClassRoom,
   type Course,
+  type Term,
 } from "@/services/courses";
 import { enrollmentSchema, type Enrollment } from "@/services/enrollments";
 import {
@@ -247,6 +249,7 @@ const mockManagedStudents = new Map<
 >();
 const mockCourses = new Map<string, Course>();
 const mockClasses = new Map<string, ClassRoom[]>();
+const mockTerms = new Map<string, Term[]>();
 const mockEnrollments = new Map<string, Enrollment>();
 const mockSessions = new Map<string, SessionDetail>();
 const mockAttendance = new Map<string, AttendanceRecord[]>();
@@ -2114,6 +2117,55 @@ export const handlers = [
     },
   ),
 
+  http.get("/api/organizations/:orgId/terms", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockTerms.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/terms", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      name?: string;
+      startsOn?: string;
+      endsOn?: string;
+    };
+    if (!body.name?.trim() || !body.startsOn || !body.endsOn) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "courses.validation.term"),
+        { status: 400 },
+      );
+    }
+    const row = termSchema.parse({
+      id: opaqueIdSchema.parse(
+        `trm_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      name: body.name.trim(),
+      startsOn: body.startsOn,
+      endsOn: body.endsOn,
+    });
+    mockTerms.set(orgId, [...(mockTerms.get(orgId) ?? []), row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
+
   http.get("/api/organizations/:orgId/courses", async ({ params }) => {
     const failed = await maybeFail();
     if (failed) return failed;
@@ -2145,6 +2197,7 @@ export const handlers = [
         name?: string;
         subjectId?: string;
         subjectName?: string;
+        termId?: string | null;
       };
       if (!body.name || !body.subjectId || !body.subjectName) {
         return HttpResponse.json(
@@ -2152,21 +2205,64 @@ export const handlers = [
           { status: 400 },
         );
       }
+      const orgId = String(params.orgId);
+      const term =
+        body.termId != null
+          ? (mockTerms.get(orgId) ?? []).find(
+              (row) => String(row.id) === body.termId,
+            )
+          : null;
       const id = opaqueIdSchema.parse(
         `crs_${Math.random().toString(36).slice(2, 10)}`,
       );
       const course = courseSchema.parse({
         id,
-        organizationId: opaqueIdSchema.parse(String(params.orgId)),
+        organizationId: opaqueIdSchema.parse(orgId),
         name: body.name,
         subjectId: opaqueIdSchema.parse(body.subjectId),
         subjectName: body.subjectName,
         status: "draft",
+        termId: term?.id ?? null,
+        termName: term?.name ?? null,
+        clonedFromId: null,
         classesCount: 0,
       });
       mockCourses.set(id, course);
       mockClasses.set(id, []);
       return HttpResponse.json(course);
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/courses/:courseId/clone",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const courseId = String(params.courseId);
+      const source = mockCourses.get(courseId);
+      if (!source) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `crs_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const cloned = courseSchema.parse({
+        ...source,
+        id,
+        name: `${source.name} (clone)`,
+        status: "draft",
+        clonedFromId: source.id,
+        classesCount: 0,
+      });
+      mockCourses.set(id, cloned);
+      mockClasses.set(id, []);
+      persistMswState();
+      return HttpResponse.json(cloned, { status: 201 });
     },
   ),
 
@@ -2224,16 +2320,89 @@ export const handlers = [
         name: body.name,
         capacity: body.capacity,
         enrolledCount: 0,
-        status: "planned",
+        status: "draft",
+        continuedFromId: null,
+        midCourseEntry: false,
       });
       const next = [...(mockClasses.get(courseId) ?? []), room];
       mockClasses.set(courseId, next);
       mockCourses.set(courseId, {
         ...course,
         classesCount: next.length,
-        status: course.status === "draft" ? "active" : course.status,
+        status: course.status === "draft" ? "published" : course.status,
       });
       return HttpResponse.json(room);
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/courses/:courseId/classes/:classId/continue",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const courseId = String(params.courseId);
+      const classId = String(params.classId);
+      const course = mockCourses.get(courseId);
+      const source = (mockClasses.get(courseId) ?? []).find(
+        (row) => String(row.id) === classId,
+      );
+      if (!course || !source) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `cls_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const continued = classSchema.parse({
+        ...source,
+        id,
+        name: `${source.name} (continued)`,
+        enrolledCount: 0,
+        status: "draft",
+        continuedFromId: source.id,
+        midCourseEntry: false,
+      });
+      const next = [...(mockClasses.get(courseId) ?? []), continued];
+      mockClasses.set(courseId, next);
+      mockCourses.set(courseId, { ...course, classesCount: next.length });
+      persistMswState();
+      return HttpResponse.json(continued, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/courses/:courseId/classes/:classId/mid-course-entry",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const courseId = String(params.courseId);
+      const classId = String(params.classId);
+      const rows = mockClasses.get(courseId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === classId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const updated = classSchema.parse({
+        ...rows[idx]!,
+        midCourseEntry: true,
+        status:
+          rows[idx]!.status === "draft" ? "enrollment_open" : rows[idx]!.status,
+      });
+      mockClasses.set(
+        courseId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 

@@ -16,10 +16,12 @@ test.describe("courses smoke", () => {
     await page.getByLabel("Course name").fill("Algebra I");
     await page.getByLabel("Subject name").fill("Mathematics");
     await page.getByRole("button", { name: "Create course" }).click();
-    await expect(page.getByText("Algebra I")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Algebra I Mathematics" }),
+    ).toBeVisible();
     await page.getByLabel("Class name").fill("Section A");
     await page.getByLabel("Capacity").fill("20");
     await page.getByRole("button", { name: "Create class" }).click();
-    await expect(page.getByText("Section A")).toBeVisible();
+    await expect(page.getByText("Section A", { exact: true })).toBeVisible();
   });
 });
