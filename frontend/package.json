@@ -37,16 +37,19 @@
     "@radix-ui/react-tabs": "^1.1.21",
     "@radix-ui/react-toast": "^1.2.23",
     "@radix-ui/react-tooltip": "^1.2.16",
+    "@tanstack/react-query": "^5.102.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.23",
     "jalaali-js": "^2.0.1",
     "lucide-react": "^1.45.0",
+    "msw": "^2.15.0",
     "next": "15.5.9",
     "react": "19.1.2",
     "react-dom": "19.1.2",
     "tailwind-merge": "^3.3.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
