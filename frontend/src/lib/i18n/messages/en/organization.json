@@ -82,5 +82,6 @@
   "navReports": "Reports",
   "navPolicies": "Policy center",
   "navShifts": "Shifts & working hours",
-  "navLeave": "Staff leave"
+  "navLeave": "Staff leave",
+  "navStaffAttendance": "Staff clock-in"
 }

@@ -63,6 +63,8 @@ export const routes = {
     policies: (orgId: string) => `/org/${encodeURIComponent(orgId)}/policies`,
     shifts: (orgId: string) => `/org/${encodeURIComponent(orgId)}/shifts`,
     leave: (orgId: string) => `/org/${encodeURIComponent(orgId)}/leave`,
+    staffAttendance: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/staff-attendance`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

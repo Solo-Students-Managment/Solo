@@ -1,0 +1,20 @@
+{
+  "title": "Staff clock-in",
+  "subtitle": "Record staff clock-in and clock-out events by branch.",
+  "createEvent": "Record clock event",
+  "eventSuccess": "Clock event recorded.",
+  "staffLabel": "Staff display name",
+  "eventTypeLabel": "Event type",
+  "branchLabel": "Branch name",
+  "event.clock_in": "Clock in",
+  "event.clock_out": "Clock out",
+  "colStaff": "Staff",
+  "colEvent": "Event",
+  "colTime": "Recorded at",
+  "colBranch": "Branch",
+  "empty": "No clock events yet.",
+  "loadError": "Could not load staff attendance.",
+  "forbidden": "You do not have permission to manage staff attendance.",
+  "validation.staff": "Staff name is required.",
+  "validation.branch": "Branch name is required."
+}

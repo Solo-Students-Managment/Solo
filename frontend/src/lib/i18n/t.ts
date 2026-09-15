@@ -30,6 +30,7 @@ import enRoles from "./messages/en/roles.json";
 import enPolicies from "./messages/en/policies.json";
 import enShifts from "./messages/en/shifts.json";
 import enLeave from "./messages/en/leave.json";
+import enStaffAttendance from "./messages/en/staffAttendance.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -71,6 +72,7 @@ import faRoles from "./messages/fa/roles.json";
 import faPolicies from "./messages/fa/policies.json";
 import faShifts from "./messages/fa/shifts.json";
 import faLeave from "./messages/fa/leave.json";
+import faStaffAttendance from "./messages/fa/staffAttendance.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -118,6 +120,7 @@ export type MessageNamespace =
   | "policies"
   | "shifts"
   | "leave"
+  | "staffAttendance"
   | "messaging"
   | "chat"
   | "notifications"
@@ -167,6 +170,7 @@ const dictionaries: Dictionaries = {
     policies: enPolicies,
     shifts: enShifts,
     leave: enLeave,
+    staffAttendance: enStaffAttendance,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -210,6 +214,7 @@ const dictionaries: Dictionaries = {
     policies: faPolicies,
     shifts: faShifts,
     leave: faLeave,
+    staffAttendance: faStaffAttendance,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

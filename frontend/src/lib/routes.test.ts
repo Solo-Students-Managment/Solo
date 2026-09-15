@@ -32,6 +32,9 @@ describe("typed routes", () => {
     expect(routes.organization.policies("org_1")).toBe("/org/org_1/policies");
     expect(routes.organization.shifts("org_1")).toBe("/org/org_1/shifts");
     expect(routes.organization.leave("org_1")).toBe("/org/org_1/leave");
+    expect(routes.organization.staffAttendance("org_1")).toBe(
+      "/org/org_1/staff-attendance",
+    );
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",
     );

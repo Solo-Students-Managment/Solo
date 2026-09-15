@@ -87,6 +87,10 @@ import {
 import { createHttpShiftsClient, setShiftsClient } from "@/services/shifts";
 import { createHttpLeaveClient, setLeaveClient } from "@/services/leave";
 import {
+  createHttpStaffAttendanceClient,
+  setStaffAttendanceClient,
+} from "@/services/staff-attendance";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -156,6 +160,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setPoliciesClient(createHttpPoliciesClient());
           setShiftsClient(createHttpShiftsClient());
           setLeaveClient(createHttpLeaveClient());
+          setStaffAttendanceClient(createHttpStaffAttendanceClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

@@ -135,6 +135,10 @@ import {
 import { orgPolicySchema, type OrgPolicy } from "@/services/policies";
 import { shiftSchema, type StaffShift } from "@/services/shifts";
 import { leaveRequestSchema, type LeaveRequest } from "@/services/leave";
+import {
+  staffClockEventSchema,
+  type StaffClockEvent,
+} from "@/services/staff-attendance";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -307,6 +311,7 @@ const mockRoleDefinitions = new Map<string, OrgRoleDefinition[]>();
 const mockPolicies = new Map<string, OrgPolicy[]>();
 const mockShifts = new Map<string, StaffShift[]>();
 const mockLeaveRequests = new Map<string, LeaveRequest[]>();
+const mockStaffClockEvents = new Map<string, StaffClockEvent[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -521,6 +526,7 @@ function persistMswState() {
         mockPolicies: [...mockPolicies.entries()],
         mockShifts: [...mockShifts.entries()],
         mockLeaveRequests: [...mockLeaveRequests.entries()],
+        mockStaffClockEvents: [...mockStaffClockEvents.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -845,6 +851,18 @@ function hydrateMswState() {
         mockLeaveRequests.set(
           entry[0],
           entry[1].map((row) => leaveRequestSchema.parse(row)),
+        );
+      }
+    }
+
+    if (Array.isArray(data.mockStaffClockEvents)) {
+      mockStaffClockEvents.clear();
+      for (const entry of data.mockStaffClockEvents as Array<
+        [string, StaffClockEvent[]]
+      >) {
+        mockStaffClockEvents.set(
+          entry[0],
+          entry[1].map((row) => staffClockEventSchema.parse(row)),
         );
       }
     }
@@ -5701,6 +5719,66 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/staff-attendance", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockStaffClockEvents.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/staff-attendance",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        staffDisplayName?: string;
+        eventType?: string;
+        branchName?: string;
+      };
+      if (
+        !body.staffDisplayName?.trim() ||
+        !body.eventType ||
+        !body.branchName?.trim()
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "staffAttendance.validation.staff"),
+          { status: 400 },
+        );
+      }
+      const row = staffClockEventSchema.parse({
+        id: opaqueIdSchema.parse(
+          `clk_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        staffDisplayName: body.staffDisplayName.trim(),
+        eventType: body.eventType,
+        recordedAt: new Date().toISOString(),
+        branchName: body.branchName.trim(),
+      });
+      mockStaffClockEvents.set(orgId, [
+        ...(mockStaffClockEvents.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
     },
   ),
 ];

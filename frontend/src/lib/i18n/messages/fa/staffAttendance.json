@@ -1,0 +1,20 @@
+{
+  "title": "ورود و خروج کارکنان",
+  "subtitle": "ثبت رویدادهای ورود و خروج کارکنان بر اساس شعبه.",
+  "createEvent": "ثبت رویداد ساعت",
+  "eventSuccess": "رویداد ساعت ثبت شد.",
+  "staffLabel": "نام نمایشی کارکنان",
+  "eventTypeLabel": "نوع رویداد",
+  "branchLabel": "نام شعبه",
+  "event.clock_in": "ورود",
+  "event.clock_out": "خروج",
+  "colStaff": "کارکنان",
+  "colEvent": "رویداد",
+  "colTime": "زمان ثبت",
+  "colBranch": "شعبه",
+  "empty": "هنوز رویدادی نیست.",
+  "loadError": "بارگذاری حضور کارکنان ممکن نشد.",
+  "forbidden": "اجازه مدیریت حضور کارکنان را ندارید.",
+  "validation.staff": "نام کارکنان الزامی است.",
+  "validation.branch": "نام شعبه الزامی است."
+}
