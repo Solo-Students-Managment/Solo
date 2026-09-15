@@ -42,6 +42,10 @@ import enFormSubmissions from "./messages/en/formSubmissions.json";
 import enCustomization from "./messages/en/customization.json";
 import enAutomation from "./messages/en/automation.json";
 import enCrm from "./messages/en/crm.json";
+import enDataOps from "./messages/en/dataOps.json";
+import enEvents from "./messages/en/events.json";
+import enAnalytics from "./messages/en/analytics.json";
+import enBulkActions from "./messages/en/bulkActions.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -95,6 +99,10 @@ import faFormSubmissions from "./messages/fa/formSubmissions.json";
 import faCustomization from "./messages/fa/customization.json";
 import faAutomation from "./messages/fa/automation.json";
 import faCrm from "./messages/fa/crm.json";
+import faDataOps from "./messages/fa/dataOps.json";
+import faEvents from "./messages/fa/events.json";
+import faAnalytics from "./messages/fa/analytics.json";
+import faBulkActions from "./messages/fa/bulkActions.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -154,6 +162,10 @@ export type MessageNamespace =
   | "customization"
   | "automation"
   | "crm"
+  | "dataOps"
+  | "events"
+  | "analytics"
+  | "bulkActions"
   | "messaging"
   | "chat"
   | "notifications"
@@ -215,6 +227,10 @@ const dictionaries: Dictionaries = {
     customization: enCustomization,
     automation: enAutomation,
     crm: enCrm,
+    dataOps: enDataOps,
+    events: enEvents,
+    analytics: enAnalytics,
+    bulkActions: enBulkActions,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -270,6 +286,10 @@ const dictionaries: Dictionaries = {
     customization: faCustomization,
     automation: faAutomation,
     crm: faCrm,
+    dataOps: faDataOps,
+    events: faEvents,
+    analytics: faAnalytics,
+    bulkActions: faBulkActions,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

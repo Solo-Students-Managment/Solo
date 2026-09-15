@@ -32,6 +32,10 @@ type OrgNavKey =
   | "customization"
   | "automation"
   | "crm"
+  | "dataOps"
+  | "events"
+  | "analytics"
+  | "bulkActions"
   | "subjects"
   | "students"
   | "courses"
@@ -174,6 +178,26 @@ function navItems(orgId: string, langQuery: string) {
       key: "crm" as const,
       href: `${routes.organization.crm(orgId)}${langQuery}`,
       labelKey: "navCrm",
+    },
+    {
+      key: "dataOps" as const,
+      href: `${routes.organization.dataOps(orgId)}${langQuery}`,
+      labelKey: "navDataOps",
+    },
+    {
+      key: "events" as const,
+      href: `${routes.organization.events(orgId)}${langQuery}`,
+      labelKey: "navEvents",
+    },
+    {
+      key: "analytics" as const,
+      href: `${routes.organization.analytics(orgId)}${langQuery}`,
+      labelKey: "navAnalytics",
+    },
+    {
+      key: "bulkActions" as const,
+      href: `${routes.organization.bulkActions(orgId)}${langQuery}`,
+      labelKey: "navBulkActions",
     },
     {
       key: "subjects" as const,

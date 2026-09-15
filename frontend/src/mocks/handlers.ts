@@ -196,6 +196,23 @@ import {
   type Deal,
   type Pipeline,
 } from "@/services/crm";
+import {
+  dataJobSchema,
+  nextDataJobStatus,
+  type DataJob,
+} from "@/services/data-ops";
+import { canRsvp, orgEventSchema, type OrgEvent } from "@/services/events";
+import {
+  goalSchema,
+  savedViewSchema,
+  type Goal,
+  type SavedView,
+} from "@/services/analytics";
+import {
+  bulkJobSchema,
+  requiresBulkApproval,
+  type BulkJob,
+} from "@/services/bulk-actions";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -382,6 +399,11 @@ const mockCustomization = new Map<string, CustomizationBundle>();
 const mockAutomation = new Map<string, AutomationRule[]>();
 const mockCrmPipelines = new Map<string, Pipeline[]>();
 const mockCrmDeals = new Map<string, Deal[]>();
+const mockDataOps = new Map<string, DataJob[]>();
+const mockEvents = new Map<string, OrgEvent[]>();
+const mockAnalyticsViews = new Map<string, SavedView[]>();
+const mockAnalyticsGoals = new Map<string, Goal[]>();
+const mockBulkActions = new Map<string, BulkJob[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -610,6 +632,11 @@ function persistMswState() {
         mockAutomation: [...mockAutomation.entries()],
         mockCrmPipelines: [...mockCrmPipelines.entries()],
         mockCrmDeals: [...mockCrmDeals.entries()],
+        mockDataOps: [...mockDataOps.entries()],
+        mockEvents: [...mockEvents.entries()],
+        mockAnalyticsViews: [...mockAnalyticsViews.entries()],
+        mockAnalyticsGoals: [...mockAnalyticsGoals.entries()],
+        mockBulkActions: [...mockBulkActions.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -1082,6 +1109,53 @@ function hydrateMswState() {
         mockCrmDeals.set(
           entry[0],
           entry[1].map((row) => dealSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockDataOps)) {
+      mockDataOps.clear();
+      for (const entry of data.mockDataOps as Array<[string, DataJob[]]>) {
+        mockDataOps.set(
+          entry[0],
+          entry[1].map((row) => dataJobSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockEvents)) {
+      mockEvents.clear();
+      for (const entry of data.mockEvents as Array<[string, OrgEvent[]]>) {
+        mockEvents.set(
+          entry[0],
+          entry[1].map((row) => orgEventSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockAnalyticsViews)) {
+      mockAnalyticsViews.clear();
+      for (const entry of data.mockAnalyticsViews as Array<
+        [string, SavedView[]]
+      >) {
+        mockAnalyticsViews.set(
+          entry[0],
+          entry[1].map((row) => savedViewSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockAnalyticsGoals)) {
+      mockAnalyticsGoals.clear();
+      for (const entry of data.mockAnalyticsGoals as Array<[string, Goal[]]>) {
+        mockAnalyticsGoals.set(
+          entry[0],
+          entry[1].map((row) => goalSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockBulkActions)) {
+      mockBulkActions.clear();
+      for (const entry of data.mockBulkActions as Array<[string, BulkJob[]]>) {
+        mockBulkActions.set(
+          entry[0],
+          entry[1].map((row) => bulkJobSchema.parse(row)),
         );
       }
     }
@@ -7199,6 +7273,486 @@ export const handlers = [
       mockCrmDeals.set(orgId, [...(mockCrmDeals.get(orgId) ?? []), row]);
       persistMswState();
       return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/data-ops", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockDataOps.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/data-ops",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        jobType?: string;
+        resourceKey?: string;
+      };
+      if (!body.jobType || !body.resourceKey?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "dataOps.validation.resourceKey"),
+          { status: 400 },
+        );
+      }
+      const row = dataJobSchema.parse({
+        id: opaqueIdSchema.parse(
+          `djob_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        jobType: body.jobType,
+        resourceKey: body.resourceKey.trim(),
+        status: "queued",
+      });
+      mockDataOps.set(orgId, [...(mockDataOps.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/data-ops/:jobId/advance",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const jobId = String(params.jobId);
+      const rows = mockDataOps.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === jobId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          {
+            status: 404,
+          },
+        );
+      }
+      const current = rows[idx]!;
+      const next = nextDataJobStatus(current.status);
+      if (!next) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "dataOps.validation.terminal"),
+          { status: 400 },
+        );
+      }
+      const updated = dataJobSchema.parse({ ...current, status: next });
+      const copy = [...rows];
+      copy[idx] = updated;
+      mockDataOps.set(orgId, copy);
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/events", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockEvents.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/events", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      title?: string;
+      startsAt?: string;
+      capacity?: number;
+      waitlistEnabled?: boolean;
+    };
+    if (
+      !body.title?.trim() ||
+      !body.startsAt?.trim() ||
+      typeof body.capacity !== "number" ||
+      body.capacity < 1
+    ) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "events.validation.title"),
+        { status: 400 },
+      );
+    }
+    const row = orgEventSchema.parse({
+      id: opaqueIdSchema.parse(
+        `evt_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      title: body.title.trim(),
+      startsAt: body.startsAt,
+      capacity: body.capacity,
+      rsvpCount: 0,
+      checkedInCount: 0,
+      waitlistEnabled: Boolean(body.waitlistEnabled),
+    });
+    mockEvents.set(orgId, [...(mockEvents.get(orgId) ?? []), row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/events/:eventId/rsvp",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const eventId = String(params.eventId);
+      const rows = mockEvents.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === eventId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          {
+            status: 404,
+          },
+        );
+      }
+      const current = rows[idx]!;
+      if (!canRsvp(current)) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "events.rsvpBlocked"),
+          { status: 400 },
+        );
+      }
+      const updated = orgEventSchema.parse({
+        ...current,
+        rsvpCount: current.rsvpCount + 1,
+      });
+      const next = [...rows];
+      next[idx] = updated;
+      mockEvents.set(orgId, next);
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/events/:eventId/check-in",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const eventId = String(params.eventId);
+      const rows = mockEvents.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === eventId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          {
+            status: 404,
+          },
+        );
+      }
+      const current = rows[idx]!;
+      if (current.checkedInCount >= current.rsvpCount) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "events.checkInBlocked"),
+          { status: 400 },
+        );
+      }
+      const updated = orgEventSchema.parse({
+        ...current,
+        checkedInCount: current.checkedInCount + 1,
+      });
+      const next = [...rows];
+      next[idx] = updated;
+      mockEvents.set(orgId, next);
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/analytics/views", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockAnalyticsViews.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.get("/api/organizations/:orgId/analytics/goals", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockAnalyticsGoals.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/analytics/views",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        metricKey?: string;
+        alertThreshold?: number;
+      };
+      if (
+        !body.name?.trim() ||
+        !body.metricKey?.trim() ||
+        typeof body.alertThreshold !== "number"
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "analytics.validation.viewName"),
+          { status: 400 },
+        );
+      }
+      const row = savedViewSchema.parse({
+        id: opaqueIdSchema.parse(
+          `view_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        metricKey: body.metricKey.trim(),
+        alertThreshold: body.alertThreshold,
+      });
+      mockAnalyticsViews.set(orgId, [
+        ...(mockAnalyticsViews.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/analytics/goals",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        targetValue?: number;
+      };
+      if (!body.name?.trim() || typeof body.targetValue !== "number") {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "analytics.validation.goalName"),
+          { status: 400 },
+        );
+      }
+      const row = goalSchema.parse({
+        id: opaqueIdSchema.parse(
+          `goal_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        targetValue: body.targetValue,
+        currentValue: 0,
+      });
+      mockAnalyticsGoals.set(orgId, [
+        ...(mockAnalyticsGoals.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/analytics/goals/:goalId/progress",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const goalId = String(params.goalId);
+      const body = (await request.json()) as { currentValue?: number };
+      const rows = mockAnalyticsGoals.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === goalId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          {
+            status: 404,
+          },
+        );
+      }
+      if (typeof body.currentValue !== "number" || body.currentValue < 0) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "analytics.validation.currentValue"),
+          { status: 400 },
+        );
+      }
+      const updated = goalSchema.parse({
+        ...rows[idx]!,
+        currentValue: body.currentValue,
+      });
+      const next = [...rows];
+      next[idx] = updated;
+      mockAnalyticsGoals.set(orgId, next);
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/bulk-actions", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockBulkActions.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/bulk-actions",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        moduleKey?: string;
+        actionKey?: string;
+        itemCount?: number;
+      };
+      if (
+        !body.moduleKey?.trim() ||
+        !body.actionKey?.trim() ||
+        typeof body.itemCount !== "number" ||
+        body.itemCount < 1
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "bulkActions.validation.moduleKey"),
+          { status: 400 },
+        );
+      }
+      const requiresApproval = requiresBulkApproval(
+        body.itemCount,
+        body.actionKey,
+      );
+      const row = bulkJobSchema.parse({
+        id: opaqueIdSchema.parse(
+          `bulk_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        moduleKey: body.moduleKey.trim(),
+        actionKey: body.actionKey.trim(),
+        itemCount: body.itemCount,
+        status: requiresApproval ? "blocked" : "pending",
+        requiresApproval,
+      });
+      mockBulkActions.set(orgId, [...(mockBulkActions.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/bulk-actions/:jobId/run",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const jobId = String(params.jobId);
+      const body = (await request.json()) as { approvalGranted?: boolean };
+      const rows = mockBulkActions.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === jobId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          {
+            status: 404,
+          },
+        );
+      }
+      const current = rows[idx]!;
+      if (current.status === "completed") {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "bulkActions.validation.done"),
+          { status: 400 },
+        );
+      }
+      if (current.requiresApproval && !body.approvalGranted) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "bulkActions.approvalRequired"),
+          { status: 400 },
+        );
+      }
+      const updated = bulkJobSchema.parse({
+        ...current,
+        status: "completed",
+      });
+      const next = [...rows];
+      next[idx] = updated;
+      mockBulkActions.set(orgId, next);
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 ];

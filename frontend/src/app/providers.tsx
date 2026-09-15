@@ -121,6 +121,16 @@ import {
   setAutomationClient,
 } from "@/services/automation";
 import { createHttpCrmClient, setCrmClient } from "@/services/crm";
+import { createHttpDataOpsClient, setDataOpsClient } from "@/services/data-ops";
+import { createHttpEventsClient, setEventsClient } from "@/services/events";
+import {
+  createHttpAnalyticsClient,
+  setAnalyticsClient,
+} from "@/services/analytics";
+import {
+  createHttpBulkActionsClient,
+  setBulkActionsClient,
+} from "@/services/bulk-actions";
 import {
   createHttpMessagingClient,
   setMessagingClient,
@@ -202,6 +212,10 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setCustomizationClient(createHttpCustomizationClient());
           setAutomationClient(createHttpAutomationClient());
           setCrmClient(createHttpCrmClient());
+          setDataOpsClient(createHttpDataOpsClient());
+          setEventsClient(createHttpEventsClient());
+          setAnalyticsClient(createHttpAnalyticsClient());
+          setBulkActionsClient(createHttpBulkActionsClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

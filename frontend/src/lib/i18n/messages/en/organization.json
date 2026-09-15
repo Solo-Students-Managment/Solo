@@ -94,5 +94,9 @@
   "navFormSubmissions": "Form submissions",
   "navCustomization": "Customization",
   "navAutomation": "Automation",
-  "navCrm": "CRM"
+  "navCrm": "CRM",
+  "navDataOps": "Data operations",
+  "navEvents": "Events",
+  "navAnalytics": "Analytics",
+  "navBulkActions": "Bulk actions"
 }

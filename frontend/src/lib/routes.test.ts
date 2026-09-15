@@ -60,6 +60,12 @@ describe("typed routes", () => {
       "/org/org_1/automation",
     );
     expect(routes.organization.crm("org_1")).toBe("/org/org_1/crm");
+    expect(routes.organization.dataOps("org_1")).toBe("/org/org_1/data-ops");
+    expect(routes.organization.events("org_1")).toBe("/org/org_1/events");
+    expect(routes.organization.analytics("org_1")).toBe("/org/org_1/analytics");
+    expect(routes.organization.bulkActions("org_1")).toBe(
+      "/org/org_1/bulk-actions",
+    );
     expect(routes.public.form("parent-feedback")).toBe("/f/parent-feedback");
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",

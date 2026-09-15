@@ -94,5 +94,9 @@
   "navFormSubmissions": "پاسخ‌های فرم",
   "navCustomization": "سفارشی‌سازی",
   "navAutomation": "اتوماسیون",
-  "navCrm": "CRM"
+  "navCrm": "CRM",
+  "navDataOps": "عملیات داده",
+  "navEvents": "رویدادها",
+  "navAnalytics": "تحلیل‌ها",
+  "navBulkActions": "عملیات گروهی"
 }

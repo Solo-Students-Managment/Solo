@@ -83,6 +83,11 @@ export const routes = {
     automation: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/automation`,
     crm: (orgId: string) => `/org/${encodeURIComponent(orgId)}/crm`,
+    dataOps: (orgId: string) => `/org/${encodeURIComponent(orgId)}/data-ops`,
+    events: (orgId: string) => `/org/${encodeURIComponent(orgId)}/events`,
+    analytics: (orgId: string) => `/org/${encodeURIComponent(orgId)}/analytics`,
+    bulkActions: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/bulk-actions`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>
