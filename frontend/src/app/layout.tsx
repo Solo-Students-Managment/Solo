@@ -17,7 +17,7 @@ const sourceSans = Source_Sans_3({
 
 export const metadata: Metadata = {
   title: "Solo",
-  description: "Solo education platform — Phase 0 frontend foundation",
+  description: "Solo education platform — Core Solo frontend",
   manifest: "/manifest.webmanifest",
 };
 

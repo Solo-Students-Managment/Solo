@@ -10,11 +10,13 @@ Canonical repository: `Solo-Students-Managment/Solo` (default branch `main`).
 
 ## Current phase
 
-**Phase 0 — Foundation**
+**Phase 1 — Core Solo**
 
-Build the repository, architecture, design system, mock/network layer, identity/context foundations, shared primitives, testing, security, PWA/realtime, and quality gates required by later features.
+Deliver the daily educational product: identity/personas, organization creation, subjects, students/guardians, courses/classes/enrollments, sessions, attendance, assignments, gradebook, messaging, notifications, tuition tracking and core files/reports.
 
-Frontend-first. Backend implementation, database work, real authorization, real payment processing, real WebSocket servers, and real storage services are **out of scope** until the backend phase.
+Phase 0 foundation (repo, design system, mocks, auth adapter, shared primitives, testing, security, PWA/realtime, quality gates) is complete and must be reused.
+
+Frontend-first. Backend implementation, database work, real authorization, real payment processing, real WebSocket servers, and real storage services remain **out of scope** until the backend phase.
 
 ## Repository layout
 

@@ -42,6 +42,7 @@ export function SoloForm<T extends FieldValues>({
         className="space-y-4"
         onSubmit={form.handleSubmit(onSubmit)}
         noValidate
+        aria-label={submitLabel}
       >
         {children}
         <Button type="submit" disabled={form.formState.isSubmitting}>

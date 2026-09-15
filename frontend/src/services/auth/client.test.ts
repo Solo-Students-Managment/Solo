@@ -15,7 +15,7 @@ describe("mock auth client", () => {
     const client = createMockAuthClient();
     const session = await client.login({
       phoneE164: "+989121234567",
-      password: "secret",
+      password: "Password1",
     });
     expect(session.userId).toContain("usr_");
     expect(await client.getSession()).not.toBeNull();
@@ -26,7 +26,7 @@ describe("mock auth client", () => {
     const client = createMockAuthClient();
     const session = await client.login({
       phoneE164: "+989121234567",
-      password: "secret",
+      password: "Password1",
     });
     session.expiresAt = new Date(Date.now() - 1000).toISOString();
     expect(await client.getSession()).toBeNull();

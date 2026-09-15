@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { apiRequest } from "@/services/api";
 import { opaqueIdSchema } from "@/services/api";
 import { validateReturnUrl } from "@/lib/routes";
 
@@ -32,6 +33,10 @@ export type AuthClient = {
     lastName: string;
     phoneE164: string;
     password: string;
+  }): Promise<{ challengeId: string }>;
+  completeSignup(input: {
+    challengeId: string;
+    code: string;
   }): Promise<Session>;
   requestOtp(phoneE164: string): Promise<{ challengeId: string }>;
   verifyOtp(input: { challengeId: string; code: string }): Promise<Session>;
@@ -40,6 +45,7 @@ export type AuthClient = {
     code: string;
     newPassword: string;
   }): Promise<void>;
+  requestPasswordReset(phoneE164: string): Promise<{ challengeId: string }>;
   reauth(password: string): Promise<void>;
   switchPersona(persona: Persona): Promise<Session>;
   switchContext(input: {
@@ -48,12 +54,117 @@ export type AuthClient = {
   }): Promise<Session>;
 };
 
+/** In-memory session metadata only — never stores tokens/passwords/OTP. */
 let memorySession: Session | null = null;
 
 function futureExpiry(minutes = 60): string {
   return new Date(Date.now() + minutes * 60_000).toISOString();
 }
 
+function cacheSession(session: Session): Session {
+  memorySession = session;
+  return session;
+}
+
+export function createHttpAuthClient(): AuthClient {
+  return {
+    async getSession() {
+      try {
+        const session = await apiRequest("/auth/session", {
+          parse: (data) => sessionSchema.parse(data),
+        });
+        return cacheSession(session);
+      } catch {
+        memorySession = null;
+        return null;
+      }
+    },
+    async login(input) {
+      const session = await apiRequest("/auth/login", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => sessionSchema.parse(data),
+      });
+      return cacheSession(session);
+    },
+    async logout() {
+      await apiRequest("/auth/logout", { method: "POST", parse: () => null });
+      memorySession = null;
+    },
+    async signup(input) {
+      return apiRequest("/auth/signup", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => z.object({ challengeId: z.string() }).parse(data),
+      });
+    },
+    async completeSignup(input) {
+      const session = await apiRequest("/auth/signup/verify", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => sessionSchema.parse(data),
+      });
+      return cacheSession(session);
+    },
+    async requestOtp(phoneE164) {
+      return apiRequest("/auth/otp/request", {
+        method: "POST",
+        body: JSON.stringify({ phoneE164 }),
+        parse: (data) => z.object({ challengeId: z.string() }).parse(data),
+      });
+    },
+    async verifyOtp(input) {
+      const session = await apiRequest("/auth/otp/verify", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => sessionSchema.parse(data),
+      });
+      return cacheSession(session);
+    },
+    async requestPasswordReset(phoneE164) {
+      return apiRequest("/auth/password/reset/request", {
+        method: "POST",
+        body: JSON.stringify({ phoneE164 }),
+        parse: (data) => z.object({ challengeId: z.string() }).parse(data),
+      });
+    },
+    async resetPassword(input) {
+      await apiRequest("/auth/password/reset/confirm", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: () => undefined,
+      });
+    },
+    async reauth(password) {
+      await apiRequest("/auth/reauth", {
+        method: "POST",
+        body: JSON.stringify({ password }),
+        parse: () => undefined,
+      });
+      if (memorySession) {
+        memorySession = { ...memorySession, requiresReauth: false };
+      }
+    },
+    async switchPersona(persona) {
+      const session = await apiRequest("/auth/persona", {
+        method: "POST",
+        body: JSON.stringify({ persona }),
+        parse: (data) => sessionSchema.parse(data),
+      });
+      return cacheSession(session);
+    },
+    async switchContext(input) {
+      const session = await apiRequest("/auth/context", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => sessionSchema.parse(data),
+      });
+      return cacheSession(session);
+    },
+  };
+}
+
+/** Offline-capable mock used in unit tests without MSW network. */
 export function createMockAuthClient(): AuthClient {
   return {
     async getSession() {
@@ -64,8 +175,11 @@ export function createMockAuthClient(): AuthClient {
       }
       return memorySession;
     },
-    async login({ phoneE164 }) {
-      memorySession = {
+    async login({ phoneE164, password }) {
+      if (password !== "Password1") {
+        throw new Error("auth.invalidCredentials");
+      }
+      return cacheSession({
         userId: opaqueIdSchema.parse(`usr_${phoneE164.replace(/\D/g, "")}`),
         displayName: "Demo User",
         activePersona: "teacher",
@@ -73,29 +187,33 @@ export function createMockAuthClient(): AuthClient {
         subjectId: null,
         expiresAt: futureExpiry(),
         requiresReauth: false,
-      };
-      return memorySession;
+      });
     },
     async logout() {
       memorySession = null;
     },
-    async signup({ firstName, lastName, phoneE164 }) {
-      memorySession = {
-        userId: opaqueIdSchema.parse(`usr_${phoneE164.replace(/\D/g, "")}`),
-        displayName: `${firstName} ${lastName}`,
+    async signup() {
+      return { challengeId: "otp_signup_1" };
+    },
+    async completeSignup() {
+      return cacheSession({
+        userId: opaqueIdSchema.parse("usr_signup"),
+        displayName: "New User",
         activePersona: "teacher",
         organizationId: null,
         subjectId: null,
         expiresAt: futureExpiry(),
         requiresReauth: false,
-      };
-      return memorySession;
+      });
     },
     async requestOtp() {
       return { challengeId: "otp_challenge_1" };
     },
-    async verifyOtp() {
-      memorySession = {
+    async verifyOtp({ code }) {
+      if (code !== "123456") {
+        throw new Error("auth.invalidOtp");
+      }
+      return cacheSession({
         userId: opaqueIdSchema.parse("usr_otp"),
         displayName: "OTP User",
         activePersona: "teacher",
@@ -103,8 +221,10 @@ export function createMockAuthClient(): AuthClient {
         subjectId: null,
         expiresAt: futureExpiry(),
         requiresReauth: false,
-      };
-      return memorySession;
+      });
+    },
+    async requestPasswordReset() {
+      return { challengeId: "otp_reset_1" };
     },
     async resetPassword() {
       return;

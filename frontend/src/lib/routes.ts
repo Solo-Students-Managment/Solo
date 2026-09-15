@@ -19,6 +19,8 @@ export const routes = {
   auth: {
     login: () => "/auth/login",
     signup: () => "/auth/signup",
+    otp: () => "/auth/otp",
+    reset: () => "/auth/reset",
   },
   personal: {
     home: () => "/personal",

@@ -25,6 +25,7 @@ const eslintConfig = [
       "test-results/**",
       "next-env.d.ts",
       "storybook-static/**",
+      "public/mockServiceWorker.js",
     ],
   },
   {

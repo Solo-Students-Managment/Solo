@@ -17,5 +17,6 @@ describe("i18n translator", () => {
   it("keeps fa/en namespace key parity", () => {
     expect(assertNamespaceParity("foundation")).toEqual([]);
     expect(assertNamespaceParity("common")).toEqual([]);
+    expect(assertNamespaceParity("auth")).toEqual([]);
   });
 });
