@@ -1,20 +1,11 @@
-import { EnvironmentBadge } from "@/components/shared/EnvironmentBadge";
-import { FoundationStatus, resolveLocale } from "@/features/foundation";
-import { localeDirection } from "@/lib/i18n/locales";
+import { Suspense } from "react";
 
-type HomePageProps = {
-  searchParams: Promise<{ lang?: string | string[] }>;
-};
+import { GlobalHomeView } from "@/features/home";
 
-export default async function HomePage({ searchParams }: HomePageProps) {
-  const params = await searchParams;
-  const locale = resolveLocale(params.lang);
-  const dir = localeDirection(locale);
-
+export default function HomePage() {
   return (
-    <div lang={locale} dir={dir}>
-      <FoundationStatus locale={locale} />
-      <EnvironmentBadge locale={locale} />
-    </div>
+    <Suspense fallback={null}>
+      <GlobalHomeView />
+    </Suspense>
   );
 }

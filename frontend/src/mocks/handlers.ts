@@ -12,6 +12,13 @@ import {
   type TwoFactorStatus,
 } from "@/services/auth/client";
 import { userProfileSchema, type UserProfile } from "@/services/profile";
+import {
+  availableContextSchema,
+  availablePersonaSchema,
+  teacherDashboardSchema,
+  type AvailableContext,
+} from "@/services/home";
+import { organizationSchema, type Organization } from "@/services/organization";
 
 export type MockScenario =
   | "success"
@@ -47,6 +54,38 @@ let twoFactorStatus: TwoFactorStatus = {
 let deviceSessions: DeviceSession[] = [];
 let currentPhoneE164 = "+989121234567";
 let mockProfile: UserProfile | null = null;
+const mockOrgs = new Map<string, Organization>();
+let mockPersonas = [
+  {
+    persona: "teacher" as const,
+    activated: true,
+    labelKey: "home.persona.teacher",
+  },
+  {
+    persona: "student" as const,
+    activated: false,
+    labelKey: "home.persona.student",
+  },
+  {
+    persona: "guardian" as const,
+    activated: false,
+    labelKey: "home.persona.guardian",
+  },
+];
+let mockContexts: AvailableContext[] = [
+  {
+    id: null,
+    kind: "personal",
+    label: "Personal",
+    organizationId: null,
+  },
+];
+let mockTeacherDash = {
+  plan: "teacher_free" as const,
+  studentsCount: 2,
+  classesCount: 1,
+  upcomingSessionsCount: 1,
+};
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -732,6 +771,106 @@ export const handlers = [
     }
     mockProfile = userProfileSchema.parse({ ...mockProfile, ...body });
     return HttpResponse.json(mockProfile);
+  }),
+
+  http.get("/api/auth/personas", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json(
+      mockPersonas.map((p) => availablePersonaSchema.parse(p)),
+    );
+  }),
+
+  http.get("/api/auth/contexts", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json(
+      mockContexts.map((c) => availableContextSchema.parse(c)),
+    );
+  }),
+
+  http.post("/api/auth/personas/teacher/activate", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    mockPersonas = mockPersonas.map((p) =>
+      p.persona === "teacher" ? { ...p, activated: true } : p,
+    );
+    mockTeacherDash = {
+      plan: "teacher_free",
+      studentsCount: 2,
+      classesCount: 1,
+      upcomingSessionsCount: 1,
+    };
+    return HttpResponse.json({ persona: "teacher" });
+  }),
+
+  http.get("/api/teacher/dashboard", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    return HttpResponse.json(teacherDashboardSchema.parse(mockTeacherDash));
+  }),
+
+  http.post("/api/organizations", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { name?: string; type?: string };
+    if (!body.name || (body.type !== "school" && body.type !== "institute")) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "errors.validation"),
+        { status: 400 },
+      );
+    }
+    const id = opaqueIdSchema.parse(
+      `org_${Math.random().toString(36).slice(2, 10)}`,
+    );
+    const org = organizationSchema.parse({
+      id,
+      name: body.name,
+      type: body.type,
+      mainBranchId: opaqueIdSchema.parse(`br_main_${id}`),
+      mainBranchName: "Main Branch",
+      ownerRole: "owner",
+      trialDaysLeft: 14,
+      branchesCount: 1,
+      membersCount: 1,
+      publicProfilePublished: false,
+    });
+    mockOrgs.set(id, org);
+    mockContexts = [
+      ...mockContexts.filter((c) => c.organizationId !== id),
+      {
+        id,
+        kind: "organization",
+        label: org.name,
+        organizationId: id,
+      },
+    ];
+    return HttpResponse.json(org);
+  }),
+
+  http.get("/api/organizations/:orgId", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const org = mockOrgs.get(String(params.orgId));
+    if (!org) {
+      return HttpResponse.json(
+        errorBody(404, "NOT_FOUND", "errors.not_found"),
+        { status: 404 },
+      );
+    }
+    return HttpResponse.json(org);
   }),
 
   http.post("/api/auth/persona", async ({ request }) => {

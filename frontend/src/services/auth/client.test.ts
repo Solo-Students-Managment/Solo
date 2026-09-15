@@ -80,6 +80,6 @@ describe("mock auth client", () => {
     });
     session.expiresAt = new Date(Date.now() - 1000).toISOString();
     expect(await client.getSession()).toBeNull();
-    expect(safeAuthReturnUrl("//evil")).toBe("/personal");
+    expect(safeAuthReturnUrl("//evil")).toBe("/");
   });
 });

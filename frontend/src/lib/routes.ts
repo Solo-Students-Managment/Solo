@@ -31,9 +31,11 @@ export const routes = {
   },
   teacher: {
     home: () => "/teacher",
+    activate: () => "/teacher/activate",
   },
   organization: {
     home: (orgId: string) => `/org/${encodeURIComponent(orgId)}`,
+    create: () => "/org/new",
   },
   admin: {
     home: () => "/admin",

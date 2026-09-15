@@ -644,7 +644,7 @@ export function setAuthClient(client: AuthClient): void {
 export function safeAuthReturnUrl(
   candidate: string | null | undefined,
 ): string {
-  return validateReturnUrl(candidate, "/personal");
+  return validateReturnUrl(candidate, "/");
 }
 
 /** Test helper */
