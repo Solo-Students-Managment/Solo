@@ -133,6 +133,7 @@ import {
   type OrgRoleDefinition,
 } from "@/services/roles";
 import { orgPolicySchema, type OrgPolicy } from "@/services/policies";
+import { shiftSchema, type StaffShift } from "@/services/shifts";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -303,6 +304,7 @@ const mockPositions = new Map<string, Position[]>();
 const mockDirectory = new Map<string, DirectoryPerson[]>();
 const mockRoleDefinitions = new Map<string, OrgRoleDefinition[]>();
 const mockPolicies = new Map<string, OrgPolicy[]>();
+const mockShifts = new Map<string, StaffShift[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -515,6 +517,7 @@ function persistMswState() {
         mockDirectory: [...mockDirectory.entries()],
         mockRoleDefinitions: [...mockRoleDefinitions.entries()],
         mockPolicies: [...mockPolicies.entries()],
+        mockShifts: [...mockShifts.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -817,6 +820,16 @@ function hydrateMswState() {
         mockPolicies.set(
           entry[0],
           entry[1].map((row) => orgPolicySchema.parse(row)),
+        );
+      }
+    }
+
+    if (Array.isArray(data.mockShifts)) {
+      mockShifts.clear();
+      for (const entry of data.mockShifts as Array<[string, StaffShift[]]>) {
+        mockShifts.set(
+          entry[0],
+          entry[1].map((row) => shiftSchema.parse(row)),
         );
       }
     }
@@ -5518,4 +5531,64 @@ export const handlers = [
       return HttpResponse.json(updated);
     },
   ),
+
+  http.get("/api/organizations/:orgId/shifts", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockShifts.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/shifts", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      name?: string;
+      weekday?: number;
+      startTime?: string;
+      endTime?: string;
+      branchName?: string;
+    };
+    if (
+      !body.name?.trim() ||
+      body.weekday === undefined ||
+      !body.startTime ||
+      !body.endTime ||
+      !body.branchName?.trim() ||
+      body.startTime >= body.endTime
+    ) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "shifts.validation.window"),
+        { status: 400 },
+      );
+    }
+    const row = shiftSchema.parse({
+      id: opaqueIdSchema.parse(
+        `shf_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      name: body.name.trim(),
+      weekday: Number(body.weekday),
+      startTime: body.startTime,
+      endTime: body.endTime,
+      branchName: body.branchName.trim(),
+    });
+    mockShifts.set(orgId, [...(mockShifts.get(orgId) ?? []), row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
 ];
