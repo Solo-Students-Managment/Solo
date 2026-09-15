@@ -60,6 +60,7 @@ import {
   type SessionDetail,
   type AttendanceRecord,
 } from "@/services/sessions";
+import { assignmentSchema, type Assignment } from "@/services/assignments";
 
 export type MockScenario =
   | "success"
@@ -186,6 +187,7 @@ const mockClasses = new Map<string, ClassRoom[]>();
 const mockEnrollments = new Map<string, Enrollment>();
 const mockSessions = new Map<string, SessionDetail>();
 const mockAttendance = new Map<string, AttendanceRecord[]>();
+const mockAssignments = new Map<string, Assignment[]>();
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -2068,6 +2070,59 @@ export const handlers = [
           records: next,
         }),
       );
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/assignments", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockAssignments.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/assignments",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        title?: string;
+        type?: Assignment["type"];
+        dueAt?: string;
+      };
+      if (!body.title || !body.type || !body.dueAt) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const item = assignmentSchema.parse({
+        id: opaqueIdSchema.parse(
+          `asg_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        title: body.title.trim(),
+        type: body.type,
+        dueAt: body.dueAt,
+        status: "published",
+        submissionsCount: 0,
+      });
+      mockAssignments.set(orgId, [...(mockAssignments.get(orgId) ?? []), item]);
+      return HttpResponse.json(item, { status: 201 });
     },
   ),
 ];

@@ -34,6 +34,10 @@ import {
   createHttpSessionsClient,
   setSessionsClient,
 } from "@/services/sessions";
+import {
+  createHttpAssignmentsClient,
+  setAssignmentsClient,
+} from "@/services/assignments";
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -68,6 +72,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setCoursesClient(createHttpCoursesClient());
           setEnrollmentsClient(createHttpEnrollmentsClient());
           setSessionsClient(createHttpSessionsClient());
+          setAssignmentsClient(createHttpAssignmentsClient());
           setReady(true);
         }
       } catch {

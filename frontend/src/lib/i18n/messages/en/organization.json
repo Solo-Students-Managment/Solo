@@ -23,6 +23,7 @@
   "navEnrollments": "Enrollments",
   "navSessions": "Sessions",
   "navAttendance": "Attendance",
+  "navAssignments": "Assignments",
   "navSettings": "Settings",
   "navGlobalHome": "Global Home",
   "loadError": "Could not load organization.",

@@ -64,6 +64,20 @@ export const routes = {
       `/org/${encodeURIComponent(orgId)}/sessions/${encodeURIComponent(sessionId)}`,
     attendance: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/attendance`,
+    assignments: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/assignments`,
+  },
+  messaging: {
+    home: () => "/personal/messages",
+  },
+  chat: {
+    home: () => "/personal/chat",
+  },
+  notifications: {
+    home: () => "/personal/notifications",
+  },
+  calendar: {
+    home: () => "/personal/calendar",
   },
   admin: {
     home: () => "/admin",
