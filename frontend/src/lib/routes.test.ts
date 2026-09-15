@@ -44,6 +44,7 @@ describe("typed routes", () => {
     expect(routes.organization.offboarding("org_1")).toBe(
       "/org/org_1/offboarding",
     );
+    expect(routes.organization.approvals("org_1")).toBe("/org/org_1/approvals");
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",
     );

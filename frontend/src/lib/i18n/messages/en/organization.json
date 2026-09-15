@@ -86,5 +86,6 @@
   "navStaffAttendance": "Staff clock-in",
   "navEmployeeDocuments": "Employee documents",
   "navOnboarding": "Staff onboarding",
-  "navOffboarding": "Staff offboarding"
+  "navOffboarding": "Staff offboarding",
+  "navApprovals": "Approval center"
 }

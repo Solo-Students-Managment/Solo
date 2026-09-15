@@ -24,6 +24,7 @@ type OrgNavKey =
   | "employeeDocuments"
   | "onboarding"
   | "offboarding"
+  | "approvals"
   | "subjects"
   | "students"
   | "courses"
@@ -126,6 +127,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "offboarding" as const,
       href: `${routes.organization.offboarding(orgId)}${langQuery}`,
       labelKey: "navOffboarding",
+    },
+    {
+      key: "approvals" as const,
+      href: `${routes.organization.approvals(orgId)}${langQuery}`,
+      labelKey: "navApprovals",
     },
     {
       key: "subjects" as const,

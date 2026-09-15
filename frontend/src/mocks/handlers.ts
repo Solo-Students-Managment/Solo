@@ -153,6 +153,11 @@ import {
   nextOffboardingStep,
   type OffboardingCase,
 } from "@/services/offboarding";
+import {
+  approvalRequestSchema,
+  canActorDecide,
+  type ApprovalRequest,
+} from "@/services/approvals";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -329,6 +334,7 @@ const mockStaffClockEvents = new Map<string, StaffClockEvent[]>();
 const mockEmployeeDocuments = new Map<string, EmployeeDocument[]>();
 const mockOnboardingCases = new Map<string, OnboardingCase[]>();
 const mockOffboardingCases = new Map<string, OffboardingCase[]>();
+const mockApprovals = new Map<string, ApprovalRequest[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -547,6 +553,7 @@ function persistMswState() {
         mockEmployeeDocuments: [...mockEmployeeDocuments.entries()],
         mockOnboardingCases: [...mockOnboardingCases.entries()],
         mockOffboardingCases: [...mockOffboardingCases.entries()],
+        mockApprovals: [...mockApprovals.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -919,6 +926,18 @@ function hydrateMswState() {
         mockOffboardingCases.set(
           entry[0],
           entry[1].map((row) => offboardingCaseSchema.parse(row)),
+        );
+      }
+    }
+
+    if (Array.isArray(data.mockApprovals)) {
+      mockApprovals.clear();
+      for (const entry of data.mockApprovals as Array<
+        [string, ApprovalRequest[]]
+      >) {
+        mockApprovals.set(
+          entry[0],
+          entry[1].map((row) => approvalRequestSchema.parse(row)),
         );
       }
     }
@@ -6071,6 +6090,119 @@ export const handlers = [
         status: next === "done" ? "completed" : "in_progress",
       });
       mockOffboardingCases.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/approvals", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockApprovals.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/approvals",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        title?: string;
+        requesterDisplayName?: string;
+        mode?: string;
+        summary?: string;
+      };
+      if (
+        !body.title?.trim() ||
+        !body.requesterDisplayName?.trim() ||
+        !body.mode ||
+        !body.summary?.trim()
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "approvals.validation.title"),
+          { status: 400 },
+        );
+      }
+      const row = approvalRequestSchema.parse({
+        id: opaqueIdSchema.parse(
+          `apr_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        title: body.title.trim(),
+        requesterDisplayName: body.requesterDisplayName.trim(),
+        mode: body.mode,
+        status: "pending",
+        summary: body.summary.trim(),
+      });
+      mockApprovals.set(orgId, [...(mockApprovals.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/approvals/:approvalId/decide",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const approvalId = String(params.approvalId);
+      const body = (await request.json()) as {
+        decision?: string;
+        actorDisplayName?: string;
+      };
+      const rows = mockApprovals.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === approvalId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "approvals.loadError"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (
+        !body.actorDisplayName ||
+        !canActorDecide(current, body.actorDisplayName)
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "approvals.selfBlocked"),
+          { status: 400 },
+        );
+      }
+      if (
+        !body.decision ||
+        !["approved", "rejected", "changes_requested"].includes(body.decision)
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "approvals.validation.title"),
+          { status: 400 },
+        );
+      }
+      const updated = approvalRequestSchema.parse({
+        ...current,
+        status: body.decision,
+      });
+      mockApprovals.set(
         orgId,
         rows.map((row, i) => (i === idx ? updated : row)),
       );
