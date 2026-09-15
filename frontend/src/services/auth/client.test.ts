@@ -45,6 +45,33 @@ describe("mock auth client", () => {
     expect(window.localStorage.length).toBe(0);
   });
 
+  it("changes phone via dual OTP challenges in memory only", async () => {
+    const client = createMockAuthClient();
+    await client.login({
+      phoneE164: "+989121234567",
+      password: "Password1",
+    });
+    const begin = await client.beginChangePhone({
+      password: "Password1",
+      newPhoneE164: "+989331112233",
+    });
+    const confirmed = await client.confirmChangePhone({
+      currentChallengeId: begin.currentChallengeId,
+      newChallengeId: begin.newChallengeId,
+      currentCode: "123456",
+      newCode: "123456",
+    });
+    expect(confirmed.phoneMasked).toContain("***");
+    const recovery = await client.requestSupportRecovery({
+      firstName: "Ali",
+      lastName: "Reza",
+      contactPhoneE164: "+989129998877",
+      details: "Lost SIM card last week.",
+    });
+    expect(recovery.status).toBe("submitted");
+    expect(window.localStorage.length).toBe(0);
+  });
+
   it("expires sessions and validates return URLs", async () => {
     const client = createMockAuthClient();
     const session = await client.login({

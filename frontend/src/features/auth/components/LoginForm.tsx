@@ -104,6 +104,12 @@ export function LoginForm() {
         </Link>
         <Link
           className="text-muted underline-offset-2 hover:underline"
+          href={`${routes.auth.recover()}?lang=${locale}`}
+        >
+          {t(locale, "auth", "recoverLink")}
+        </Link>
+        <Link
+          className="text-muted underline-offset-2 hover:underline"
           href={`${routes.auth.signup()}?lang=${locale}`}
         >
           {t(locale, "auth", "signupLink")}

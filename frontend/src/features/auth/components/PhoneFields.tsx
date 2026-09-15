@@ -11,26 +11,38 @@ import { CALLING_CODES } from "../schemas";
 
 type PhoneFieldsProps = {
   locale: Locale;
+  legend?: string;
+  callingCodeName?: string;
+  nationalNumberName?: string;
+  callingCodeId?: string;
+  nationalNumberId?: string;
 };
 
-export function PhoneFields({ locale }: PhoneFieldsProps) {
+export function PhoneFields({
+  locale,
+  legend,
+  callingCodeName = "callingCode",
+  nationalNumberName = "nationalNumber",
+  callingCodeId = "callingCode",
+  nationalNumberId = "nationalNumber",
+}: PhoneFieldsProps) {
   const { register } = useFormContext();
 
   return (
     <fieldset className="space-y-3">
       <legend className="text-foreground text-sm font-medium">
-        {t(locale, "auth", "phoneLabel")}
+        {legend ?? t(locale, "auth", "phoneLabel")}
       </legend>
       <div className="grid grid-cols-[7.5rem_1fr] gap-2">
         <div className="space-y-1.5">
-          <Label htmlFor="callingCode">
+          <Label htmlFor={callingCodeId}>
             {t(locale, "auth", "callingCodeLabel")}
           </Label>
           <select
-            id="callingCode"
+            id={callingCodeId}
             className="border-border bg-elevated text-foreground focus-visible:ring-ring h-10 w-full rounded-md border px-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
             defaultValue="+98"
-            {...register("callingCode")}
+            {...register(callingCodeName)}
           >
             {CALLING_CODES.map((item) => (
               <option key={item.code} value={item.code}>
@@ -40,16 +52,16 @@ export function PhoneFields({ locale }: PhoneFieldsProps) {
           </select>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="nationalNumber">
+          <Label htmlFor={nationalNumberId}>
             {t(locale, "auth", "nationalNumberLabel")}
           </Label>
           <Input
-            id="nationalNumber"
+            id={nationalNumberId}
             inputMode="numeric"
             autoComplete="tel-national"
-            {...register("nationalNumber")}
+            {...register(nationalNumberName)}
           />
-          <SoloFieldError name="nationalNumber" />
+          <SoloFieldError name={nationalNumberName} />
         </div>
       </div>
     </fieldset>

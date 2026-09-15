@@ -9,14 +9,20 @@ import { t, type MessageNamespace } from "@/lib/i18n/t";
 type AuthShellProps = {
   titleKey: string;
   subtitleKey: string;
+  namespace?: MessageNamespace;
   children: React.ReactNode;
 };
 
-export function AuthShell({ titleKey, subtitleKey, children }: AuthShellProps) {
+export function AuthShell({
+  titleKey,
+  subtitleKey,
+  namespace = "auth",
+  children,
+}: AuthShellProps) {
   const searchParams = useSearchParams();
   const locale = resolveLocale(searchParams.get("lang") ?? undefined);
   const dir = localeDirection(locale);
-  const ns: MessageNamespace = "auth";
+  const ns = namespace;
 
   return (
     <main
@@ -27,7 +33,7 @@ export function AuthShell({ titleKey, subtitleKey, children }: AuthShellProps) {
       <div className="w-full max-w-md space-y-8">
         <header className="space-y-2 text-center">
           <p className="font-display text-brand text-3xl font-semibold tracking-tight">
-            {t(locale, ns, "brand")}
+            {t(locale, "auth", "brand")}
           </p>
           <h1 className="font-display text-2xl font-medium">
             {t(locale, ns, titleKey)}
@@ -38,7 +44,7 @@ export function AuthShell({ titleKey, subtitleKey, children }: AuthShellProps) {
           {children}
         </div>
         <p className="text-muted text-center text-xs">
-          {t(locale, ns, "demoHint")}
+          {t(locale, "auth", "demoHint")}
         </p>
         <div className="flex justify-center gap-3 text-sm">
           <Link

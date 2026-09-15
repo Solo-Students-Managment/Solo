@@ -17,8 +17,18 @@ import {
   type TwoFactorMethod,
   type TwoFactorStatus,
 } from "./security";
+import {
+  changePhoneBeginSchema,
+  changePhoneConfirmSchema,
+  maskPhoneE164,
+  supportRecoveryRequestSchema,
+  type ChangePhoneBegin,
+  type ChangePhoneConfirm,
+  type SupportRecoveryResult,
+} from "./phone";
 
 export * from "./security";
+export * from "./phone";
 
 export const personaSchema = z.enum([
   "student",
@@ -82,6 +92,23 @@ export type AuthClient = {
   listSessions(): Promise<DeviceSession[]>;
   revokeSession(input: { sessionId: string; password: string }): Promise<void>;
   revokeOtherSessions(input: { password: string }): Promise<void>;
+  beginChangePhone(input: {
+    password: string;
+    newPhoneE164: string;
+  }): Promise<ChangePhoneBegin>;
+  confirmChangePhone(input: {
+    currentChallengeId: string;
+    currentCode: string;
+    newChallengeId: string;
+    newCode: string;
+  }): Promise<ChangePhoneConfirm>;
+  requestSupportRecovery(input: {
+    firstName: string;
+    lastName: string;
+    previousPhoneE164?: string;
+    contactPhoneE164: string;
+    details: string;
+  }): Promise<SupportRecoveryResult>;
   switchPersona(persona: Persona): Promise<Session>;
   switchContext(input: {
     organizationId: string | null;
@@ -106,6 +133,12 @@ let pendingTwoFactorChallenge: {
 } | null = null;
 /** Short-lived reauth window in memory only — never localStorage. */
 let reauthFreshUntil = 0;
+let memoryPhoneE164 = "+989121234567";
+let pendingPhoneChange: {
+  currentChallengeId: string;
+  newChallengeId: string;
+  newPhoneE164: string;
+} | null = null;
 
 function futureExpiry(minutes = 60): string {
   return new Date(Date.now() + minutes * 60_000).toISOString();
@@ -299,6 +332,27 @@ export function createHttpAuthClient(): AuthClient {
         method: "POST",
         body: JSON.stringify(input),
         parse: () => undefined,
+      });
+    },
+    async beginChangePhone(input) {
+      return apiRequest("/auth/phone/change/begin", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => changePhoneBeginSchema.parse(data),
+      });
+    },
+    async confirmChangePhone(input) {
+      return apiRequest("/auth/phone/change/confirm", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => changePhoneConfirmSchema.parse(data),
+      });
+    },
+    async requestSupportRecovery(input) {
+      return apiRequest("/auth/recovery/support", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => supportRecoveryRequestSchema.parse(data),
       });
     },
     async switchPersona(persona) {
@@ -507,6 +561,57 @@ export function createMockAuthClient(): AuthClient {
       reauthFreshUntil = Date.now() + 5 * 60_000;
       memoryDeviceSessions = memoryDeviceSessions.filter((s) => s.isCurrent);
     },
+    async beginChangePhone({ password, newPhoneE164 }) {
+      requireSession();
+      if (password !== "Password1") throw new Error("auth.invalidCredentials");
+      if (newPhoneE164 === memoryPhoneE164) {
+        throw new Error("auth.phoneUnchanged");
+      }
+      reauthFreshUntil = Date.now() + 5 * 60_000;
+      const currentChallengeId = `phone_cur_${Math.random().toString(36).slice(2, 8)}`;
+      const newChallengeId = `phone_new_${Math.random().toString(36).slice(2, 8)}`;
+      pendingPhoneChange = {
+        currentChallengeId,
+        newChallengeId,
+        newPhoneE164,
+      };
+      return {
+        currentChallengeId,
+        newChallengeId,
+        currentPhoneMasked: maskPhoneE164(memoryPhoneE164),
+      };
+    },
+    async confirmChangePhone({
+      currentChallengeId,
+      currentCode,
+      newChallengeId,
+      newCode,
+    }) {
+      requireSession();
+      if (
+        !pendingPhoneChange ||
+        pendingPhoneChange.currentChallengeId !== currentChallengeId ||
+        pendingPhoneChange.newChallengeId !== newChallengeId
+      ) {
+        throw new Error("auth.invalidOtp");
+      }
+      if (currentCode !== "123456" || newCode !== "123456") {
+        throw new Error("auth.invalidOtp");
+      }
+      memoryPhoneE164 = pendingPhoneChange.newPhoneE164;
+      const masked = maskPhoneE164(memoryPhoneE164);
+      pendingPhoneChange = null;
+      return { phoneMasked: masked };
+    },
+    async requestSupportRecovery(input) {
+      if (!input.contactPhoneE164 || !input.details.trim()) {
+        throw new Error("auth.recoveryInvalid");
+      }
+      return {
+        ticketId: `tkt_${Math.random().toString(36).slice(2, 10)}`,
+        status: "submitted" as const,
+      };
+    },
     async switchPersona(persona) {
       if (!memorySession) throw new Error("No session");
       memorySession = { ...memorySession, activePersona: persona };
@@ -548,6 +653,8 @@ export function __resetMockSession(): void {
   memoryDeviceSessions = [];
   memoryTwoFactor = defaultTwoFactorStatus();
   pendingTwoFactorChallenge = null;
+  pendingPhoneChange = null;
+  memoryPhoneE164 = "+989121234567";
   reauthFreshUntil = 0;
   authClient = createMockAuthClient();
 }

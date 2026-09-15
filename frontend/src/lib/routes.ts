@@ -21,10 +21,12 @@ export const routes = {
     signup: () => "/auth/signup",
     otp: () => "/auth/otp",
     reset: () => "/auth/reset",
+    recover: () => "/auth/recover",
   },
   personal: {
     home: () => "/personal",
     security: () => "/personal/security",
+    phone: () => "/personal/phone",
   },
   teacher: {
     home: () => "/teacher",

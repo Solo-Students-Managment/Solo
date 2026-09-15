@@ -1,16 +1,19 @@
 import type { Locale } from "@/lib/i18n/locales";
 import { defaultLocale } from "@/lib/i18n/locales";
 
+import enAccountPhone from "./messages/en/accountPhone.json";
 import enAuth from "./messages/en/auth.json";
 import enCommon from "./messages/en/common.json";
 import enFoundation from "./messages/en/foundation.json";
 import enSecurity from "./messages/en/security.json";
+import faAccountPhone from "./messages/fa/accountPhone.json";
 import faAuth from "./messages/fa/auth.json";
 import faCommon from "./messages/fa/common.json";
 import faFoundation from "./messages/fa/foundation.json";
 import faSecurity from "./messages/fa/security.json";
 
-export type MessageNamespace = "common" | "foundation" | "auth" | "security";
+export type MessageNamespace =
+  "common" | "foundation" | "auth" | "security" | "accountPhone";
 
 type Dictionaries = Record<
   Locale,
@@ -23,12 +26,14 @@ const dictionaries: Dictionaries = {
     foundation: enFoundation,
     auth: enAuth,
     security: enSecurity,
+    accountPhone: enAccountPhone,
   },
   fa: {
     common: faCommon,
     foundation: faFoundation,
     auth: faAuth,
     security: faSecurity,
+    accountPhone: faAccountPhone,
   },
 };
 

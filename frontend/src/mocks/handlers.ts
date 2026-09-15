@@ -5,6 +5,7 @@ import type { ApiError } from "@/services/api";
 import { opaqueIdSchema } from "@/services/api";
 import {
   deviceSessionSchema,
+  maskPhoneE164,
   sessionSchema,
   twoFactorStatusSchema,
   type DeviceSession,
@@ -43,6 +44,12 @@ let twoFactorStatus: TwoFactorStatus = {
   adminMandatory: false,
 };
 let deviceSessions: DeviceSession[] = [];
+let currentPhoneE164 = "+989121234567";
+let pendingPhoneChange: {
+  currentChallengeId: string;
+  newChallengeId: string;
+  newPhoneE164: string;
+} | null = null;
 
 const DEMO_PHONE = "+989121234567";
 const DEMO_PASSWORD = "Password1";
@@ -242,6 +249,8 @@ export const handlers = [
       );
     }
     currentSession = makeSession("Demo User", body.phoneE164);
+    currentPhoneE164 = body.phoneE164;
+    pendingPhoneChange = null;
     resetTwoFactor();
     seedSessions(currentSession.userId);
     return HttpResponse.json(currentSession);
@@ -252,6 +261,8 @@ export const handlers = [
     if (failed) return failed;
     currentSession = null;
     deviceSessions = [];
+    pendingPhoneChange = null;
+    currentPhoneE164 = DEMO_PHONE;
     resetTwoFactor();
     return HttpResponse.json({ ok: true });
   }),
@@ -579,6 +590,98 @@ export const handlers = [
     }
     deviceSessions = deviceSessions.filter((s) => s.isCurrent);
     return HttpResponse.json({ ok: true });
+  }),
+
+  http.post("/api/auth/phone/change/begin", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      password?: string;
+      newPhoneE164?: string;
+    };
+    if (body.password !== DEMO_PASSWORD || !body.newPhoneE164) {
+      return HttpResponse.json(
+        errorBody(401, "UNAUTHORIZED", "errors.unauthorized"),
+        { status: 401 },
+      );
+    }
+    if (body.newPhoneE164 === currentPhoneE164) {
+      return HttpResponse.json(
+        errorBody(409, "CONFLICT", "errors.validation"),
+        { status: 409 },
+      );
+    }
+    const currentChallengeId = newChallengeId("phone_cur");
+    const newChallengeIdValue = newChallengeId("phone_new");
+    pendingPhoneChange = {
+      currentChallengeId,
+      newChallengeId: newChallengeIdValue,
+      newPhoneE164: body.newPhoneE164,
+    };
+    currentSession = { ...currentSession!, requiresReauth: false };
+    return HttpResponse.json({
+      currentChallengeId,
+      newChallengeId: newChallengeIdValue,
+      currentPhoneMasked: maskPhoneE164(currentPhoneE164),
+    });
+  }),
+
+  http.post("/api/auth/phone/change/confirm", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      currentChallengeId?: string;
+      currentCode?: string;
+      newChallengeId?: string;
+      newCode?: string;
+    };
+    if (
+      !pendingPhoneChange ||
+      body.currentChallengeId !== pendingPhoneChange.currentChallengeId ||
+      body.newChallengeId !== pendingPhoneChange.newChallengeId ||
+      body.currentCode !== DEMO_OTP ||
+      body.newCode !== DEMO_OTP
+    ) {
+      return HttpResponse.json(
+        errorBody(401, "UNAUTHORIZED", "errors.unauthorized"),
+        { status: 401 },
+      );
+    }
+    currentPhoneE164 = pendingPhoneChange.newPhoneE164;
+    const phoneMasked = maskPhoneE164(currentPhoneE164);
+    pendingPhoneChange = null;
+    return HttpResponse.json({ phoneMasked });
+  }),
+
+  http.post("/api/auth/recovery/support", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const body = (await request.json()) as {
+      firstName?: string;
+      lastName?: string;
+      previousPhoneE164?: string;
+      contactPhoneE164?: string;
+      details?: string;
+    };
+    if (
+      !body.firstName ||
+      !body.lastName ||
+      !body.contactPhoneE164 ||
+      !body.details?.trim()
+    ) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "errors.validation"),
+        { status: 400 },
+      );
+    }
+    return HttpResponse.json({
+      ticketId: newChallengeId("tkt"),
+      status: "submitted",
+    });
   }),
 
   http.post("/api/auth/persona", async ({ request }) => {

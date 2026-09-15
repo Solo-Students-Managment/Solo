@@ -13,6 +13,8 @@ describe("typed routes", () => {
     expect(routes.home()).toBe("/");
     expect(routes.teacher.home()).toBe("/teacher");
     expect(routes.personal.security()).toBe("/personal/security");
+    expect(routes.personal.phone()).toBe("/personal/phone");
+    expect(routes.auth.recover()).toBe("/auth/recover");
     expect(routes.organization.home("org_1")).toBe("/org/org_1");
     expect(routes.public.profile("ali-school")).toBe("/p/ali-school");
     expect(routes.home("fa")).not.toMatch(/token|password|otp|phone/i);
