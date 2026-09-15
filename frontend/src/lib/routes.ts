@@ -82,6 +82,7 @@ export const routes = {
       `/org/${encodeURIComponent(orgId)}/customization`,
     automation: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/automation`,
+    crm: (orgId: string) => `/org/${encodeURIComponent(orgId)}/crm`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

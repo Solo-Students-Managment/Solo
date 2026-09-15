@@ -120,6 +120,7 @@ import {
   createHttpAutomationClient,
   setAutomationClient,
 } from "@/services/automation";
+import { createHttpCrmClient, setCrmClient } from "@/services/crm";
 import {
   createHttpMessagingClient,
   setMessagingClient,
@@ -200,6 +201,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setFormsClient(createHttpFormsClient());
           setCustomizationClient(createHttpCustomizationClient());
           setAutomationClient(createHttpAutomationClient());
+          setCrmClient(createHttpCrmClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

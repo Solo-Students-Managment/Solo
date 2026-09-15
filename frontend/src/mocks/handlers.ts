@@ -190,6 +190,12 @@ import {
   requiresApprovalGate,
   type AutomationRule,
 } from "@/services/automation";
+import {
+  dealSchema,
+  pipelineSchema,
+  type Deal,
+  type Pipeline,
+} from "@/services/crm";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -374,6 +380,8 @@ const mockFormSubmissions = new Map<string, FormSubmission[]>();
 const mockPublicForms = new Map<string, SurveyForm>();
 const mockCustomization = new Map<string, CustomizationBundle>();
 const mockAutomation = new Map<string, AutomationRule[]>();
+const mockCrmPipelines = new Map<string, Pipeline[]>();
+const mockCrmDeals = new Map<string, Deal[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -600,6 +608,8 @@ function persistMswState() {
         mockPublicForms: [...mockPublicForms.entries()],
         mockCustomization: [...mockCustomization.entries()],
         mockAutomation: [...mockAutomation.entries()],
+        mockCrmPipelines: [...mockCrmPipelines.entries()],
+        mockCrmDeals: [...mockCrmDeals.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -1052,6 +1062,26 @@ function hydrateMswState() {
         mockAutomation.set(
           entry[0],
           entry[1].map((row) => automationRuleSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockCrmPipelines)) {
+      mockCrmPipelines.clear();
+      for (const entry of data.mockCrmPipelines as Array<
+        [string, Pipeline[]]
+      >) {
+        mockCrmPipelines.set(
+          entry[0],
+          entry[1].map((row) => pipelineSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockCrmDeals)) {
+      mockCrmDeals.clear();
+      for (const entry of data.mockCrmDeals as Array<[string, Deal[]]>) {
+        mockCrmDeals.set(
+          entry[0],
+          entry[1].map((row) => dealSchema.parse(row)),
         );
       }
     }
@@ -7048,6 +7078,127 @@ export const handlers = [
       mockAutomation.set(orgId, next);
       persistMswState();
       return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/crm/pipelines", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockCrmPipelines.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.get("/api/organizations/:orgId/crm/deals", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockCrmDeals.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/crm/pipelines",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        isPrivate?: boolean;
+        stageLabels?: string[];
+      };
+      if (
+        !body.name?.trim() ||
+        !Array.isArray(body.stageLabels) ||
+        body.stageLabels.length === 0
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "crm.validation.pipelineName"),
+          { status: 400 },
+        );
+      }
+      const row = pipelineSchema.parse({
+        id: opaqueIdSchema.parse(
+          `pip_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        isPrivate: Boolean(body.isPrivate),
+        stageLabels: body.stageLabels
+          .map((label) => label.trim())
+          .filter(Boolean),
+      });
+      mockCrmPipelines.set(orgId, [
+        ...(mockCrmPipelines.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/crm/deals",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        title?: string;
+        pipelineName?: string;
+        stage?: string;
+        valueMinor?: number;
+      };
+      if (
+        !body.title?.trim() ||
+        !body.pipelineName?.trim() ||
+        !body.stage?.trim() ||
+        typeof body.valueMinor !== "number" ||
+        body.valueMinor < 0
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "crm.validation.dealTitle"),
+          { status: 400 },
+        );
+      }
+      const row = dealSchema.parse({
+        id: opaqueIdSchema.parse(
+          `deal_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        title: body.title.trim(),
+        pipelineName: body.pipelineName.trim(),
+        stage: body.stage.trim(),
+        valueMinor: body.valueMinor,
+      });
+      mockCrmDeals.set(orgId, [...(mockCrmDeals.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
     },
   ),
 ];
