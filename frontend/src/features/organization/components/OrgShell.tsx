@@ -29,6 +29,7 @@ type OrgNavKey =
   | "knowledgeBase"
   | "forms"
   | "formSubmissions"
+  | "customization"
   | "subjects"
   | "students"
   | "courses"
@@ -156,6 +157,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "formSubmissions" as const,
       href: `${routes.organization.formSubmissions(orgId)}${langQuery}`,
       labelKey: "navFormSubmissions",
+    },
+    {
+      key: "customization" as const,
+      href: `${routes.organization.customization(orgId)}${langQuery}`,
+      labelKey: "navCustomization",
     },
     {
       key: "subjects" as const,

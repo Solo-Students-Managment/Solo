@@ -53,6 +53,9 @@ describe("typed routes", () => {
     expect(routes.organization.formSubmissions("org_1")).toBe(
       "/org/org_1/form-submissions",
     );
+    expect(routes.organization.customization("org_1")).toBe(
+      "/org/org_1/customization",
+    );
     expect(routes.public.form("parent-feedback")).toBe("/f/parent-feedback");
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",

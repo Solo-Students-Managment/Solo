@@ -177,6 +177,14 @@ import {
   type FormSubmission,
   type SurveyForm,
 } from "@/services/forms";
+import {
+  contextTagSchema,
+  customFieldSchema,
+  customizationBundleSchema,
+  customStatusSchema,
+  selectFieldHasOptions,
+  type CustomizationBundle,
+} from "@/services/customization";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -359,6 +367,7 @@ const mockKbArticles = new Map<string, KbArticle[]>();
 const mockSurveyForms = new Map<string, SurveyForm[]>();
 const mockFormSubmissions = new Map<string, FormSubmission[]>();
 const mockPublicForms = new Map<string, SurveyForm>();
+const mockCustomization = new Map<string, CustomizationBundle>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -583,6 +592,7 @@ function persistMswState() {
         mockSurveyForms: [...mockSurveyForms.entries()],
         mockFormSubmissions: [...mockFormSubmissions.entries()],
         mockPublicForms: [...mockPublicForms.entries()],
+        mockCustomization: [...mockCustomization.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -1014,6 +1024,17 @@ function hydrateMswState() {
       mockPublicForms.clear();
       for (const entry of data.mockPublicForms as Array<[string, SurveyForm]>) {
         mockPublicForms.set(entry[0], surveyFormSchema.parse(entry[1]));
+      }
+    }
+    if (Array.isArray(data.mockCustomization)) {
+      mockCustomization.clear();
+      for (const entry of data.mockCustomization as Array<
+        [string, CustomizationBundle]
+      >) {
+        mockCustomization.set(
+          entry[0],
+          customizationBundleSchema.parse(entry[1]),
+        );
       }
     }
     if (Array.isArray(data.mockTuition)) {
@@ -6757,6 +6778,153 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/customization", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    return HttpResponse.json(
+      mockCustomization.get(orgId) ?? { fields: [], statuses: [], tags: [] },
+    );
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/customization/fields",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        fieldType?: string;
+        entityTarget?: string;
+        options?: string;
+        required?: boolean;
+      };
+      if (
+        !body.name?.trim() ||
+        !body.fieldType ||
+        !body.entityTarget ||
+        !selectFieldHasOptions(
+          body.fieldType as "text" | "number" | "select",
+          body.options ?? "",
+        )
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "customization.validation.options"),
+          { status: 400 },
+        );
+      }
+      const row = customFieldSchema.parse({
+        id: opaqueIdSchema.parse(
+          `cf_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        fieldType: body.fieldType,
+        entityTarget: body.entityTarget,
+        options: (body.options ?? "").trim(),
+        required: Boolean(body.required),
+      });
+      const current = mockCustomization.get(orgId) ?? {
+        fields: [],
+        statuses: [],
+        tags: [],
+      };
+      mockCustomization.set(orgId, {
+        ...current,
+        fields: [...current.fields, row],
+      });
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/customization/statuses",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        entityTarget?: string;
+        colorKey?: string;
+      };
+      if (!body.name?.trim() || !body.entityTarget || !body.colorKey?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "customization.validation.name"),
+          { status: 400 },
+        );
+      }
+      const row = customStatusSchema.parse({
+        id: opaqueIdSchema.parse(
+          `cs_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        entityTarget: body.entityTarget,
+        colorKey: body.colorKey.trim(),
+      });
+      const current = mockCustomization.get(orgId) ?? {
+        fields: [],
+        statuses: [],
+        tags: [],
+      };
+      mockCustomization.set(orgId, {
+        ...current,
+        statuses: [...current.statuses, row],
+      });
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/customization/tags",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        colorKey?: string;
+      };
+      if (!body.name?.trim() || !body.colorKey?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "customization.validation.name"),
+          { status: 400 },
+        );
+      }
+      const row = contextTagSchema.parse({
+        id: opaqueIdSchema.parse(
+          `tg_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        colorKey: body.colorKey.trim(),
+      });
+      const current = mockCustomization.get(orgId) ?? {
+        fields: [],
+        statuses: [],
+        tags: [],
+      };
+      mockCustomization.set(orgId, {
+        ...current,
+        tags: [...current.tags, row],
+      });
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
     },
   ),
 ];
