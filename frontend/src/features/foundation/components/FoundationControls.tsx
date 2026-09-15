@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import type { Locale } from "@/lib/i18n/locales";
+import { applyThemeMode, type ThemeMode } from "@/lib/theme/tokens";
 import { cn } from "@/lib/utils/cn";
 
 import type { FoundationMessages } from "../messages";
-
-type ThemeMode = "light" | "dark" | "system";
 
 type FoundationControlsProps = {
   locale: Locale;
@@ -16,11 +15,8 @@ type FoundationControlsProps = {
 };
 
 function applyTheme(mode: ThemeMode): void {
-  const root = document.documentElement;
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const isDark = mode === "dark" || (mode === "system" && prefersDark);
-  root.classList.toggle("dark", isDark);
-  root.dataset.theme = mode;
+  applyThemeMode(document.documentElement, mode, prefersDark);
 }
 
 export function FoundationControls({

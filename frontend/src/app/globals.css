@@ -1,46 +1,120 @@
 @import "tailwindcss";
 
 :root {
-  --solo-bg: #f7f5f1;
-  --solo-bg-elevated: #ffffff;
-  --solo-fg: #1c1917;
-  --solo-fg-muted: #57534e;
-  --solo-border: #e7e5e4;
+  /* Surfaces */
+  --solo-surface-canvas: #f7f5f1;
+  --solo-surface-elevated: #ffffff;
+  --solo-surface-sunken: #ece8e1;
+  --solo-surface-overlay: rgb(28 25 23 / 0.48);
+
+  /* Text */
+  --solo-text-primary: #1c1917;
+  --solo-text-secondary: #57534e;
+  --solo-text-inverse: #fafaf9;
+  --solo-text-disabled: #a8a29e;
+
+  /* Brand / accent */
   --solo-brand: #0f766e;
-  --solo-brand-fg: #ecfdf5;
+  --solo-brand-foreground: #ecfdf5;
   --solo-accent: #b45309;
+  --solo-accent-foreground: #fffbeb;
+
+  /* Status */
+  --solo-status-success: #15803d;
+  --solo-status-success-bg: #dcfce7;
+  --solo-status-warning: #b45309;
+  --solo-status-warning-bg: #ffedd5;
+  --solo-status-danger: #b91c1c;
+  --solo-status-danger-bg: #fee2e2;
+  --solo-status-info: #1d4ed8;
+  --solo-status-info-bg: #dbeafe;
+
+  /* Borders / focus */
+  --solo-border: #e7e5e4;
+  --solo-border-strong: #d6d3d1;
   --solo-ring: #0d9488;
-  --solo-danger: #b91c1c;
+  --solo-ring-offset: #ffffff;
+
+  /* Spacing scale */
+  --solo-space-1: 0.25rem;
+  --solo-space-2: 0.5rem;
+  --solo-space-3: 0.75rem;
+  --solo-space-4: 1rem;
+  --solo-space-6: 1.5rem;
+  --solo-space-8: 2rem;
+
+  /* Radius / elevation / motion */
+  --solo-radius-sm: 0.375rem;
+  --solo-radius-md: 0.5rem;
+  --solo-radius-lg: 0.75rem;
+  --solo-shadow-sm: 0 1px 2px rgb(28 25 23 / 0.06);
+  --solo-shadow-md: 0 8px 24px rgb(28 25 23 / 0.08);
+  --solo-motion-fast: 120ms;
+  --solo-motion-normal: 200ms;
+  --solo-motion-slow: 320ms;
+
   --font-sans: var(--font-solo-sans), "Segoe UI", sans-serif;
   --font-display: var(--font-solo-display), var(--font-solo-sans), sans-serif;
 }
 
 .dark {
-  --solo-bg: #0c0a09;
-  --solo-bg-elevated: #1c1917;
-  --solo-fg: #fafaf9;
-  --solo-fg-muted: #a8a29e;
-  --solo-border: #292524;
+  --solo-surface-canvas: #0c0a09;
+  --solo-surface-elevated: #1c1917;
+  --solo-surface-sunken: #292524;
+  --solo-surface-overlay: rgb(0 0 0 / 0.64);
+
+  --solo-text-primary: #fafaf9;
+  --solo-text-secondary: #a8a29e;
+  --solo-text-inverse: #1c1917;
+  --solo-text-disabled: #78716c;
+
   --solo-brand: #2dd4bf;
-  --solo-brand-fg: #042f2e;
+  --solo-brand-foreground: #042f2e;
   --solo-accent: #fbbf24;
+  --solo-accent-foreground: #1c1917;
+
+  --solo-status-success: #4ade80;
+  --solo-status-success-bg: #14532d;
+  --solo-status-warning: #fbbf24;
+  --solo-status-warning-bg: #78350f;
+  --solo-status-danger: #f87171;
+  --solo-status-danger-bg: #7f1d1d;
+  --solo-status-info: #60a5fa;
+  --solo-status-info-bg: #1e3a8a;
+
+  --solo-border: #292524;
+  --solo-border-strong: #44403c;
   --solo-ring: #5eead4;
-  --solo-danger: #f87171;
+  --solo-ring-offset: #0c0a09;
+
+  --solo-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --solo-shadow-md: 0 12px 32px rgb(0 0 0 / 0.45);
 }
 
 @theme inline {
-  --color-background: var(--solo-bg);
-  --color-foreground: var(--solo-fg);
-  --color-muted: var(--solo-fg-muted);
+  --color-background: var(--solo-surface-canvas);
+  --color-foreground: var(--solo-text-primary);
+  --color-muted: var(--solo-text-secondary);
+  --color-elevated: var(--solo-surface-elevated);
+  --color-sunken: var(--solo-surface-sunken);
   --color-border: var(--solo-border);
+  --color-border-strong: var(--solo-border-strong);
   --color-brand: var(--solo-brand);
-  --color-brand-foreground: var(--solo-brand-fg);
+  --color-brand-foreground: var(--solo-brand-foreground);
   --color-accent: var(--solo-accent);
+  --color-accent-foreground: var(--solo-accent-foreground);
   --color-ring: var(--solo-ring);
-  --color-danger: var(--solo-danger);
-  --color-elevated: var(--solo-bg-elevated);
+  --color-danger: var(--solo-status-danger);
+  --color-success: var(--solo-status-success);
+  --color-warning: var(--solo-status-warning);
+  --color-info: var(--solo-status-info);
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
+  --radius-sm: var(--solo-radius-sm);
+  --radius-md: var(--solo-radius-md);
+  --radius-lg: var(--solo-radius-lg);
+  --shadow-sm: var(--solo-shadow-sm);
+  --shadow-md: var(--solo-shadow-md);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -55,7 +129,11 @@
 }
 
 body {
-  background: var(--solo-bg);
-  color: var(--solo-fg);
+  background: var(--solo-surface-canvas);
+  color: var(--solo-text-primary);
   font-family: var(--font-sans);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
