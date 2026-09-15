@@ -24,6 +24,7 @@
   "navSessions": "Sessions",
   "navAttendance": "Attendance",
   "navAssignments": "Assignments",
+  "navGradebook": "Gradebook",
   "navSettings": "Settings",
   "navGlobalHome": "Global Home",
   "loadError": "Could not load organization.",

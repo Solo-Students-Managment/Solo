@@ -1,0 +1,17 @@
+{
+  "title": "Gradebook",
+  "subtitle": "Record and publish basic evaluation scores.",
+  "saveSubmit": "Save grade",
+  "saveSuccess": "Grade saved.",
+  "studentLabel": "Student name",
+  "subjectLabel": "Subject",
+  "scoreLabel": "Score",
+  "colStudent": "Student",
+  "colSubject": "Subject",
+  "colScore": "Score",
+  "empty": "No grades yet.",
+  "loadError": "Could not load gradebook.",
+  "forbidden": "You do not have permission to edit grades.",
+  "validation.student": "Student is required.",
+  "validation.subject": "Subject is required."
+}

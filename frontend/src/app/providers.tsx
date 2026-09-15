@@ -38,6 +38,10 @@ import {
   createHttpAssignmentsClient,
   setAssignmentsClient,
 } from "@/services/assignments";
+import {
+  createHttpGradebookClient,
+  setGradebookClient,
+} from "@/services/gradebook";
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -73,6 +77,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setEnrollmentsClient(createHttpEnrollmentsClient());
           setSessionsClient(createHttpSessionsClient());
           setAssignmentsClient(createHttpAssignmentsClient());
+          setGradebookClient(createHttpGradebookClient());
           setReady(true);
         }
       } catch {

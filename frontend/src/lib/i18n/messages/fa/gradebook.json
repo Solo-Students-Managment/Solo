@@ -1,0 +1,17 @@
+{
+  "title": "کارنامه",
+  "subtitle": "نمرات ارزیابی پایه را ثبت و منتشر کنید.",
+  "saveSubmit": "ذخیره نمره",
+  "saveSuccess": "نمره ذخیره شد.",
+  "studentLabel": "نام دانش‌آموز",
+  "subjectLabel": "موضوع",
+  "scoreLabel": "نمره",
+  "colStudent": "دانش‌آموز",
+  "colSubject": "موضوع",
+  "colScore": "نمره",
+  "empty": "هنوز نمره‌ای نیست.",
+  "loadError": "بارگذاری کارنامه ناموفق بود.",
+  "forbidden": "اجازه ویرایش نمرات را ندارید.",
+  "validation.student": "دانش‌آموز الزامی است.",
+  "validation.subject": "موضوع الزامی است."
+}

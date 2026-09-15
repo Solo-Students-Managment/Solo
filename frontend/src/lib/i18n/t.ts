@@ -15,6 +15,7 @@ import enEnrollments from "./messages/en/enrollments.json";
 import enSessions from "./messages/en/sessions.json";
 import enAttendance from "./messages/en/attendance.json";
 import enAssignments from "./messages/en/assignments.json";
+import enGradebook from "./messages/en/gradebook.json";
 import enAuth from "./messages/en/auth.json";
 import enCommon from "./messages/en/common.json";
 import enFoundation from "./messages/en/foundation.json";
@@ -33,6 +34,7 @@ import faEnrollments from "./messages/fa/enrollments.json";
 import faSessions from "./messages/fa/sessions.json";
 import faAttendance from "./messages/fa/attendance.json";
 import faAssignments from "./messages/fa/assignments.json";
+import faGradebook from "./messages/fa/gradebook.json";
 import faAuth from "./messages/fa/auth.json";
 import faCommon from "./messages/fa/common.json";
 import faFoundation from "./messages/fa/foundation.json";
@@ -56,7 +58,8 @@ export type MessageNamespace =
   | "enrollments"
   | "sessions"
   | "attendance"
-  | "assignments";
+  | "assignments"
+  | "gradebook";
 
 type Dictionaries = Record<
   Locale,
@@ -83,6 +86,7 @@ const dictionaries: Dictionaries = {
     sessions: enSessions,
     attendance: enAttendance,
     assignments: enAssignments,
+    gradebook: enGradebook,
   },
   fa: {
     common: faCommon,
@@ -103,6 +107,7 @@ const dictionaries: Dictionaries = {
     sessions: faSessions,
     attendance: faAttendance,
     assignments: faAssignments,
+    gradebook: faGradebook,
   },
 };
 

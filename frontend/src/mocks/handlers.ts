@@ -61,6 +61,7 @@ import {
   type AttendanceRecord,
 } from "@/services/sessions";
 import { assignmentSchema, type Assignment } from "@/services/assignments";
+import { gradeEntrySchema, type GradeEntry } from "@/services/gradebook";
 
 export type MockScenario =
   | "success"
@@ -188,6 +189,7 @@ const mockEnrollments = new Map<string, Enrollment>();
 const mockSessions = new Map<string, SessionDetail>();
 const mockAttendance = new Map<string, AttendanceRecord[]>();
 const mockAssignments = new Map<string, Assignment[]>();
+const mockGradebook = new Map<string, GradeEntry[]>();
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -2123,6 +2125,75 @@ export const handlers = [
       });
       mockAssignments.set(orgId, [...(mockAssignments.get(orgId) ?? []), item]);
       return HttpResponse.json(item, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/gradebook", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockGradebook.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/gradebook",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        studentDisplayName?: string;
+        subjectName?: string;
+        score?: number;
+      };
+      if (
+        !body.studentDisplayName ||
+        !body.subjectName ||
+        typeof body.score !== "number"
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const rows = mockGradebook.get(orgId) ?? [];
+      const existing = rows.findIndex(
+        (row) =>
+          row.studentDisplayName === body.studentDisplayName &&
+          row.subjectName === body.subjectName,
+      );
+      const item = gradeEntrySchema.parse({
+        id:
+          existing >= 0
+            ? rows[existing]!.id
+            : opaqueIdSchema.parse(
+                `grd_${Math.random().toString(36).slice(2, 10)}`,
+              ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        studentDisplayName: body.studentDisplayName.trim(),
+        subjectName: body.subjectName.trim(),
+        score: body.score,
+        published: true,
+      });
+      const next =
+        existing >= 0
+          ? rows.map((row, index) => (index === existing ? item : row))
+          : [...rows, item];
+      mockGradebook.set(orgId, next);
+      return HttpResponse.json(item, { status: existing >= 0 ? 200 : 201 });
     },
   ),
 ];

@@ -66,6 +66,7 @@ export const routes = {
       `/org/${encodeURIComponent(orgId)}/attendance`,
     assignments: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/assignments`,
+    gradebook: (orgId: string) => `/org/${encodeURIComponent(orgId)}/gradebook`,
   },
   messaging: {
     home: () => "/personal/messages",

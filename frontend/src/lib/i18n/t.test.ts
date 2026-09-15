@@ -32,6 +32,7 @@ describe("i18n translator", () => {
     expect(assertNamespaceParity("sessions")).toEqual([]);
     expect(assertNamespaceParity("attendance")).toEqual([]);
     expect(assertNamespaceParity("assignments")).toEqual([]);
+    expect(assertNamespaceParity("gradebook")).toEqual([]);
     expect(assertNamespaceParity("home")).toEqual([]);
   });
 });
