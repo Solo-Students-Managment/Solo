@@ -11,6 +11,7 @@ import { t } from "@/lib/i18n/t";
 import { routes } from "@/lib/routes";
 import { getAuthClient } from "@/services/auth";
 import { getHomeClient } from "@/services/home";
+import { SubjectSwitcher } from "@/features/subjects";
 
 export function GlobalHomeView() {
   const searchParams = useSearchParams();
@@ -198,6 +199,12 @@ export function GlobalHomeView() {
           ))}
         </div>
       </section>
+
+      <SubjectSwitcher
+        locale={locale}
+        organizationId={session.organizationId}
+        subjectId={session.subjectId}
+      />
 
       <nav className="flex flex-wrap gap-3" aria-label="Quick links">
         <Button asChild variant="secondary">

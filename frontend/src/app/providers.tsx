@@ -20,6 +20,7 @@ import {
   createHttpGuardianClient,
   setGuardianClient,
 } from "@/services/guardian";
+import { createHttpSubjectClient, setSubjectClient } from "@/services/subjects";
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -49,6 +50,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setOrganizationMembersClient(createHttpOrganizationMembersClient());
           setStudentClient(createHttpStudentClient());
           setGuardianClient(createHttpGuardianClient());
+          setSubjectClient(createHttpSubjectClient());
           setReady(true);
         }
       } catch {

@@ -39,6 +39,7 @@ import {
   guardianRelationshipSchema,
   type GuardianRelationship,
 } from "@/services/guardian";
+import { subjectSchema, type Subject } from "@/services/subjects";
 
 export type MockScenario =
   | "success"
@@ -142,6 +143,20 @@ let mockGuardianDash = {
   unreadUpdatesCount: 0,
   relationships: [] as GuardianRelationship[],
 };
+const mockSubjects = new Map<string, Subject>([
+  [
+    "sub_math_personal",
+    subjectSchema.parse({
+      id: opaqueIdSchema.parse("sub_math_personal"),
+      organizationId: null,
+      name: "Mathematics",
+      code: "MATH",
+      levelLabel: "Grade 8",
+      teacherDisplayName: "Ms. Rezaei",
+      active: true,
+    }),
+  ],
+]);
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -1334,5 +1349,98 @@ export const handlers = [
       orgRole,
     });
     return HttpResponse.json(currentSession);
+  }),
+
+  http.get("/api/subjects", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const url = new URL(request.url);
+    const organizationId = url.searchParams.get("organizationId");
+    const data = [...mockSubjects.values()].filter((row) =>
+      organizationId
+        ? String(row.organizationId) === organizationId
+        : row.organizationId === null,
+    );
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/subjects",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      if (!mockOrgs.get(orgId)) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const body = (await request.json()) as {
+        name?: string;
+        code?: string;
+        levelLabel?: string;
+        teacherDisplayName?: string;
+      };
+      if (
+        !body.name ||
+        !body.code ||
+        !body.levelLabel ||
+        !body.teacherDisplayName
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `sub_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const subject = subjectSchema.parse({
+        id,
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name,
+        code: body.code.toUpperCase(),
+        levelLabel: body.levelLabel,
+        teacherDisplayName: body.teacherDisplayName,
+        active: true,
+      });
+      mockSubjects.set(id, subject);
+      return HttpResponse.json(subject);
+    },
+  ),
+
+  http.patch("/api/subjects/:subjectId", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const subjectId = String(params.subjectId);
+    const current = mockSubjects.get(subjectId);
+    if (!current) {
+      return HttpResponse.json(
+        errorBody(404, "NOT_FOUND", "errors.not_found"),
+        { status: 404 },
+      );
+    }
+    const body = (await request.json()) as { active?: boolean };
+    const next = subjectSchema.parse({
+      ...current,
+      active: body.active ?? current.active,
+    });
+    mockSubjects.set(subjectId, next);
+    return HttpResponse.json(next);
   }),
 ];

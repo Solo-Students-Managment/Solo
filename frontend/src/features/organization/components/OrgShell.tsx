@@ -13,7 +13,7 @@ type OrgShellProps = {
   dir: "rtl" | "ltr";
   orgId: string;
   orgName: string;
-  active: "home" | "members";
+  active: "home" | "members" | "subjects";
   children: ReactNode;
 };
 
@@ -57,6 +57,15 @@ export function OrgShell({
           >
             {t(locale, "organization", "navMembers")}
           </Link>
+          <Link
+            href={`${routes.organization.subjects(orgId)}${langQuery}`}
+            className={cn(
+              "hover:bg-sunken rounded-md px-3 py-2 text-sm",
+              active === "subjects" && "bg-sunken font-medium",
+            )}
+          >
+            {t(locale, "organization", "navSubjects")}
+          </Link>
           <span className="text-muted px-3 py-2 text-sm">
             {t(locale, "organization", "navSettings")}
           </span>
@@ -86,6 +95,15 @@ export function OrgShell({
           )}
         >
           {t(locale, "organization", "navMembers")}
+        </Link>
+        <Link
+          href={`${routes.organization.subjects(orgId)}${langQuery}`}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
+            active === "subjects" && "bg-sunken font-medium",
+          )}
+        >
+          {t(locale, "organization", "navSubjects")}
         </Link>
       </div>
       <main className="flex-1 space-y-6 px-4 py-6">{children}</main>

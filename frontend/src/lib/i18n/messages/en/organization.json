@@ -17,6 +17,7 @@
   "mainBranch": "Main Branch",
   "navHome": "Dashboard",
   "navMembers": "Members",
+  "navSubjects": "Subjects",
   "navSettings": "Settings",
   "navGlobalHome": "Global Home",
   "loadError": "Could not load organization.",
