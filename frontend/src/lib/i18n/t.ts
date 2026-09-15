@@ -35,6 +35,7 @@ import enEmployeeDocuments from "./messages/en/employeeDocuments.json";
 import enOnboarding from "./messages/en/onboarding.json";
 import enOffboarding from "./messages/en/offboarding.json";
 import enApprovals from "./messages/en/approvals.json";
+import enTasks from "./messages/en/tasks.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -81,6 +82,7 @@ import faEmployeeDocuments from "./messages/fa/employeeDocuments.json";
 import faOnboarding from "./messages/fa/onboarding.json";
 import faOffboarding from "./messages/fa/offboarding.json";
 import faApprovals from "./messages/fa/approvals.json";
+import faTasks from "./messages/fa/tasks.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -133,6 +135,7 @@ export type MessageNamespace =
   | "onboarding"
   | "offboarding"
   | "approvals"
+  | "tasks"
   | "messaging"
   | "chat"
   | "notifications"
@@ -187,6 +190,7 @@ const dictionaries: Dictionaries = {
     onboarding: enOnboarding,
     offboarding: enOffboarding,
     approvals: enApprovals,
+    tasks: enTasks,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -235,6 +239,7 @@ const dictionaries: Dictionaries = {
     onboarding: faOnboarding,
     offboarding: faOffboarding,
     approvals: faApprovals,
+    tasks: faTasks,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

@@ -72,6 +72,7 @@ export const routes = {
     offboarding: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/offboarding`,
     approvals: (orgId: string) => `/org/${encodeURIComponent(orgId)}/approvals`,
+    tasks: (orgId: string) => `/org/${encodeURIComponent(orgId)}/tasks`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

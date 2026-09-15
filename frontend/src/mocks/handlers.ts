@@ -158,6 +158,11 @@ import {
   canActorDecide,
   type ApprovalRequest,
 } from "@/services/approvals";
+import {
+  canTransitionTaskStatus,
+  orgTaskSchema,
+  type OrgTask,
+} from "@/services/tasks";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -335,6 +340,7 @@ const mockEmployeeDocuments = new Map<string, EmployeeDocument[]>();
 const mockOnboardingCases = new Map<string, OnboardingCase[]>();
 const mockOffboardingCases = new Map<string, OffboardingCase[]>();
 const mockApprovals = new Map<string, ApprovalRequest[]>();
+const mockTasks = new Map<string, OrgTask[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -554,6 +560,7 @@ function persistMswState() {
         mockOnboardingCases: [...mockOnboardingCases.entries()],
         mockOffboardingCases: [...mockOffboardingCases.entries()],
         mockApprovals: [...mockApprovals.entries()],
+        mockTasks: [...mockTasks.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -938,6 +945,15 @@ function hydrateMswState() {
         mockApprovals.set(
           entry[0],
           entry[1].map((row) => approvalRequestSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockTasks)) {
+      mockTasks.clear();
+      for (const entry of data.mockTasks as Array<[string, OrgTask[]]>) {
+        mockTasks.set(
+          entry[0],
+          entry[1].map((row) => orgTaskSchema.parse(row)),
         );
       }
     }
@@ -6203,6 +6219,118 @@ export const handlers = [
         status: body.decision,
       });
       mockApprovals.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/tasks", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockTasks.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/tasks", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      title?: string;
+      description?: string;
+      assigneeDisplayName?: string;
+      departmentName?: string;
+      priority?: string;
+      dueDate?: string;
+    };
+    if (
+      !body.title?.trim() ||
+      !body.description?.trim() ||
+      !body.assigneeDisplayName?.trim() ||
+      !body.departmentName?.trim() ||
+      !body.priority ||
+      !body.dueDate?.trim()
+    ) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "tasks.validation.title"),
+        { status: 400 },
+      );
+    }
+    const row = orgTaskSchema.parse({
+      id: opaqueIdSchema.parse(
+        `tsk_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      title: body.title.trim(),
+      description: body.description.trim(),
+      assigneeDisplayName: body.assigneeDisplayName.trim(),
+      departmentName: body.departmentName.trim(),
+      priority: body.priority,
+      status: "todo",
+      dueDate: body.dueDate.trim(),
+    });
+    mockTasks.set(orgId, [...(mockTasks.get(orgId) ?? []), row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/tasks/:taskId/status",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const taskId = String(params.taskId);
+      const body = (await request.json()) as { status?: string };
+      const rows = mockTasks.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === taskId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "tasks.loadError"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (
+        !body.status ||
+        !["todo", "in_progress", "blocked", "done"].includes(body.status)
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "tasks.validation.title"),
+          { status: 400 },
+        );
+      }
+      const nextStatus = body.status as
+        "todo" | "in_progress" | "blocked" | "done";
+      if (!canTransitionTaskStatus(current.status, nextStatus)) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "tasks.invalidTransition"),
+          { status: 400 },
+        );
+      }
+      const updated = orgTaskSchema.parse({
+        ...current,
+        status: nextStatus,
+      });
+      mockTasks.set(
         orgId,
         rows.map((row, i) => (i === idx ? updated : row)),
       );

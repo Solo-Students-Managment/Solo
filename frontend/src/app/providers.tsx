@@ -106,6 +106,7 @@ import {
   createHttpApprovalsClient,
   setApprovalsClient,
 } from "@/services/approvals";
+import { createHttpTasksClient, setTasksClient } from "@/services/tasks";
 import {
   createHttpMessagingClient,
   setMessagingClient,
@@ -181,6 +182,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setOnboardingClient(createHttpOnboardingClient());
           setOffboardingClient(createHttpOffboardingClient());
           setApprovalsClient(createHttpApprovalsClient());
+          setTasksClient(createHttpTasksClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());
