@@ -4,6 +4,22 @@ import { apiRequest } from "@/services/api";
 import { opaqueIdSchema } from "@/services/api";
 import { validateReturnUrl } from "@/lib/routes";
 
+import {
+  deviceSessionSchema,
+  enableTwoFactorBeginSchema,
+  enableTwoFactorConfirmSchema,
+  recoveryCodesResultSchema,
+  twoFactorStatusSchema,
+  type DeviceSession,
+  type EnableTwoFactorBegin,
+  type EnableTwoFactorConfirm,
+  type RecoveryCodesResult,
+  type TwoFactorMethod,
+  type TwoFactorStatus,
+} from "./security";
+
+export * from "./security";
+
 export const personaSchema = z.enum([
   "student",
   "guardian",
@@ -47,6 +63,25 @@ export type AuthClient = {
   }): Promise<void>;
   requestPasswordReset(phoneE164: string): Promise<{ challengeId: string }>;
   reauth(password: string): Promise<void>;
+  getTwoFactorStatus(): Promise<TwoFactorStatus>;
+  beginEnableTwoFactor(input: {
+    method: TwoFactorMethod;
+    password: string;
+  }): Promise<EnableTwoFactorBegin>;
+  confirmEnableTwoFactor(input: {
+    challengeId: string;
+    code: string;
+  }): Promise<EnableTwoFactorConfirm>;
+  disableTwoFactor(input: {
+    password: string;
+    code: string;
+  }): Promise<TwoFactorStatus>;
+  regenerateRecoveryCodes(input: {
+    password: string;
+  }): Promise<RecoveryCodesResult>;
+  listSessions(): Promise<DeviceSession[]>;
+  revokeSession(input: { sessionId: string; password: string }): Promise<void>;
+  revokeOtherSessions(input: { password: string }): Promise<void>;
   switchPersona(persona: Persona): Promise<Session>;
   switchContext(input: {
     organizationId: string | null;
@@ -56,6 +91,21 @@ export type AuthClient = {
 
 /** In-memory session metadata only — never stores tokens/passwords/OTP. */
 let memorySession: Session | null = null;
+let memoryTwoFactor: TwoFactorStatus = {
+  enabled: false,
+  smsEnabled: false,
+  totpEnabled: false,
+  recoveryCodesRemaining: 0,
+  orgRequires2fa: false,
+  adminMandatory: false,
+};
+let memoryDeviceSessions: DeviceSession[] = [];
+let pendingTwoFactorChallenge: {
+  challengeId: string;
+  method: TwoFactorMethod;
+} | null = null;
+/** Short-lived reauth window in memory only — never localStorage. */
+let reauthFreshUntil = 0;
 
 function futureExpiry(minutes = 60): string {
   return new Date(Date.now() + minutes * 60_000).toISOString();
@@ -64,6 +114,57 @@ function futureExpiry(minutes = 60): string {
 function cacheSession(session: Session): Session {
   memorySession = session;
   return session;
+}
+
+function requireSession(): Session {
+  if (!memorySession) throw new Error("No session");
+  return memorySession;
+}
+
+function seedDeviceSessions(userId: string): void {
+  const now = Date.now();
+  memoryDeviceSessions = [
+    deviceSessionSchema.parse({
+      id: opaqueIdSchema.parse(`ses_current_${userId}`),
+      deviceLabel: "This browser",
+      locationHint: "Tehran",
+      userAgentSummary: "Chrome · macOS",
+      lastActiveAt: new Date(now).toISOString(),
+      createdAt: new Date(now - 86_400_000).toISOString(),
+      expiresAt: futureExpiry(7 * 24 * 60),
+      isCurrent: true,
+    }),
+    deviceSessionSchema.parse({
+      id: opaqueIdSchema.parse(`ses_other_${userId}`),
+      deviceLabel: "iPhone",
+      locationHint: "Isfahan",
+      userAgentSummary: "Safari · iOS",
+      lastActiveAt: new Date(now - 3_600_000).toISOString(),
+      createdAt: new Date(now - 7 * 86_400_000).toISOString(),
+      expiresAt: futureExpiry(7 * 24 * 60),
+      isCurrent: false,
+    }),
+  ];
+}
+
+function assertReauthFresh(): void {
+  if (Date.now() > reauthFreshUntil) {
+    if (memorySession) {
+      memorySession = { ...memorySession, requiresReauth: true };
+    }
+    throw new Error("auth.reauthRequired");
+  }
+}
+
+function defaultTwoFactorStatus(): TwoFactorStatus {
+  return {
+    enabled: false,
+    smsEnabled: false,
+    totpEnabled: false,
+    recoveryCodesRemaining: 0,
+    orgRequires2fa: false,
+    adminMandatory: false,
+  };
 }
 
 export function createHttpAuthClient(): AuthClient {
@@ -145,6 +246,61 @@ export function createHttpAuthClient(): AuthClient {
         memorySession = { ...memorySession, requiresReauth: false };
       }
     },
+    async getTwoFactorStatus() {
+      return apiRequest("/auth/2fa", {
+        parse: (data) => twoFactorStatusSchema.parse(data),
+      });
+    },
+    async beginEnableTwoFactor(input) {
+      return apiRequest("/auth/2fa/enable/begin", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => enableTwoFactorBeginSchema.parse(data),
+      });
+    },
+    async confirmEnableTwoFactor(input) {
+      return apiRequest("/auth/2fa/enable/confirm", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => enableTwoFactorConfirmSchema.parse(data),
+      });
+    },
+    async disableTwoFactor(input) {
+      return apiRequest("/auth/2fa/disable", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => twoFactorStatusSchema.parse(data),
+      });
+    },
+    async regenerateRecoveryCodes(input) {
+      return apiRequest("/auth/2fa/recovery/regenerate", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: (data) => recoveryCodesResultSchema.parse(data),
+      });
+    },
+    async listSessions() {
+      return apiRequest("/auth/sessions", {
+        parse: (data) => z.array(deviceSessionSchema).parse(data),
+      });
+    },
+    async revokeSession(input) {
+      await apiRequest(
+        `/auth/sessions/${encodeURIComponent(input.sessionId)}`,
+        {
+          method: "DELETE",
+          body: JSON.stringify({ password: input.password }),
+          parse: () => undefined,
+        },
+      );
+    },
+    async revokeOtherSessions(input) {
+      await apiRequest("/auth/sessions/revoke-others", {
+        method: "POST",
+        body: JSON.stringify(input),
+        parse: () => undefined,
+      });
+    },
     async switchPersona(persona) {
       const session = await apiRequest("/auth/persona", {
         method: "POST",
@@ -179,7 +335,7 @@ export function createMockAuthClient(): AuthClient {
       if (password !== "Password1") {
         throw new Error("auth.invalidCredentials");
       }
-      return cacheSession({
+      const session = cacheSession({
         userId: opaqueIdSchema.parse(`usr_${phoneE164.replace(/\D/g, "")}`),
         displayName: "Demo User",
         activePersona: "teacher",
@@ -188,15 +344,22 @@ export function createMockAuthClient(): AuthClient {
         expiresAt: futureExpiry(),
         requiresReauth: false,
       });
+      seedDeviceSessions(session.userId);
+      memoryTwoFactor = defaultTwoFactorStatus();
+      return session;
     },
     async logout() {
       memorySession = null;
+      memoryDeviceSessions = [];
+      memoryTwoFactor = defaultTwoFactorStatus();
+      pendingTwoFactorChallenge = null;
+      reauthFreshUntil = 0;
     },
     async signup() {
       return { challengeId: "otp_signup_1" };
     },
     async completeSignup() {
-      return cacheSession({
+      const session = cacheSession({
         userId: opaqueIdSchema.parse("usr_signup"),
         displayName: "New User",
         activePersona: "teacher",
@@ -205,6 +368,8 @@ export function createMockAuthClient(): AuthClient {
         expiresAt: futureExpiry(),
         requiresReauth: false,
       });
+      seedDeviceSessions(session.userId);
+      return session;
     },
     async requestOtp() {
       return { challengeId: "otp_challenge_1" };
@@ -213,7 +378,7 @@ export function createMockAuthClient(): AuthClient {
       if (code !== "123456") {
         throw new Error("auth.invalidOtp");
       }
-      return cacheSession({
+      const session = cacheSession({
         userId: opaqueIdSchema.parse("usr_otp"),
         displayName: "OTP User",
         activePersona: "teacher",
@@ -222,6 +387,8 @@ export function createMockAuthClient(): AuthClient {
         expiresAt: futureExpiry(),
         requiresReauth: false,
       });
+      seedDeviceSessions(session.userId);
+      return session;
     },
     async requestPasswordReset() {
       return { challengeId: "otp_reset_1" };
@@ -229,9 +396,116 @@ export function createMockAuthClient(): AuthClient {
     async resetPassword() {
       return;
     },
-    async reauth() {
-      if (!memorySession) throw new Error("No session");
-      memorySession = { ...memorySession, requiresReauth: false };
+    async reauth(password) {
+      requireSession();
+      if (password !== "Password1") {
+        throw new Error("auth.invalidCredentials");
+      }
+      reauthFreshUntil = Date.now() + 5 * 60_000;
+      memorySession = { ...memorySession!, requiresReauth: false };
+    },
+    async getTwoFactorStatus() {
+      requireSession();
+      return memoryTwoFactor;
+    },
+    async beginEnableTwoFactor({ method, password }) {
+      requireSession();
+      if (password !== "Password1") throw new Error("auth.invalidCredentials");
+      reauthFreshUntil = Date.now() + 5 * 60_000;
+      const challengeId = `2fa_${method}_${Math.random().toString(36).slice(2, 8)}`;
+      pendingTwoFactorChallenge = { challengeId, method };
+      if (method === "totp") {
+        return {
+          challengeId,
+          totpSecret: "SOLODEMOSECRET",
+          totpUri: "otpauth://totp/Solo:demo?secret=SOLODEMOSECRET&issuer=Solo",
+        };
+      }
+      return { challengeId };
+    },
+    async confirmEnableTwoFactor({ challengeId, code }) {
+      requireSession();
+      assertReauthFresh();
+      if (
+        !pendingTwoFactorChallenge ||
+        pendingTwoFactorChallenge.challengeId !== challengeId
+      ) {
+        throw new Error("auth.invalidOtp");
+      }
+      if (code !== "123456") throw new Error("auth.invalidOtp");
+      const method = pendingTwoFactorChallenge.method;
+      pendingTwoFactorChallenge = null;
+      memoryTwoFactor = {
+        ...memoryTwoFactor,
+        enabled: true,
+        smsEnabled: method === "sms" ? true : memoryTwoFactor.smsEnabled,
+        totpEnabled: method === "totp" ? true : memoryTwoFactor.totpEnabled,
+        recoveryCodesRemaining: 8,
+      };
+      return {
+        recoveryCodes: [
+          "RCVR-1111",
+          "RCVR-2222",
+          "RCVR-3333",
+          "RCVR-4444",
+          "RCVR-5555",
+          "RCVR-6666",
+          "RCVR-7777",
+          "RCVR-8888",
+        ],
+        status: memoryTwoFactor,
+      };
+    },
+    async disableTwoFactor({ password, code }) {
+      requireSession();
+      if (password !== "Password1") throw new Error("auth.invalidCredentials");
+      if (code !== "123456") throw new Error("auth.invalidOtp");
+      reauthFreshUntil = Date.now() + 5 * 60_000;
+      memoryTwoFactor = defaultTwoFactorStatus();
+      return memoryTwoFactor;
+    },
+    async regenerateRecoveryCodes({ password }) {
+      requireSession();
+      if (password !== "Password1") throw new Error("auth.invalidCredentials");
+      reauthFreshUntil = Date.now() + 5 * 60_000;
+      if (!memoryTwoFactor.enabled) throw new Error("auth.twoFactorRequired");
+      memoryTwoFactor = { ...memoryTwoFactor, recoveryCodesRemaining: 8 };
+      return {
+        recoveryCodes: [
+          "RCVR-AAAA",
+          "RCVR-BBBB",
+          "RCVR-CCCC",
+          "RCVR-DDDD",
+          "RCVR-EEEE",
+          "RCVR-FFFF",
+          "RCVR-GGGG",
+          "RCVR-HHHH",
+        ],
+      };
+    },
+    async listSessions() {
+      const session = requireSession();
+      if (memoryDeviceSessions.length === 0) {
+        seedDeviceSessions(session.userId);
+      }
+      return memoryDeviceSessions;
+    },
+    async revokeSession({ sessionId, password }) {
+      requireSession();
+      if (password !== "Password1") throw new Error("auth.invalidCredentials");
+      reauthFreshUntil = Date.now() + 5 * 60_000;
+      const target = memoryDeviceSessions.find((s) => s.id === sessionId);
+      if (!target) throw new Error("auth.sessionNotFound");
+      if (target.isCurrent) throw new Error("auth.cannotRevokeCurrent");
+      memoryDeviceSessions = memoryDeviceSessions.filter(
+        (s) => s.id !== sessionId,
+      );
+    },
+    async revokeOtherSessions({ password }) {
+      requireSession();
+      if (password !== "Password1") throw new Error("auth.invalidCredentials");
+      reauthFreshUntil = Date.now() + 5 * 60_000;
+      memoryDeviceSessions = memoryDeviceSessions.filter((s) => s.isCurrent);
     },
     async switchPersona(persona) {
       if (!memorySession) throw new Error("No session");
@@ -271,5 +545,9 @@ export function safeAuthReturnUrl(
 /** Test helper */
 export function __resetMockSession(): void {
   memorySession = null;
+  memoryDeviceSessions = [];
+  memoryTwoFactor = defaultTwoFactorStatus();
+  pendingTwoFactorChallenge = null;
+  reauthFreshUntil = 0;
   authClient = createMockAuthClient();
 }

@@ -24,6 +24,7 @@ export const routes = {
   },
   personal: {
     home: () => "/personal",
+    security: () => "/personal/security",
   },
   teacher: {
     home: () => "/teacher",

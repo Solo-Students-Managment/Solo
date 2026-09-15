@@ -19,17 +19,24 @@ export type Capability =
   | "nav.teacher"
   | "nav.organization"
   | "nav.admin"
+  | "account.security.manage"
   | "students.manage"
   | "billing.manage"
   | "exams.publish";
 
 const personaCapabilities: Record<Persona, Capability[]> = {
-  student: ["nav.personal"],
-  guardian: ["nav.personal"],
-  teacher: ["nav.personal", "nav.teacher", "students.manage"],
+  student: ["nav.personal", "account.security.manage"],
+  guardian: ["nav.personal", "account.security.manage"],
+  teacher: [
+    "nav.personal",
+    "nav.teacher",
+    "account.security.manage",
+    "students.manage",
+  ],
   organization: [
     "nav.personal",
     "nav.organization",
+    "account.security.manage",
     "students.manage",
     "billing.manage",
   ],
@@ -38,6 +45,7 @@ const personaCapabilities: Record<Persona, Capability[]> = {
     "nav.teacher",
     "nav.organization",
     "nav.admin",
+    "account.security.manage",
     "students.manage",
     "billing.manage",
     "exams.publish",

@@ -22,6 +22,29 @@ describe("mock auth client", () => {
     expect(window.localStorage.length).toBe(0);
   });
 
+  it("enables 2FA and lists device sessions in memory only", async () => {
+    const client = createMockAuthClient();
+    await client.login({
+      phoneE164: "+989121234567",
+      password: "Password1",
+    });
+    const begin = await client.beginEnableTwoFactor({
+      method: "sms",
+      password: "Password1",
+    });
+    const confirmed = await client.confirmEnableTwoFactor({
+      challengeId: begin.challengeId,
+      code: "123456",
+    });
+    expect(confirmed.status.enabled).toBe(true);
+    expect(confirmed.recoveryCodes?.length).toBeGreaterThan(0);
+    const sessions = await client.listSessions();
+    expect(sessions.some((s) => s.isCurrent)).toBe(true);
+    await client.revokeOtherSessions({ password: "Password1" });
+    expect((await client.listSessions()).every((s) => s.isCurrent)).toBe(true);
+    expect(window.localStorage.length).toBe(0);
+  });
+
   it("expires sessions and validates return URLs", async () => {
     const client = createMockAuthClient();
     const session = await client.login({

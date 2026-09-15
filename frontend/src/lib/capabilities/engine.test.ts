@@ -16,6 +16,9 @@ describe("effective capabilities", () => {
       requiresReauth: false,
     };
     expect(resolveCapability(session, "students.manage").allowed).toBe(true);
+    expect(resolveCapability(session, "account.security.manage").allowed).toBe(
+      true,
+    );
     expect(resolveCapability(session, "nav.admin")).toEqual({
       allowed: false,
       reason: "permission",

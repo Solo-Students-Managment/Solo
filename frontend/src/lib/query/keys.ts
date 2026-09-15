@@ -27,3 +27,4 @@ export function createQueryKeyFactory(scope: string) {
 }
 
 export const studentsQueryKeys = createQueryKeyFactory("students");
+export const securityQueryKeys = createQueryKeyFactory("account-security");
