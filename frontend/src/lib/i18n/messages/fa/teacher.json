@@ -1,0 +1,16 @@
+{
+  "title": "داشبورد معلم",
+  "subtitle": "نمای کلی فضای Teacher Free شما.",
+  "activateTitle": "معلم شوید",
+  "activateSubtitle": "شخصیت معلم را خودتان فعال کنید. پیش‌فرض Teacher Free است.",
+  "activate": "فعال‌سازی معلم",
+  "activated": "شخصیت معلم فعال است.",
+  "statsStudents": "دانش‌آموزان",
+  "statsClasses": "کلاس‌ها",
+  "statsSessions": "جلسات آینده",
+  "empty": "هنوز فعالیت تدریس ندارید.",
+  "loadError": "بارگذاری داشبورد معلم ناموفق بود.",
+  "retry": "تلاش دوباره",
+  "offline": "آفلاین هستید.",
+  "forbidden": "برای این داشبورد شخصیت معلم را فعال کنید."
+}

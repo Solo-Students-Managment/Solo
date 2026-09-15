@@ -1,0 +1,16 @@
+{
+  "title": "Teacher dashboard",
+  "subtitle": "Your Teacher Free workspace overview.",
+  "activateTitle": "Become a teacher",
+  "activateSubtitle": "Self-activate the teacher persona. Defaults to Teacher Free.",
+  "activate": "Activate teacher",
+  "activated": "Teacher persona is active.",
+  "statsStudents": "Students",
+  "statsClasses": "Classes",
+  "statsSessions": "Upcoming sessions",
+  "empty": "No teaching activity yet.",
+  "loadError": "Could not load teacher dashboard.",
+  "retry": "Retry",
+  "offline": "You are offline.",
+  "forbidden": "Activate the teacher persona to open this dashboard."
+}
