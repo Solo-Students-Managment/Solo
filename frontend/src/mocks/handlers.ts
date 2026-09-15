@@ -134,6 +134,7 @@ import {
 } from "@/services/roles";
 import { orgPolicySchema, type OrgPolicy } from "@/services/policies";
 import { shiftSchema, type StaffShift } from "@/services/shifts";
+import { leaveRequestSchema, type LeaveRequest } from "@/services/leave";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -305,6 +306,7 @@ const mockDirectory = new Map<string, DirectoryPerson[]>();
 const mockRoleDefinitions = new Map<string, OrgRoleDefinition[]>();
 const mockPolicies = new Map<string, OrgPolicy[]>();
 const mockShifts = new Map<string, StaffShift[]>();
+const mockLeaveRequests = new Map<string, LeaveRequest[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -518,6 +520,7 @@ function persistMswState() {
         mockRoleDefinitions: [...mockRoleDefinitions.entries()],
         mockPolicies: [...mockPolicies.entries()],
         mockShifts: [...mockShifts.entries()],
+        mockLeaveRequests: [...mockLeaveRequests.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -830,6 +833,18 @@ function hydrateMswState() {
         mockShifts.set(
           entry[0],
           entry[1].map((row) => shiftSchema.parse(row)),
+        );
+      }
+    }
+
+    if (Array.isArray(data.mockLeaveRequests)) {
+      mockLeaveRequests.clear();
+      for (const entry of data.mockLeaveRequests as Array<
+        [string, LeaveRequest[]]
+      >) {
+        mockLeaveRequests.set(
+          entry[0],
+          entry[1].map((row) => leaveRequestSchema.parse(row)),
         );
       }
     }
@@ -5591,4 +5606,101 @@ export const handlers = [
     persistMswState();
     return HttpResponse.json(row, { status: 201 });
   }),
+
+  http.get("/api/organizations/:orgId/leave-requests", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockLeaveRequests.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/leave-requests",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        staffDisplayName?: string;
+        leaveType?: string;
+        startDate?: string;
+        endDate?: string;
+        reason?: string;
+      };
+      if (
+        !body.staffDisplayName?.trim() ||
+        !body.leaveType ||
+        !body.startDate ||
+        !body.endDate ||
+        body.startDate > body.endDate ||
+        !body.reason?.trim()
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "leave.validation.range"),
+          { status: 400 },
+        );
+      }
+      const row = leaveRequestSchema.parse({
+        id: opaqueIdSchema.parse(
+          `lv_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        staffDisplayName: body.staffDisplayName.trim(),
+        leaveType: body.leaveType,
+        status: "pending",
+        startDate: body.startDate,
+        endDate: body.endDate,
+        reason: body.reason.trim(),
+      });
+      mockLeaveRequests.set(orgId, [
+        ...(mockLeaveRequests.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/leave-requests/:leaveId/approve",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const leaveId = String(params.leaveId);
+      const rows = mockLeaveRequests.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === leaveId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "leave.loadError"),
+          { status: 404 },
+        );
+      }
+      const updated = leaveRequestSchema.parse({
+        ...rows[idx],
+        status: "approved",
+      });
+      mockLeaveRequests.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
 ];
