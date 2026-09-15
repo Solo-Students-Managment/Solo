@@ -46,6 +46,9 @@ describe("typed routes", () => {
     );
     expect(routes.organization.approvals("org_1")).toBe("/org/org_1/approvals");
     expect(routes.organization.tasks("org_1")).toBe("/org/org_1/tasks");
+    expect(routes.organization.knowledgeBase("org_1")).toBe(
+      "/org/org_1/knowledge-base",
+    );
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",
     );

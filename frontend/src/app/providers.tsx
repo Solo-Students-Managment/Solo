@@ -108,6 +108,10 @@ import {
 } from "@/services/approvals";
 import { createHttpTasksClient, setTasksClient } from "@/services/tasks";
 import {
+  createHttpKnowledgeBaseClient,
+  setKnowledgeBaseClient,
+} from "@/services/knowledge-base";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -183,6 +187,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setOffboardingClient(createHttpOffboardingClient());
           setApprovalsClient(createHttpApprovalsClient());
           setTasksClient(createHttpTasksClient());
+          setKnowledgeBaseClient(createHttpKnowledgeBaseClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

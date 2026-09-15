@@ -163,6 +163,11 @@ import {
   orgTaskSchema,
   type OrgTask,
 } from "@/services/tasks";
+import {
+  canTransitionKbStatus,
+  kbArticleSchema,
+  type KbArticle,
+} from "@/services/knowledge-base";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -341,6 +346,7 @@ const mockOnboardingCases = new Map<string, OnboardingCase[]>();
 const mockOffboardingCases = new Map<string, OffboardingCase[]>();
 const mockApprovals = new Map<string, ApprovalRequest[]>();
 const mockTasks = new Map<string, OrgTask[]>();
+const mockKbArticles = new Map<string, KbArticle[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -561,6 +567,7 @@ function persistMswState() {
         mockOffboardingCases: [...mockOffboardingCases.entries()],
         mockApprovals: [...mockApprovals.entries()],
         mockTasks: [...mockTasks.entries()],
+        mockKbArticles: [...mockKbArticles.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -954,6 +961,15 @@ function hydrateMswState() {
         mockTasks.set(
           entry[0],
           entry[1].map((row) => orgTaskSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockKbArticles)) {
+      mockKbArticles.clear();
+      for (const entry of data.mockKbArticles as Array<[string, KbArticle[]]>) {
+        mockKbArticles.set(
+          entry[0],
+          entry[1].map((row) => kbArticleSchema.parse(row)),
         );
       }
     }
@@ -6331,6 +6347,116 @@ export const handlers = [
         status: nextStatus,
       });
       mockTasks.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/knowledge-base", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockKbArticles.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/knowledge-base",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        title?: string;
+        spaceName?: string;
+        bodyHtml?: string;
+        tags?: string;
+      };
+      if (
+        !body.title?.trim() ||
+        !body.spaceName?.trim() ||
+        !body.bodyHtml?.trim()
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "knowledgeBase.validation.title"),
+          { status: 400 },
+        );
+      }
+      const row = kbArticleSchema.parse({
+        id: opaqueIdSchema.parse(
+          `kb_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        title: body.title.trim(),
+        spaceName: body.spaceName.trim(),
+        bodyHtml: body.bodyHtml,
+        tags: (body.tags ?? "").trim(),
+        status: "draft",
+        version: 1,
+      });
+      mockKbArticles.set(orgId, [...(mockKbArticles.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/knowledge-base/:articleId/status",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const articleId = String(params.articleId);
+      const body = (await request.json()) as { status?: string };
+      const rows = mockKbArticles.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === articleId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "knowledgeBase.loadError"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (
+        !body.status ||
+        !["draft", "in_review", "published"].includes(body.status)
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "knowledgeBase.validation.title"),
+          { status: 400 },
+        );
+      }
+      const nextStatus = body.status as "draft" | "in_review" | "published";
+      if (!canTransitionKbStatus(current.status, nextStatus)) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "knowledgeBase.invalidTransition"),
+          { status: 400 },
+        );
+      }
+      const updated = kbArticleSchema.parse({
+        ...current,
+        status: nextStatus,
+        version:
+          nextStatus === "published" ? current.version + 1 : current.version,
+      });
+      mockKbArticles.set(
         orgId,
         rows.map((row, i) => (i === idx ? updated : row)),
       );
