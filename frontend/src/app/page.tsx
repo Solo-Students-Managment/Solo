@@ -1,3 +1,4 @@
+import { EnvironmentBadge } from "@/components/shared/EnvironmentBadge";
 import { FoundationStatus, resolveLocale } from "@/features/foundation";
 import { localeDirection } from "@/lib/i18n/locales";
 
@@ -13,6 +14,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <div lang={locale} dir={dir}>
       <FoundationStatus locale={locale} />
+      <EnvironmentBadge locale={locale} />
     </div>
   );
 }
