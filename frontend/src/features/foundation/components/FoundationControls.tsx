@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import type { FoundationMessages } from "@/features/foundation/messages";
 import type { Locale } from "@/lib/i18n/locales";
 import { cn } from "@/lib/utils/cn";
+
+import type { FoundationMessages } from "../messages";
 
 type ThemeMode = "light" | "dark" | "system";
 
@@ -22,7 +23,10 @@ function applyTheme(mode: ThemeMode): void {
   root.dataset.theme = mode;
 }
 
-export function FoundationControls({ locale, labels }: FoundationControlsProps) {
+export function FoundationControls({
+  locale,
+  labels,
+}: FoundationControlsProps) {
   const router = useRouter();
   const [theme, setTheme] = useState<ThemeMode>("system");
   const [isPending, startTransition] = useTransition();
@@ -35,7 +39,9 @@ export function FoundationControls({ locale, labels }: FoundationControlsProps) 
   useEffect(() => {
     const stored = window.sessionStorage.getItem("solo.theme");
     const initial: ThemeMode =
-      stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+      stored === "light" || stored === "dark" || stored === "system"
+        ? stored
+        : "system";
     setTheme(initial);
     applyTheme(initial);
   }, []);
@@ -55,10 +61,14 @@ export function FoundationControls({ locale, labels }: FoundationControlsProps) 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="flex flex-col gap-2">
-        <span className="text-sm text-muted" id="language-label">
+        <span className="text-muted text-sm" id="language-label">
           {labels.languageLabel}
         </span>
-        <div className="flex gap-2" role="group" aria-labelledby="language-label">
+        <div
+          className="flex gap-2"
+          role="group"
+          aria-labelledby="language-label"
+        >
           {(["fa", "en"] as const).map((code) => (
             <button
               key={code}
@@ -66,8 +76,8 @@ export function FoundationControls({ locale, labels }: FoundationControlsProps) 
               disabled={isPending || locale === code}
               onClick={() => onLocaleChange(code)}
               className={cn(
-                "rounded-md border border-border bg-elevated px-3 py-2 text-sm text-foreground",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "border-border bg-elevated text-foreground rounded-md border px-3 py-2 text-sm",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
                 "disabled:cursor-default disabled:opacity-60",
                 locale === code && "border-brand text-brand",
               )}
@@ -79,7 +89,7 @@ export function FoundationControls({ locale, labels }: FoundationControlsProps) 
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm text-muted" id="theme-label">
+        <span className="text-muted text-sm" id="theme-label">
           {labels.themeLabel}
         </span>
         <div className="flex gap-2" role="group" aria-labelledby="theme-label">
@@ -96,8 +106,8 @@ export function FoundationControls({ locale, labels }: FoundationControlsProps) 
               aria-pressed={theme === value}
               onClick={() => onThemeChange(value)}
               className={cn(
-                "rounded-md border border-border bg-elevated px-3 py-2 text-sm text-foreground",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "border-border bg-elevated text-foreground rounded-md border px-3 py-2 text-sm",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
                 theme === value && "border-brand text-brand",
               )}
             >
@@ -109,7 +119,7 @@ export function FoundationControls({ locale, labels }: FoundationControlsProps) 
 
       <Link
         href={`/?lang=${locale === "fa" ? "en" : "fa"}`}
-        className="sr-only focus:not-sr-only focus:absolute focus:inset-s-4 focus:top-4 focus:rounded-md focus:bg-elevated focus:px-3 focus:py-2 focus:ring-2 focus:ring-ring"
+        className="focus:bg-elevated focus:ring-ring sr-only focus:not-sr-only focus:absolute focus:inset-s-4 focus:top-4 focus:rounded-md focus:px-3 focus:py-2 focus:ring-2"
       >
         {locale === "fa" ? "Switch to English" : "رفتن به فارسی"}
       </Link>

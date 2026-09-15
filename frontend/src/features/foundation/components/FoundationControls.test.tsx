@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { FoundationControls } from "@/features/foundation/components/FoundationControls";
-import { getFoundationMessages } from "@/features/foundation/messages";
+import { getFoundationMessages } from "../messages";
+
+import { FoundationControls } from "./FoundationControls";
 
 const replace = vi.fn();
 

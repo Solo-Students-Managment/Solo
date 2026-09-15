@@ -27,7 +27,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body
-        className={`${vazirmatn.variable} ${sourceSans.variable} min-h-dvh bg-background font-sans text-foreground antialiased`}
+        className={`${vazirmatn.variable} ${sourceSans.variable} bg-background text-foreground min-h-dvh font-sans antialiased`}
       >
         {children}
       </body>

@@ -1,5 +1,2 @@
-export { FoundationStatus } from "@/features/foundation/components/FoundationStatus";
-export {
-  getFoundationMessages,
-  resolveLocale,
-} from "@/features/foundation/messages";
+export { FoundationStatus } from "./components/FoundationStatus";
+export { getFoundationMessages, resolveLocale } from "./messages";
