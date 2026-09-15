@@ -1,0 +1,109 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+
+concurrency:
+  group: frontend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  quality:
+    name: Lint Typecheck Test Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Format check
+        run: pnpm format:check
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Knip
+        run: pnpm knip
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_APP_ENV: preview
+          NEXT_PUBLIC_ENABLE_MSW: "true"
+          NEXT_PUBLIC_ENABLE_DEV_TOOLS: "true"
+          NEXT_PUBLIC_RELEASE_SHA: ${{ github.sha }}
+
+  e2e-smoke:
+    name: Playwright smoke
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: E2E smoke
+        run: pnpm test:e2e
+        env:
+          NEXT_PUBLIC_APP_ENV: preview
+          NEXT_PUBLIC_ENABLE_MSW: "true"
+          NEXT_PUBLIC_ENABLE_DEV_TOOLS: "true"
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          retention-days: 7
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+      - name: Audit
+        working-directory: frontend
+        run: pnpm audit --prod --audit-level=high || true

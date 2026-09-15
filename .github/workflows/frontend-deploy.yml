@@ -1,0 +1,74 @@
+name: Frontend Deploy Interfaces
+
+# Provider-agnostic deployment interfaces for preview / staging / production.
+# Wire the actual hosting provider in a later DevOps task; these jobs define gates
+# and release metadata contracts only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Deployment target
+        required: true
+        type: choice
+        options:
+          - preview
+          - staging
+          - production
+      ref:
+        description: Git ref to deploy
+        required: false
+        default: main
+
+jobs:
+  gate:
+    name: Required quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install and verify
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm typecheck
+          pnpm test
+          pnpm build
+        env:
+          NEXT_PUBLIC_APP_ENV: ${{ inputs.target == 'production' && 'production' || inputs.target }}
+          NEXT_PUBLIC_ENABLE_MSW: ${{ inputs.target == 'production' && 'false' || 'true' }}
+          NEXT_PUBLIC_ENABLE_DEV_TOOLS: ${{ inputs.target == 'production' && 'false' || 'true' }}
+          NEXT_PUBLIC_RELEASE_SHA: ${{ github.sha }}
+
+  publish-metadata:
+    name: Emit release metadata
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write release metadata
+        run: |
+          mkdir -p artifacts
+          cat > artifacts/release.json <<EOF
+          {
+            "target": "${{ inputs.target }}",
+            "commitSha": "${{ github.sha }}",
+            "ref": "${{ inputs.ref }}",
+            "rollbackTag": "solo-frontend-${{ inputs.target }}-${{ github.sha }}",
+            "createdAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-metadata-${{ inputs.target }}
+          path: artifacts/release.json
+          retention-days: 30
