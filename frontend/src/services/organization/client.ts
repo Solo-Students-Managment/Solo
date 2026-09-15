@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import { apiRequest, opaqueIdSchema } from "@/services/api";
 
+import { __resetMockMembers, seedOwnerMembership } from "./members";
+
+export * from "./members";
+
 export const organizationTypeSchema = z.enum(["school", "institute"]);
 export type OrganizationType = z.infer<typeof organizationTypeSchema>;
 
@@ -52,11 +56,12 @@ export function createMockOrganizationClient(): OrganizationClient {
       const id = opaqueIdSchema.parse(
         `org_${Math.random().toString(36).slice(2, 10)}`,
       );
+      const mainBranchId = opaqueIdSchema.parse(`br_main_${id}`);
       const org = organizationSchema.parse({
         id,
         name,
         type,
-        mainBranchId: opaqueIdSchema.parse(`br_main_${id}`),
+        mainBranchId,
         mainBranchName: "Main Branch",
         ownerRole: "owner",
         trialDaysLeft: 14,
@@ -66,7 +71,18 @@ export function createMockOrganizationClient(): OrganizationClient {
       });
       orgs.set(id, org);
       const { __addMockOrgContext } = await import("@/services/home");
+      const { getAuthClient } = await import("@/services/auth");
       __addMockOrgContext(id, name);
+      const session = await getAuthClient().getSession();
+      if (session) {
+        seedOwnerMembership({
+          organizationId: id,
+          userId: session.userId,
+          displayName: session.displayName,
+          phoneE164: "+989121234567",
+          mainBranchId,
+        });
+      }
       return org;
     },
     async get(orgId) {
@@ -89,5 +105,6 @@ export function setOrganizationClient(client: OrganizationClient): void {
 
 export function __resetMockOrganizations(): void {
   orgs.clear();
+  __resetMockMembers();
   organizationClient = createMockOrganizationClient();
 }

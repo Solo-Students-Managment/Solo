@@ -39,12 +39,23 @@ export const personaSchema = z.enum([
 ]);
 export type Persona = z.infer<typeof personaSchema>;
 
+export const orgRoleSchema = z.enum([
+  "owner",
+  "manager",
+  "academic_manager",
+  "teacher",
+  "finance",
+  "support_staff",
+]);
+export type OrgRole = z.infer<typeof orgRoleSchema>;
+
 export const sessionSchema = z.object({
   userId: opaqueIdSchema,
   displayName: z.string(),
   activePersona: personaSchema,
   organizationId: opaqueIdSchema.nullable(),
   subjectId: opaqueIdSchema.nullable(),
+  orgRole: orgRoleSchema.nullable().default(null),
   expiresAt: z.string(),
   requiresReauth: z.boolean().default(false),
 });
@@ -395,6 +406,7 @@ export function createMockAuthClient(): AuthClient {
         activePersona: "teacher",
         organizationId: null,
         subjectId: null,
+        orgRole: null,
         expiresAt: futureExpiry(),
         requiresReauth: false,
       });
@@ -419,6 +431,7 @@ export function createMockAuthClient(): AuthClient {
         activePersona: "teacher",
         organizationId: null,
         subjectId: null,
+        orgRole: null,
         expiresAt: futureExpiry(),
         requiresReauth: false,
       });
@@ -438,6 +451,7 @@ export function createMockAuthClient(): AuthClient {
         activePersona: "teacher",
         organizationId: null,
         subjectId: null,
+        orgRole: null,
         expiresAt: futureExpiry(),
         requiresReauth: false,
       });
@@ -619,12 +633,19 @@ export function createMockAuthClient(): AuthClient {
     },
     async switchContext({ organizationId, subjectId = null }) {
       if (!memorySession) throw new Error("No session");
+      let orgRole: OrgRole | null = null;
+      if (organizationId) {
+        const { resolveOrgRoleForUser } =
+          await import("@/services/organization/members");
+        orgRole = resolveOrgRoleForUser(organizationId, memorySession.userId);
+      }
       memorySession = {
         ...memorySession,
         organizationId: organizationId
           ? opaqueIdSchema.parse(organizationId)
           : null,
         subjectId: subjectId ? opaqueIdSchema.parse(subjectId) : null,
+        orgRole,
       };
       return memorySession;
     },

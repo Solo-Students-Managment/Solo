@@ -18,6 +18,7 @@ describe("typed routes", () => {
     expect(routes.auth.recover()).toBe("/auth/recover");
     expect(routes.organization.home("org_1")).toBe("/org/org_1");
     expect(routes.organization.create()).toBe("/org/new");
+    expect(routes.organization.members("org_1")).toBe("/org/org_1/members");
     expect(routes.teacher.activate()).toBe("/teacher/activate");
     expect(routes.public.profile("ali-school")).toBe("/p/ali-school");
     expect(routes.home("fa")).not.toMatch(/token|password|otp|phone/i);

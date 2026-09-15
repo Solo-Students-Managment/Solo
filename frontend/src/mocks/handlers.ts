@@ -19,6 +19,16 @@ import {
   type AvailableContext,
 } from "@/services/home";
 import { organizationSchema, type Organization } from "@/services/organization";
+import {
+  ASSIGNABLE_ORG_ROLES,
+  inviteStaffResultSchema,
+  orgMemberSchema,
+  orgRoleSchema,
+  resolveOrgRoleForUser,
+  seedOwnerMembership,
+  type OrgMember,
+  type OrgRole,
+} from "@/services/organization/members";
 
 export type MockScenario =
   | "success"
@@ -55,6 +65,10 @@ let deviceSessions: DeviceSession[] = [];
 let currentPhoneE164 = "+989121234567";
 let mockProfile: UserProfile | null = null;
 const mockOrgs = new Map<string, Organization>();
+const mockMembersByOrg = new Map<
+  string,
+  Array<OrgMember & { phoneE164: string; userId: string | null }>
+>();
 let mockPersonas = [
   {
     persona: "teacher" as const,
@@ -144,6 +158,7 @@ function makeSession(displayName: string, phoneE164: string) {
     activePersona: "teacher",
     organizationId: null,
     subjectId: null,
+    orgRole: null,
     expiresAt: new Date(Date.now() + 60 * 60_000).toISOString(),
     requiresReauth: false,
   });
@@ -833,11 +848,12 @@ export const handlers = [
     const id = opaqueIdSchema.parse(
       `org_${Math.random().toString(36).slice(2, 10)}`,
     );
+    const mainBranchId = opaqueIdSchema.parse(`br_main_${id}`);
     const org = organizationSchema.parse({
       id,
       name: body.name,
       type: body.type,
-      mainBranchId: opaqueIdSchema.parse(`br_main_${id}`),
+      mainBranchId,
       mainBranchName: "Main Branch",
       ownerRole: "owner",
       trialDaysLeft: 14,
@@ -846,6 +862,27 @@ export const handlers = [
       publicProfilePublished: false,
     });
     mockOrgs.set(id, org);
+    seedOwnerMembership({
+      organizationId: id,
+      userId: currentSession!.userId,
+      displayName: currentSession!.displayName,
+      phoneE164: currentPhoneE164,
+      mainBranchId,
+    });
+    mockMembersByOrg.set(id, [
+      {
+        id: opaqueIdSchema.parse(`mem_owner_${id}`),
+        organizationId: id,
+        displayName: currentSession!.displayName,
+        phoneMasked: maskPhoneE164(currentPhoneE164),
+        phoneE164: currentPhoneE164,
+        userId: currentSession!.userId,
+        role: "owner",
+        branchIds: [mainBranchId],
+        status: "active",
+        joinedAt: new Date().toISOString(),
+      },
+    ]);
     mockContexts = [
       ...mockContexts.filter((c) => c.organizationId !== id),
       {
@@ -872,6 +909,229 @@ export const handlers = [
     }
     return HttpResponse.json(org);
   }),
+
+  http.get("/api/organizations/:orgId/members", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    if (scenario === "forbidden") {
+      return HttpResponse.json(
+        errorBody(403, "FORBIDDEN", "errors.forbidden"),
+        { status: 403 },
+      );
+    }
+    const orgId = String(params.orgId);
+    if (!mockOrgs.get(orgId)) {
+      return HttpResponse.json(
+        errorBody(404, "NOT_FOUND", "errors.not_found"),
+        { status: 404 },
+      );
+    }
+    if (scenario === "empty") {
+      return HttpResponse.json({
+        data: [],
+        meta: { page: 1, pageSize: 20, totalItems: 0, totalPages: 0 },
+      });
+    }
+    const rows = mockMembersByOrg.get(orgId) ?? [];
+    const data = rows.map((row) =>
+      orgMemberSchema.parse({
+        id: row.id,
+        organizationId: row.organizationId,
+        displayName: row.displayName,
+        phoneMasked: row.phoneMasked,
+        role: row.role,
+        branchIds: row.branchIds,
+        status: row.status,
+        invitedAt: row.invitedAt,
+        joinedAt: row.joinedAt,
+      }),
+    );
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/members/invite",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      if (scenario === "forbidden") {
+        return HttpResponse.json(
+          errorBody(403, "FORBIDDEN", "errors.forbidden"),
+          { status: 403 },
+        );
+      }
+      const orgId = String(params.orgId);
+      const org = mockOrgs.get(orgId);
+      if (!org) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const body = (await request.json()) as {
+        phoneE164?: string;
+        role?: string;
+        displayName?: string;
+      };
+      const roleParsed = orgRoleSchema.safeParse(body.role);
+      if (
+        !body.phoneE164 ||
+        !roleParsed.success ||
+        !ASSIGNABLE_ORG_ROLES.includes(roleParsed.data) ||
+        !body.displayName?.trim()
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const rows = mockMembersByOrg.get(orgId) ?? [];
+      if (rows.some((row) => row.phoneE164 === body.phoneE164)) {
+        return HttpResponse.json(
+          errorBody(409, "CONFLICT", "organization.invite.duplicate"),
+          { status: 409 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `mem_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const member = {
+        id,
+        organizationId: org.id,
+        displayName: body.displayName.trim(),
+        phoneMasked: maskPhoneE164(body.phoneE164),
+        phoneE164: body.phoneE164,
+        userId: null as string | null,
+        role: roleParsed.data as OrgRole,
+        branchIds: [org.mainBranchId],
+        status: "invited" as const,
+        invitedAt: new Date().toISOString(),
+      };
+      mockMembersByOrg.set(orgId, [...rows, member]);
+      mockOrgs.set(orgId, {
+        ...org,
+        membersCount: org.membersCount + 1,
+      });
+      return HttpResponse.json(
+        inviteStaffResultSchema.parse({
+          inviteId: id,
+          status: "sent",
+          member: orgMemberSchema.parse({
+            id: member.id,
+            organizationId: member.organizationId,
+            displayName: member.displayName,
+            phoneMasked: member.phoneMasked,
+            role: member.role,
+            branchIds: member.branchIds,
+            status: member.status,
+            invitedAt: member.invitedAt,
+          }),
+        }),
+      );
+    },
+  ),
+
+  http.patch(
+    "/api/organizations/:orgId/members/:memberId",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const memberId = String(params.memberId);
+      const rows = mockMembersByOrg.get(orgId) ?? [];
+      const index = rows.findIndex((row) => String(row.id) === memberId);
+      if (index < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const body = (await request.json()) as { role?: string };
+      const roleParsed = orgRoleSchema.safeParse(body.role);
+      if (!roleParsed.success || roleParsed.data === "owner") {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const current = rows[index]!;
+      if (current.role === "owner") {
+        return HttpResponse.json(
+          errorBody(409, "CONFLICT", "organization.roles.ownerImmutable"),
+          { status: 409 },
+        );
+      }
+      const next = { ...current, role: roleParsed.data };
+      const updated = [...rows];
+      updated[index] = next;
+      mockMembersByOrg.set(orgId, updated);
+      return HttpResponse.json(
+        orgMemberSchema.parse({
+          id: next.id,
+          organizationId: next.organizationId,
+          displayName: next.displayName,
+          phoneMasked: next.phoneMasked,
+          role: next.role,
+          branchIds: next.branchIds,
+          status: next.status,
+          invitedAt: next.invitedAt,
+          joinedAt: next.joinedAt,
+        }),
+      );
+    },
+  ),
+
+  http.delete(
+    "/api/organizations/:orgId/members/:memberId",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const memberId = String(params.memberId);
+      const rows = mockMembersByOrg.get(orgId) ?? [];
+      const target = rows.find((row) => String(row.id) === memberId);
+      if (!target) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      if (target.role === "owner") {
+        return HttpResponse.json(
+          errorBody(409, "CONFLICT", "organization.member.ownerCannotRevoke"),
+          { status: 409 },
+        );
+      }
+      mockMembersByOrg.set(
+        orgId,
+        rows.filter((row) => String(row.id) !== memberId),
+      );
+      const org = mockOrgs.get(orgId);
+      if (org) {
+        mockOrgs.set(orgId, {
+          ...org,
+          membersCount: Math.max(1, org.membersCount - 1),
+        });
+      }
+      return new HttpResponse(null, { status: 204 });
+    },
+  ),
 
   http.post("/api/auth/persona", async ({ request }) => {
     const failed = await maybeFail();
@@ -903,10 +1163,25 @@ export const handlers = [
       organizationId: string | null;
       subjectId?: string | null;
     };
+    let orgRole = null as OrgRole | null;
+    if (body.organizationId) {
+      const fromSeed = resolveOrgRoleForUser(
+        body.organizationId,
+        currentSession.userId,
+      );
+      const fromHandler = (
+        mockMembersByOrg.get(body.organizationId) ?? []
+      ).find(
+        (row) =>
+          row.userId === currentSession!.userId && row.status === "active",
+      )?.role;
+      orgRole = fromSeed ?? fromHandler ?? "owner";
+    }
     currentSession = sessionSchema.parse({
       ...currentSession,
       organizationId: body.organizationId,
       subjectId: body.subjectId ?? null,
+      orgRole,
     });
     return HttpResponse.json(currentSession);
   }),

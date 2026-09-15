@@ -1,3 +1,4 @@
+import type { OrgRole } from "@/services/organization/members";
 import type { Persona, Session } from "@/services/auth";
 
 export type CapabilityDenyReason =
@@ -23,7 +24,11 @@ export type Capability =
   | "account.phone.change"
   | "students.manage"
   | "billing.manage"
-  | "exams.publish";
+  | "exams.publish"
+  | "org.members.view"
+  | "org.members.invite"
+  | "org.members.manage"
+  | "org.roles.assign";
 
 const personaCapabilities: Record<Persona, Capability[]> = {
   student: ["nav.personal", "account.security.manage", "account.phone.change"],
@@ -42,6 +47,10 @@ const personaCapabilities: Record<Persona, Capability[]> = {
     "account.phone.change",
     "students.manage",
     "billing.manage",
+    "org.members.view",
+    "org.members.invite",
+    "org.members.manage",
+    "org.roles.assign",
   ],
   admin_solo: [
     "nav.personal",
@@ -53,8 +62,37 @@ const personaCapabilities: Record<Persona, Capability[]> = {
     "students.manage",
     "billing.manage",
     "exams.publish",
+    "org.members.view",
+    "org.members.invite",
+    "org.members.manage",
+    "org.roles.assign",
   ],
 };
+
+const orgRoleCapabilities: Record<OrgRole, Capability[]> = {
+  owner: [
+    "org.members.view",
+    "org.members.invite",
+    "org.members.manage",
+    "org.roles.assign",
+    "students.manage",
+    "billing.manage",
+  ],
+  manager: [
+    "org.members.view",
+    "org.members.invite",
+    "org.members.manage",
+    "students.manage",
+  ],
+  academic_manager: ["org.members.view", "students.manage"],
+  teacher: ["org.members.view"],
+  finance: ["org.members.view", "billing.manage"],
+  support_staff: ["org.members.view"],
+};
+
+function isOrgScopedCapability(capability: Capability): boolean {
+  return capability.startsWith("org.");
+}
 
 export function resolveCapability(
   session: Session | null,
@@ -66,7 +104,34 @@ export function resolveCapability(
   if (session.requiresReauth) {
     return { allowed: false, reason: "reauth_required" };
   }
-  const allowed =
+
+  const personaAllows =
     personaCapabilities[session.activePersona].includes(capability);
-  return allowed ? { allowed: true } : { allowed: false, reason: "permission" };
+
+  if (!isOrgScopedCapability(capability)) {
+    return personaAllows
+      ? { allowed: true }
+      : { allowed: false, reason: "permission" };
+  }
+
+  if (!personaAllows) {
+    return { allowed: false, reason: "permission" };
+  }
+
+  if (!session.organizationId) {
+    return { allowed: false, reason: "permission" };
+  }
+
+  if (session.activePersona === "admin_solo") {
+    return { allowed: true };
+  }
+
+  if (!session.orgRole) {
+    return { allowed: false, reason: "permission" };
+  }
+
+  const roleAllows = orgRoleCapabilities[session.orgRole].includes(capability);
+  return roleAllows
+    ? { allowed: true }
+    : { allowed: false, reason: "permission" };
 }
