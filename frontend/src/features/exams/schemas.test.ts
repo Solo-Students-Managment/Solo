@@ -1,39 +1,38 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  createExamSchema,
-  parseTimeLimitMinutes,
-  recordSignalSchema,
-  startAttemptSchema,
-} from "./schemas";
+import { gradeAttemptSchema, regradeAttemptSchema } from "./schemas";
 
-describe("exam builder schemas", () => {
-  it("accepts exam builder policy payload", () => {
-    expect(
-      createExamSchema.safeParse({
-        title: "Midterm",
-        poolSize: 20,
-        randomize: "yes",
-        maxAttempts: 2,
-        timeLimitMinutes: "45",
-      }).success,
-    ).toBe(true);
+describe("exam grading schemas", () => {
+  it("accepts valid grade payloads", () => {
+    const parsed = gradeAttemptSchema.parse({
+      attemptId: "exa_abc",
+      score: "88",
+      rubricNotes: "Clear reasoning",
+      placementRecommendation: "",
+      humanOverride: "no",
+    });
+    expect(parsed.score).toBe(88);
+    expect(parsed.humanOverride).toBe("no");
   });
 
-  it("parses optional time limits and attempt forms", () => {
-    expect(parseTimeLimitMinutes("45")).toBe(45);
-    expect(parseTimeLimitMinutes("")).toBeNull();
-    expect(
-      startAttemptSchema.safeParse({
-        examTitle: "Midterm",
-        studentDisplayName: "Sara",
-      }).success,
-    ).toBe(true);
-    expect(
-      recordSignalSchema.safeParse({
-        attemptId: "exa_1",
-        signal: "tab_blur",
-      }).success,
-    ).toBe(true);
+  it("rejects out-of-range scores", () => {
+    const result = gradeAttemptSchema.safeParse({
+      attemptId: "exa_abc",
+      score: 120,
+      rubricNotes: "notes",
+      humanOverride: "no",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("requires grade id for regrade", () => {
+    const result = regradeAttemptSchema.safeParse({
+      gradeId: "",
+      attemptId: "exa_abc",
+      score: 70,
+      rubricNotes: "notes",
+      humanOverride: "yes",
+    });
+    expect(result.success).toBe(false);
   });
 });

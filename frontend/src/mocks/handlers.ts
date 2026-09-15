@@ -89,10 +89,12 @@ import {
 import {
   antiCheatSignalSchema,
   examAttemptSchema,
+  examGradeSchema,
   examSchema,
   type AntiCheatSignal,
   type Exam,
   type ExamAttempt,
+  type ExamGrade,
 } from "@/services/exams";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
@@ -249,6 +251,7 @@ const mockProgressMetrics = new Map<string, ProgressMetric[]>();
 const mockQuestionBank = new Map<string, BankQuestion[]>();
 const mockExams = new Map<string, Exam[]>();
 const mockExamAttempts = new Map<string, ExamAttempt[]>();
+const mockExamGrades = new Map<string, ExamGrade[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -447,6 +450,7 @@ function persistMswState() {
         mockQuestionBank: [...mockQuestionBank.entries()],
         mockExams: [...mockExams.entries()],
         mockExamAttempts: [...mockExamAttempts.entries()],
+        mockExamGrades: [...mockExamGrades.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -608,6 +612,15 @@ function hydrateMswState() {
         mockExamAttempts.set(
           entry[0],
           entry[1].map((row) => examAttemptSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockExamGrades)) {
+      mockExamGrades.clear();
+      for (const entry of data.mockExamGrades as Array<[string, ExamGrade[]]>) {
+        mockExamGrades.set(
+          entry[0],
+          entry[1].map((row) => examGradeSchema.parse(row)),
         );
       }
     }
@@ -3927,6 +3940,139 @@ export const handlers = [
         status: "submitted",
       });
       mockExamAttempts.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/exam-grades", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockExamGrades.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/exam-grades",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        attemptId?: string;
+        score?: number;
+        rubricNotes?: string;
+        placementRecommendation?: string | null;
+        humanOverride?: boolean;
+      };
+      const attemptId = String(body.attemptId ?? "").trim();
+      const score = Number(body.score);
+      if (!attemptId || Number.isNaN(score)) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const attempts = mockExamAttempts.get(orgId) ?? [];
+      if (!attempts.some((row) => String(row.id) === attemptId)) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const now = new Date().toISOString();
+      const created = examGradeSchema.parse({
+        id: opaqueIdSchema.parse(
+          `exg_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        attemptId: opaqueIdSchema.parse(attemptId),
+        organizationId: opaqueIdSchema.parse(orgId),
+        score,
+        rubricNotes: String(body.rubricNotes ?? ""),
+        placementRecommendation: body.placementRecommendation ?? null,
+        humanOverride: Boolean(body.humanOverride),
+        history: [
+          {
+            score,
+            rubricNotes: String(body.rubricNotes ?? ""),
+            changedAt: now,
+          },
+        ],
+      });
+      mockExamGrades.set(orgId, [
+        ...(mockExamGrades.get(orgId) ?? []),
+        created,
+      ]);
+      persistMswState();
+      return HttpResponse.json(created, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/exam-grades/:gradeId/regrade",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const gradeId = String(params.gradeId);
+      const body = (await request.json()) as {
+        score?: number;
+        rubricNotes?: string;
+        placementRecommendation?: string | null;
+        humanOverride?: boolean;
+      };
+      const score = Number(body.score);
+      if (Number.isNaN(score)) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const rows = mockExamGrades.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === gradeId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const existing = rows[idx]!;
+      const now = new Date().toISOString();
+      const updated = examGradeSchema.parse({
+        ...existing,
+        score,
+        rubricNotes: String(body.rubricNotes ?? existing.rubricNotes),
+        placementRecommendation:
+          body.placementRecommendation ?? existing.placementRecommendation,
+        humanOverride: body.humanOverride ?? true,
+        history: [
+          ...existing.history,
+          {
+            score,
+            rubricNotes: String(body.rubricNotes ?? existing.rubricNotes),
+            changedAt: now,
+          },
+        ],
+      });
+      mockExamGrades.set(
         orgId,
         rows.map((row, i) => (i === idx ? updated : row)),
       );

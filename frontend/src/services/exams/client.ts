@@ -37,12 +37,39 @@ export const examAttemptSchema = z.object({
 export type ExamAttempt = z.infer<typeof examAttemptSchema>;
 export const examAttemptsCollectionSchema = collectionSchema(examAttemptSchema);
 
+export const examGradeSchema = z.object({
+  id: opaqueIdSchema,
+  attemptId: opaqueIdSchema,
+  organizationId: opaqueIdSchema,
+  score: z.number().min(0).max(100),
+  rubricNotes: z.string(),
+  placementRecommendation: z.string().nullable(),
+  humanOverride: z.boolean(),
+  history: z.array(
+    z.object({
+      score: z.number(),
+      rubricNotes: z.string(),
+      changedAt: z.string(),
+    }),
+  ),
+});
+export type ExamGrade = z.infer<typeof examGradeSchema>;
+export const examGradesCollectionSchema = collectionSchema(examGradeSchema);
+
 export type CreateExamInput = {
   title: string;
   poolSize: number;
   randomize: boolean;
   maxAttempts: number;
   timeLimitMinutes: number | null;
+};
+
+export type GradeAttemptInput = {
+  attemptId: string;
+  score: number;
+  rubricNotes: string;
+  placementRecommendation?: string | null;
+  humanOverride?: boolean;
 };
 
 export type ExamsClient = {
@@ -67,10 +94,23 @@ export type ExamsClient = {
     organizationId: string,
     attemptId: string,
   ): Promise<ExamAttempt>;
+  listGrades(
+    organizationId: string,
+  ): Promise<z.infer<typeof examGradesCollectionSchema>>;
+  gradeAttempt(
+    organizationId: string,
+    input: GradeAttemptInput,
+  ): Promise<ExamGrade>;
+  regradeAttempt(
+    organizationId: string,
+    gradeId: string,
+    input: GradeAttemptInput,
+  ): Promise<ExamGrade>;
 };
 
 const examsMemory = new Map<string, Exam[]>();
 const attemptsMemory = new Map<string, ExamAttempt[]>();
+const gradesMemory = new Map<string, ExamGrade[]>();
 
 function meta<T>(data: T[]) {
   return {
@@ -152,6 +192,32 @@ export function createHttpExamsClient(): ExamsClient {
           method: "POST",
           body: JSON.stringify({}),
           parse: (data) => examAttemptSchema.parse(data),
+        },
+      );
+    },
+    async listGrades(organizationId) {
+      return apiRequest(
+        `/organizations/${encodeURIComponent(organizationId)}/exam-grades`,
+        { parse: (data) => examGradesCollectionSchema.parse(data) },
+      );
+    },
+    async gradeAttempt(organizationId, input) {
+      return apiRequest(
+        `/organizations/${encodeURIComponent(organizationId)}/exam-grades`,
+        {
+          method: "POST",
+          body: JSON.stringify(input),
+          parse: (data) => examGradeSchema.parse(data),
+        },
+      );
+    },
+    async regradeAttempt(organizationId, gradeId, input) {
+      return apiRequest(
+        `/organizations/${encodeURIComponent(organizationId)}/exam-grades/${encodeURIComponent(gradeId)}/regrade`,
+        {
+          method: "POST",
+          body: JSON.stringify(input),
+          parse: (data) => examGradeSchema.parse(data),
         },
       );
     },
@@ -269,6 +335,65 @@ export function createMockExamsClient(): ExamsClient {
       );
       return updated;
     },
+    async listGrades(organizationId) {
+      return meta(gradesMemory.get(organizationId) ?? []);
+    },
+    async gradeAttempt(organizationId, input) {
+      const attempt = (attemptsMemory.get(organizationId) ?? []).find(
+        (row) => String(row.id) === input.attemptId,
+      );
+      if (!attempt) throw new Error("NOT_FOUND");
+      const now = new Date().toISOString();
+      const grade = examGradeSchema.parse({
+        id: opaqueIdSchema.parse(
+          `exg_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        attemptId: attempt.id,
+        organizationId: opaqueIdSchema.parse(organizationId),
+        score: input.score,
+        rubricNotes: input.rubricNotes.trim(),
+        placementRecommendation: input.placementRecommendation?.trim() || null,
+        humanOverride: Boolean(input.humanOverride),
+        history: [
+          {
+            score: input.score,
+            rubricNotes: input.rubricNotes.trim(),
+            changedAt: now,
+          },
+        ],
+      });
+      gradesMemory.set(organizationId, [
+        ...(gradesMemory.get(organizationId) ?? []),
+        grade,
+      ]);
+      return grade;
+    },
+    async regradeAttempt(organizationId, gradeId, input) {
+      const rows = gradesMemory.get(organizationId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === gradeId);
+      if (idx < 0) throw new Error("NOT_FOUND");
+      const current = rows[idx]!;
+      const updated = examGradeSchema.parse({
+        ...current,
+        score: input.score,
+        rubricNotes: input.rubricNotes.trim(),
+        placementRecommendation: input.placementRecommendation?.trim() || null,
+        humanOverride: Boolean(input.humanOverride),
+        history: [
+          ...current.history,
+          {
+            score: current.score,
+            rubricNotes: current.rubricNotes,
+            changedAt: new Date().toISOString(),
+          },
+        ],
+      });
+      gradesMemory.set(
+        organizationId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      return updated;
+    },
   };
 }
 
@@ -282,6 +407,7 @@ export function setExamsClient(next: ExamsClient) {
 export function __resetMockExams() {
   examsMemory.clear();
   attemptsMemory.clear();
+  gradesMemory.clear();
   client = createMockExamsClient();
 }
 
@@ -294,4 +420,10 @@ export function canStartAttempt(
   priorAttempts: number,
 ) {
   return exam.status === "published" && priorAttempts < exam.maxAttempts;
+}
+
+export function suggestPlacement(score: number): string {
+  if (score >= 85) return "advanced";
+  if (score >= 70) return "intermediate";
+  return "foundational";
 }

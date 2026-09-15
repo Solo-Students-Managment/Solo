@@ -33,6 +33,23 @@ export const submitAttemptSchema = z.object({
 });
 export type SubmitAttemptValues = z.infer<typeof submitAttemptSchema>;
 
+export const gradeAttemptSchema = z.object({
+  attemptId: z.string().trim().min(1, "exams.validation.attempt"),
+  score: z.coerce
+    .number()
+    .min(0, "exams.validation.score")
+    .max(100, "exams.validation.score"),
+  rubricNotes: z.string().trim().min(1, "exams.validation.rubric"),
+  placementRecommendation: z.string().trim().optional(),
+  humanOverride: z.enum(["yes", "no"]),
+});
+export type GradeAttemptValues = z.infer<typeof gradeAttemptSchema>;
+
+export const regradeAttemptSchema = gradeAttemptSchema.extend({
+  gradeId: z.string().trim().min(1, "exams.validation.grade"),
+});
+export type RegradeAttemptValues = z.infer<typeof regradeAttemptSchema>;
+
 export function parseTimeLimitMinutes(raw: string | undefined): number | null {
   if (!raw?.trim()) return null;
   const value = Number(raw);

@@ -26,6 +26,7 @@ import { getAuthClient } from "@/services/auth";
 import { getExamsClient, isExamPublishable, type Exam } from "@/services/exams";
 import { getOrganizationClient } from "@/services/organization";
 
+import { OrganizationExamGradingPanel } from "./OrganizationExamGradingPanel";
 import {
   createExamSchema,
   parseTimeLimitMinutes,
@@ -446,6 +447,13 @@ export function OrganizationExamsView() {
           <SubmitAttemptFields locale={locale} />
         </SoloForm>
       </section>
+
+      <OrganizationExamGradingPanel
+        locale={locale}
+        orgId={orgId}
+        personaId={sessionQuery.data?.userId}
+        defaultAttemptId={lastAttemptId}
+      />
     </OrgShell>
   );
 }
