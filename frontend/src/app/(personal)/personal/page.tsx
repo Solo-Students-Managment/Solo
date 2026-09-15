@@ -1,7 +1,12 @@
+import { AppShell } from "@/components/layouts";
+
 export default function PersonalHomePage() {
   return (
-    <main className="p-6">
-      <h1 className="font-display text-2xl">Personal home</h1>
-    </main>
+    <AppShell title="Solo">
+      <h1 className="font-display text-2xl font-medium">Personal home</h1>
+      <p className="text-muted mt-2 text-sm">
+        Capability-aware shell with desktop sidebar and mobile bottom nav.
+      </p>
+    </AppShell>
   );
 }
