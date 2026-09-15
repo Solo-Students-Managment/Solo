@@ -50,7 +50,7 @@ export function FoundationControls({
 
   function onLocaleChange(next: Locale): void {
     startTransition(() => {
-      router.replace(`/?lang=${next}`);
+      router.replace(`/dev/foundation?lang=${next}`);
     });
   }
 

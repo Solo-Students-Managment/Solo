@@ -19,7 +19,7 @@ describe("FoundationControls", () => {
     render(<FoundationControls locale="fa" labels={labels} />);
 
     await user.click(screen.getByRole("button", { name: "EN" }));
-    expect(replace).toHaveBeenCalledWith("/?lang=en");
+    expect(replace).toHaveBeenCalledWith("/dev/foundation?lang=en");
   });
 
   it("exposes theme buttons with pressed state", async () => {

@@ -15,8 +15,12 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
   NEXT_PUBLIC_API_BASE_URL: z
     .string()
-    .url()
-    .default("http://localhost:3000/api"),
+    .default("/api")
+    .refine(
+      (value) =>
+        value.startsWith("/") || z.string().url().safeParse(value).success,
+      { message: "Must be an absolute URL or a root-relative path" },
+    ),
   NEXT_PUBLIC_ENABLE_MSW: z
     .enum(["true", "false"])
     .default("true")

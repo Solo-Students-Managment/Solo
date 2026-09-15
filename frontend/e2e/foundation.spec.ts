@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("F0-001 foundation smoke", () => {
+test.describe("F0 foundation smoke", () => {
   test("shows Persian foundation status by default", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/dev/foundation");
     await expect(page.getByText("Solo").first()).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "پایه‌گذاری فرانت‌اند" }),
@@ -11,7 +11,7 @@ test.describe("F0-001 foundation smoke", () => {
   });
 
   test("switches to English LTR via language control", async ({ page }) => {
-    await page.goto("/?lang=fa");
+    await page.goto("/dev/foundation?lang=fa");
     await page.getByRole("button", { name: "EN", exact: true }).click();
     await expect(page).toHaveURL(/lang=en/);
     await expect(
@@ -23,7 +23,7 @@ test.describe("F0-001 foundation smoke", () => {
   test("rejects unknown lang with default Persian content", async ({
     page,
   }) => {
-    await page.goto("/?lang=zz");
+    await page.goto("/dev/foundation?lang=zz");
     await expect(
       page.getByRole("heading", { name: "پایه‌گذاری فرانت‌اند" }),
     ).toBeVisible();

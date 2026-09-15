@@ -23,8 +23,10 @@ describe("public env schema", () => {
   it("loads local defaults with mocks enabled", () => {
     delete process.env.NEXT_PUBLIC_APP_ENV;
     delete process.env.NEXT_PUBLIC_ENABLE_MSW;
+    delete process.env.NEXT_PUBLIC_API_BASE_URL;
     const env = getPublicEnv();
     expect(env.NEXT_PUBLIC_APP_ENV).toBe("local");
+    expect(env.NEXT_PUBLIC_API_BASE_URL).toBe("/api");
     expect(canEnableMocks(env)).toBe(true);
     expect(canEnableDevTools(env)).toBe(true);
   });

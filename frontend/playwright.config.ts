@@ -17,6 +17,13 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      ...process.env,
+      NEXT_PUBLIC_APP_URL: baseURL,
+      NEXT_PUBLIC_API_BASE_URL: "/api",
+      NEXT_PUBLIC_ENABLE_MSW: "true",
+      NEXT_PUBLIC_ENABLE_DEV_TOOLS: "true",
+    },
   },
   projects: [
     {

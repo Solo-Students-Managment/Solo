@@ -1,11 +1,18 @@
 import { expect, test } from "@playwright/test";
 
+async function signIn(page: import("@playwright/test").Page) {
+  await page.goto("/auth/login?lang=en");
+  await page.getByLabel("Mobile number").fill("9121234567");
+  await page.getByLabel("Password", { exact: true }).fill("Password1");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Welcome to Solo" }),
+  ).toBeVisible();
+}
+
 test.describe("change phone and recovery smoke", () => {
   test("happy path changes phone after login", async ({ page }) => {
-    await page.goto("/auth/login?lang=en");
-    await page.getByLabel("Mobile number").fill("9121234567");
-    await page.getByLabel("Password", { exact: true }).fill("Password1");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await signIn(page);
     await page.goto("/personal/phone?lang=en");
     await expect(
       page.getByRole("heading", { name: "Change phone number" }),

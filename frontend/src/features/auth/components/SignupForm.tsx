@@ -21,6 +21,7 @@ import {
   type SignupValues,
 } from "../schemas";
 import { PhoneFields } from "./PhoneFields";
+import { withLang } from "../with-lang";
 import { z } from "zod";
 
 function NameFields({ locale }: { locale: ReturnType<typeof resolveLocale> }) {
@@ -82,7 +83,7 @@ export function SignupForm() {
                 tone: "success",
                 title: t(locale, "auth", "signupSuccess"),
               });
-              router.push(returnUrl);
+              router.push(withLang(returnUrl, locale));
             } catch (error) {
               const message =
                 error instanceof SoloApiError

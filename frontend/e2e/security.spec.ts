@@ -1,12 +1,18 @@
 import { expect, test } from "@playwright/test";
 
+async function signIn(page: import("@playwright/test").Page) {
+  await page.goto("/auth/login?lang=en");
+  await page.getByLabel("Mobile number").fill("9121234567");
+  await page.getByLabel("Password", { exact: true }).fill("Password1");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Welcome to Solo" }),
+  ).toBeVisible();
+}
+
 test.describe("account security smoke", () => {
   test("happy path enables SMS 2FA after login", async ({ page }) => {
-    await page.goto("/auth/login?lang=en");
-    await page.getByLabel("Mobile number").fill("9121234567");
-    await page.getByLabel("Password", { exact: true }).fill("Password1");
-    await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(page).toHaveURL(/\/personal/);
+    await signIn(page);
     await page.goto("/personal/security?lang=en");
     await expect(
       page.getByRole("heading", { name: "Account security" }),
@@ -22,10 +28,7 @@ test.describe("account security smoke", () => {
   test("wrong reauth password keeps device list unchanged", async ({
     page,
   }) => {
-    await page.goto("/auth/login?lang=en");
-    await page.getByLabel("Mobile number").fill("9121234567");
-    await page.getByLabel("Password", { exact: true }).fill("Password1");
-    await page.getByRole("button", { name: "Sign in" }).click();
+    await signIn(page);
     await page.goto("/personal/security?lang=en");
     await expect(page.getByText("iPhone")).toBeVisible();
     await page.getByRole("button", { name: "Revoke" }).click();

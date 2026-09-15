@@ -19,6 +19,7 @@ import {
   type LoginPasswordValues,
 } from "../schemas";
 import { PhoneFields } from "./PhoneFields";
+import { withLang } from "../with-lang";
 
 function PasswordField({
   locale,
@@ -73,7 +74,7 @@ export function LoginForm() {
               tone: "success",
               title: t(locale, "auth", "loginSuccess"),
             });
-            router.push(returnUrl);
+            router.push(withLang(returnUrl, locale));
           } catch (error) {
             const message =
               error instanceof SoloApiError

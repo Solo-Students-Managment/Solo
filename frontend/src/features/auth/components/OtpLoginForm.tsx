@@ -17,6 +17,7 @@ import { routes } from "@/lib/routes";
 
 import { loginOtpRequestSchema, otpCodeSchema, toE164 } from "../schemas";
 import { PhoneFields } from "./PhoneFields";
+import { withLang } from "../with-lang";
 
 const otpOnlySchema = z.object({ code: otpCodeSchema });
 
@@ -41,7 +42,7 @@ export function OtpLoginForm() {
                 tone: "success",
                 title: t(locale, "auth", "loginSuccess"),
               });
-              router.push(returnUrl);
+              router.push(withLang(returnUrl, locale));
             } catch (error) {
               const message =
                 error instanceof SoloApiError
