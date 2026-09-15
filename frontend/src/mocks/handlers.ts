@@ -148,6 +148,11 @@ import {
   nextOnboardingStep,
   type OnboardingCase,
 } from "@/services/onboarding";
+import {
+  offboardingCaseSchema,
+  nextOffboardingStep,
+  type OffboardingCase,
+} from "@/services/offboarding";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -323,6 +328,7 @@ const mockLeaveRequests = new Map<string, LeaveRequest[]>();
 const mockStaffClockEvents = new Map<string, StaffClockEvent[]>();
 const mockEmployeeDocuments = new Map<string, EmployeeDocument[]>();
 const mockOnboardingCases = new Map<string, OnboardingCase[]>();
+const mockOffboardingCases = new Map<string, OffboardingCase[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -540,6 +546,7 @@ function persistMswState() {
         mockStaffClockEvents: [...mockStaffClockEvents.entries()],
         mockEmployeeDocuments: [...mockEmployeeDocuments.entries()],
         mockOnboardingCases: [...mockOnboardingCases.entries()],
+        mockOffboardingCases: [...mockOffboardingCases.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -900,6 +907,18 @@ function hydrateMswState() {
         mockOnboardingCases.set(
           entry[0],
           entry[1].map((row) => onboardingCaseSchema.parse(row)),
+        );
+      }
+    }
+
+    if (Array.isArray(data.mockOffboardingCases)) {
+      mockOffboardingCases.clear();
+      for (const entry of data.mockOffboardingCases as Array<
+        [string, OffboardingCase[]]
+      >) {
+        mockOffboardingCases.set(
+          entry[0],
+          entry[1].map((row) => offboardingCaseSchema.parse(row)),
         );
       }
     }
@@ -5964,6 +5983,94 @@ export const handlers = [
         status: next === "done" ? "completed" : "in_progress",
       });
       mockOnboardingCases.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/offboarding", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockOffboardingCases.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/offboarding",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        staffDisplayName?: string;
+        lastWorkingDay?: string;
+      };
+      if (!body.staffDisplayName?.trim() || !body.lastWorkingDay) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "offboarding.validation.staff"),
+          { status: 400 },
+        );
+      }
+      const row = offboardingCaseSchema.parse({
+        id: opaqueIdSchema.parse(
+          `off_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        staffDisplayName: body.staffDisplayName.trim(),
+        status: "in_progress",
+        currentStep: "access_review",
+        lastWorkingDay: body.lastWorkingDay,
+      });
+      mockOffboardingCases.set(orgId, [
+        ...(mockOffboardingCases.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/offboarding/:caseId/advance",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const caseId = String(params.caseId);
+      const rows = mockOffboardingCases.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === caseId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "offboarding.loadError"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      const next = nextOffboardingStep(current.currentStep);
+      const updated = offboardingCaseSchema.parse({
+        ...current,
+        currentStep: next === "done" ? "deactivate" : next,
+        status: next === "done" ? "completed" : "in_progress",
+      });
+      mockOffboardingCases.set(
         orgId,
         rows.map((row, i) => (i === idx ? updated : row)),
       );

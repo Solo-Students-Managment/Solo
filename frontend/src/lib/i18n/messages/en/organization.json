@@ -85,5 +85,6 @@
   "navLeave": "Staff leave",
   "navStaffAttendance": "Staff clock-in",
   "navEmployeeDocuments": "Employee documents",
-  "navOnboarding": "Staff onboarding"
+  "navOnboarding": "Staff onboarding",
+  "navOffboarding": "Staff offboarding"
 }
