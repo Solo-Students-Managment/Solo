@@ -25,9 +25,10 @@ test.describe("assignments and gradebook smoke", () => {
     await page.getByRole("button", { name: "Publish assignment" }).click();
     await expect(page.getByText("Homework 1").first()).toBeVisible();
 
-    await page.getByLabel("Assignment title").fill("Homework 1");
-    await page.getByLabel("Student name").fill("Sara");
-    await page.getByRole("button", { name: "Record submission" }).click();
+    const submitForm = page.getByRole("form", { name: "Record submission" });
+    await submitForm.getByLabel("Assignment title").fill("Homework 1");
+    await submitForm.getByLabel("Student name").fill("Sara");
+    await submitForm.getByRole("button", { name: "Record submission" }).click();
     await expect(page.getByText("Submission recorded.")).toBeVisible();
 
     await page.goto(`/org/${orgId}/gradebook?lang=en`);

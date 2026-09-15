@@ -60,7 +60,13 @@ import {
   type SessionDetail,
   type AttendanceRecord,
 } from "@/services/sessions";
-import { assignmentSchema, type Assignment } from "@/services/assignments";
+import {
+  assignmentSchema,
+  assignmentTeamSchema,
+  canRequestRevision,
+  type Assignment,
+  type AssignmentTeam,
+} from "@/services/assignments";
 import { gradeEntrySchema, type GradeEntry } from "@/services/gradebook";
 import {
   evaluationLevelSchema,
@@ -220,6 +226,7 @@ const mockEnrollments = new Map<string, Enrollment>();
 const mockSessions = new Map<string, SessionDetail>();
 const mockAttendance = new Map<string, AttendanceRecord[]>();
 const mockAssignments = new Map<string, Assignment[]>();
+const mockAssignmentTeams = new Map<string, AssignmentTeam[]>();
 const mockGradebook = new Map<string, GradeEntry[]>();
 const mockEvaluationTemplates = new Map<string, EvaluationTemplate[]>();
 const mockGradeScales = new Map<string, GradeScale[]>();
@@ -414,6 +421,7 @@ function persistMswState() {
         mockOrgs: [...mockOrgs.entries()],
         mockMembersByOrg: [...mockMembersByOrg.entries()],
         mockAssignments: [...mockAssignments.entries()],
+        mockAssignmentTeams: [...mockAssignmentTeams.entries()],
         mockGradebook: [...mockGradebook.entries()],
         mockEvaluationTemplates: [...mockEvaluationTemplates.entries()],
         mockGradeScales: [...mockGradeScales.entries()],
@@ -485,6 +493,17 @@ function hydrateMswState() {
         mockAssignments.set(
           entry[0],
           entry[1].map((row) => assignmentSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockAssignmentTeams)) {
+      mockAssignmentTeams.clear();
+      for (const entry of data.mockAssignmentTeams as Array<
+        [string, AssignmentTeam[]]
+      >) {
+        mockAssignmentTeams.set(
+          entry[0],
+          entry[1].map((row) => assignmentTeamSchema.parse(row)),
         );
       }
     }
@@ -2450,6 +2469,9 @@ export const handlers = [
         title?: string;
         type?: Assignment["type"];
         dueAt?: string;
+        collaborationMode?: Assignment["collaborationMode"];
+        peerReviewEnabled?: boolean;
+        maxRevisions?: number;
       };
       if (!body.title || !body.type || !body.dueAt) {
         return HttpResponse.json(
@@ -2467,6 +2489,13 @@ export const handlers = [
         dueAt: body.dueAt,
         status: "published",
         submissionsCount: 0,
+        collaborationMode: body.collaborationMode ?? "individual",
+        peerReviewEnabled: body.peerReviewEnabled ?? false,
+        maxRevisions: body.maxRevisions ?? 1,
+        gradeRelease: "hidden",
+        teamsCount: 0,
+        peerReviewsCount: 0,
+        revisionsCount: 0,
       });
       mockAssignments.set(orgId, [...(mockAssignments.get(orgId) ?? []), item]);
       persistMswState();
@@ -2518,6 +2547,215 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(updated, { status: 201 });
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/assignments/:assignmentId/teams",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const key = `${String(params.orgId)}:${String(params.assignmentId)}`;
+      const data = mockAssignmentTeams.get(key) ?? [];
+      return HttpResponse.json({
+        data,
+        meta: {
+          page: 1,
+          pageSize: Math.max(data.length, 1),
+          totalItems: data.length,
+          totalPages: 1,
+        },
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/assignments/:assignmentId/teams",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const assignmentId = String(params.assignmentId);
+      const body = (await request.json()) as {
+        name?: string;
+        memberNames?: string[];
+      };
+      const rows = mockAssignments.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === assignmentId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (current.collaborationMode !== "group") {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "assignments.teamNotGroup"),
+          { status: 400 },
+        );
+      }
+      if (!body.name?.trim() || !body.memberNames?.length) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const team = assignmentTeamSchema.parse({
+        id: opaqueIdSchema.parse(
+          `atm_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        assignmentId: current.id,
+        name: body.name.trim(),
+        memberNames: body.memberNames
+          .map((name) => name.trim())
+          .filter(Boolean),
+      });
+      const key = `${orgId}:${assignmentId}`;
+      mockAssignmentTeams.set(key, [
+        ...(mockAssignmentTeams.get(key) ?? []),
+        team,
+      ]);
+      const updated = assignmentSchema.parse({
+        ...current,
+        teamsCount: current.teamsCount + 1,
+      });
+      mockAssignments.set(
+        orgId,
+        rows.map((row, index) => (index === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(team, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/assignments/:assignmentId/peer-reviews",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const assignmentId = String(params.assignmentId);
+      const body = (await request.json()) as {
+        reviewerName?: string;
+        revieweeName?: string;
+        score?: number;
+      };
+      if (!body.reviewerName || !body.revieweeName || body.score == null) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const rows = mockAssignments.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === assignmentId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (!current.peerReviewEnabled) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "assignments.peerDisabled"),
+          { status: 400 },
+        );
+      }
+      const updated = assignmentSchema.parse({
+        ...current,
+        peerReviewsCount: current.peerReviewsCount + 1,
+      });
+      mockAssignments.set(
+        orgId,
+        rows.map((row, index) => (index === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/assignments/:assignmentId/revisions",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const assignmentId = String(params.assignmentId);
+      const body = (await request.json()) as {
+        studentDisplayName?: string;
+        note?: string;
+      };
+      if (!body.studentDisplayName) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const rows = mockAssignments.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === assignmentId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (!canRequestRevision(current)) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "assignments.revisionLimit"),
+          { status: 400 },
+        );
+      }
+      const updated = assignmentSchema.parse({
+        ...current,
+        revisionsCount: current.revisionsCount + 1,
+      });
+      mockAssignments.set(
+        orgId,
+        rows.map((row, index) => (index === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/assignments/:assignmentId/grade-release",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const assignmentId = String(params.assignmentId);
+      const rows = mockAssignments.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === assignmentId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      const updated = assignmentSchema.parse({
+        ...current,
+        gradeRelease: "released",
+      });
+      mockAssignments.set(
+        orgId,
+        rows.map((row, index) => (index === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 
