@@ -132,6 +132,7 @@ import {
   ROLE_TEMPLATE_KEYS,
   type OrgRoleDefinition,
 } from "@/services/roles";
+import { orgPolicySchema, type OrgPolicy } from "@/services/policies";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -301,6 +302,7 @@ const mockTeams = new Map<string, Team[]>();
 const mockPositions = new Map<string, Position[]>();
 const mockDirectory = new Map<string, DirectoryPerson[]>();
 const mockRoleDefinitions = new Map<string, OrgRoleDefinition[]>();
+const mockPolicies = new Map<string, OrgPolicy[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -512,6 +514,7 @@ function persistMswState() {
         mockPositions: [...mockPositions.entries()],
         mockDirectory: [...mockDirectory.entries()],
         mockRoleDefinitions: [...mockRoleDefinitions.entries()],
+        mockPolicies: [...mockPolicies.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -804,6 +807,16 @@ function hydrateMswState() {
         mockRoleDefinitions.set(
           entry[0],
           entry[1].map((row) => orgRoleDefinitionSchema.parse(row)),
+        );
+      }
+    }
+
+    if (Array.isArray(data.mockPolicies)) {
+      mockPolicies.clear();
+      for (const entry of data.mockPolicies as Array<[string, OrgPolicy[]]>) {
+        mockPolicies.set(
+          entry[0],
+          entry[1].map((row) => orgPolicySchema.parse(row)),
         );
       }
     }
@@ -5402,4 +5415,107 @@ export const handlers = [
     persistMswState();
     return HttpResponse.json(row, { status: 201 });
   }),
+
+  http.get("/api/organizations/:orgId/policies", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockPolicies.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/policies",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        title?: string;
+        category?: string;
+        inheritsFromParent?: boolean;
+        sensitive?: boolean;
+        effectiveFrom?: string;
+        summary?: string;
+      };
+      if (
+        !body.title?.trim() ||
+        !body.category?.trim() ||
+        !body.effectiveFrom ||
+        !body.summary?.trim()
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "policies.validation.title"),
+          { status: 400 },
+        );
+      }
+      const row = orgPolicySchema.parse({
+        id: opaqueIdSchema.parse(
+          `pol_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        title: body.title.trim(),
+        category: body.category.trim(),
+        status: "draft",
+        version: 1,
+        inheritsFromParent: Boolean(body.inheritsFromParent),
+        sensitive: Boolean(body.sensitive),
+        effectiveFrom: body.effectiveFrom,
+        summary: body.summary.trim(),
+      });
+      mockPolicies.set(orgId, [...(mockPolicies.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/policies/:policyId/publish",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const policyId = String(params.policyId);
+      const rows = mockPolicies.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === policyId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "policies.loadError"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (current.status !== "draft") {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "policies.status.published"),
+          { status: 400 },
+        );
+      }
+      const updated = orgPolicySchema.parse({
+        ...current,
+        status: "published",
+        version: current.version + 1,
+      });
+      mockPolicies.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
 ];

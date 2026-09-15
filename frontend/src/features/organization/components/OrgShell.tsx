@@ -17,6 +17,7 @@ type OrgNavKey =
   | "positions"
   | "directory"
   | "roles"
+  | "policies"
   | "subjects"
   | "students"
   | "courses"
@@ -84,6 +85,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "roles" as const,
       href: `${routes.organization.roles(orgId)}${langQuery}`,
       labelKey: "navRoles",
+    },
+    {
+      key: "policies" as const,
+      href: `${routes.organization.policies(orgId)}${langQuery}`,
+      labelKey: "navPolicies",
     },
     {
       key: "subjects" as const,

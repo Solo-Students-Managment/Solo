@@ -81,6 +81,10 @@ import {
 } from "@/services/people-directory";
 import { createHttpRolesClient, setRolesClient } from "@/services/roles";
 import {
+  createHttpPoliciesClient,
+  setPoliciesClient,
+} from "@/services/policies";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -147,6 +151,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setPositionsClient(createHttpPositionsClient());
           setPeopleDirectoryClient(createHttpPeopleDirectoryClient());
           setRolesClient(createHttpRolesClient());
+          setPoliciesClient(createHttpPoliciesClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());
