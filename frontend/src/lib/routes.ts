@@ -57,6 +57,7 @@ export const routes = {
       `/org/${encodeURIComponent(orgId)}/facilities`,
     departments: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/departments`,
+    positions: (orgId: string) => `/org/${encodeURIComponent(orgId)}/positions`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

@@ -120,6 +120,7 @@ import {
   type Department,
   type Team,
 } from "@/services/departments";
+import { positionSchema, type Position } from "@/services/positions";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -286,6 +287,7 @@ const mockRooms = new Map<string, Room[]>();
 const mockEquipment = new Map<string, Equipment[]>();
 const mockDepartments = new Map<string, Department[]>();
 const mockTeams = new Map<string, Team[]>();
+const mockPositions = new Map<string, Position[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -494,6 +496,7 @@ function persistMswState() {
         mockEquipment: [...mockEquipment.entries()],
         mockDepartments: [...mockDepartments.entries()],
         mockTeams: [...mockTeams.entries()],
+        mockPositions: [...mockPositions.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -755,6 +758,15 @@ function hydrateMswState() {
         mockTeams.set(
           entry[0],
           entry[1].map((row) => teamSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockPositions)) {
+      mockPositions.clear();
+      for (const entry of data.mockPositions as Array<[string, Position[]]>) {
+        mockPositions.set(
+          entry[0],
+          entry[1].map((row) => positionSchema.parse(row)),
         );
       }
     }
@@ -5102,4 +5114,75 @@ export const handlers = [
     persistMswState();
     return HttpResponse.json(row, { status: 201 });
   }),
+
+  http.get("/api/organizations/:orgId/positions", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockPositions.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/positions",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        title?: string;
+        departmentId?: string | null;
+        reportsToPositionId?: string | null;
+        holderDisplayName?: string | null;
+      };
+      if (!body.title?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "positions.validation.title"),
+          { status: 400 },
+        );
+      }
+      const deptId = body.departmentId ? String(body.departmentId) : "";
+      const dept = deptId
+        ? (mockDepartments.get(orgId) ?? []).find(
+            (row) => String(row.id) === deptId,
+          )
+        : undefined;
+      const reportsToId = body.reportsToPositionId
+        ? String(body.reportsToPositionId)
+        : "";
+      const reportsTo = reportsToId
+        ? (mockPositions.get(orgId) ?? []).find(
+            (row) => String(row.id) === reportsToId,
+          )
+        : undefined;
+      const holder = body.holderDisplayName?.trim() || null;
+      const row = positionSchema.parse({
+        id: opaqueIdSchema.parse(
+          `pos_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        title: body.title.trim(),
+        departmentId: dept?.id ?? null,
+        departmentName: dept?.name ?? null,
+        reportsToPositionId: reportsTo?.id ?? null,
+        holderDisplayName: holder,
+        status: holder ? "filled" : "vacant",
+      });
+      mockPositions.set(orgId, [...(mockPositions.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
 ];
