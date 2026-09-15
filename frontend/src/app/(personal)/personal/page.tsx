@@ -18,6 +18,12 @@ export default function PersonalHomePage() {
           Account security
         </Link>
         <Link
+          href={routes.personal.profile()}
+          className="text-brand text-sm underline-offset-2 hover:underline"
+        >
+          Profile
+        </Link>
+        <Link
           href={routes.personal.phone()}
           className="text-brand text-sm underline-offset-2 hover:underline"
         >

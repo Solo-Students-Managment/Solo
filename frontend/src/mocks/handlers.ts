@@ -11,6 +11,7 @@ import {
   type DeviceSession,
   type TwoFactorStatus,
 } from "@/services/auth/client";
+import { userProfileSchema, type UserProfile } from "@/services/profile";
 
 export type MockScenario =
   | "success"
@@ -45,6 +46,7 @@ let twoFactorStatus: TwoFactorStatus = {
 };
 let deviceSessions: DeviceSession[] = [];
 let currentPhoneE164 = "+989121234567";
+let mockProfile: UserProfile | null = null;
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -682,6 +684,54 @@ export const handlers = [
       ticketId: newChallengeId("tkt"),
       status: "submitted",
     });
+  }),
+
+  http.get("/api/me/profile", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    if (!mockProfile) {
+      mockProfile = userProfileSchema.parse({
+        userId: currentSession!.userId,
+        firstName: "Demo",
+        lastName: "User",
+        email: null,
+        dateOfBirth: null,
+        locale: "fa",
+        timeZone: "Asia/Tehran",
+        calendar: "jalali",
+        digits: "arabext",
+        hourCycle: "h23",
+        theme: "system",
+      });
+    }
+    return HttpResponse.json(mockProfile);
+  }),
+
+  http.patch("/api/me/profile", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as Partial<UserProfile>;
+    if (!mockProfile) {
+      mockProfile = userProfileSchema.parse({
+        userId: currentSession!.userId,
+        firstName: "Demo",
+        lastName: "User",
+        email: null,
+        dateOfBirth: null,
+        locale: "fa",
+        timeZone: "Asia/Tehran",
+        calendar: "jalali",
+        digits: "arabext",
+        hourCycle: "h23",
+        theme: "system",
+      });
+    }
+    mockProfile = userProfileSchema.parse({ ...mockProfile, ...body });
+    return HttpResponse.json(mockProfile);
   }),
 
   http.post("/api/auth/persona", async ({ request }) => {

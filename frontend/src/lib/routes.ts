@@ -27,6 +27,7 @@ export const routes = {
     home: () => "/personal",
     security: () => "/personal/security",
     phone: () => "/personal/phone",
+    profile: () => "/personal/profile",
   },
   teacher: {
     home: () => "/teacher",

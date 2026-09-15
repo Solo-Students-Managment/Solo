@@ -6,6 +6,7 @@ import { SoloFeedbackViewport } from "@/components/shared/SoloFeedback";
 import { canEnableMocks } from "@/config";
 import { AppQueryProvider } from "@/lib/query/provider";
 import { createHttpAuthClient, setAuthClient } from "@/services/auth";
+import { createHttpProfileClient, setProfileClient } from "@/services/profile";
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -24,6 +25,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
         });
         if (!cancelled) {
           setAuthClient(createHttpAuthClient());
+          setProfileClient(createHttpProfileClient());
         }
       } catch {
         // Keep in-memory mock auth client when the worker cannot start.
