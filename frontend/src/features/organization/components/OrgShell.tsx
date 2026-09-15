@@ -21,6 +21,7 @@ type OrgNavKey =
   | "shifts"
   | "leave"
   | "staffAttendance"
+  | "employeeDocuments"
   | "subjects"
   | "students"
   | "courses"
@@ -108,6 +109,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "staffAttendance" as const,
       href: `${routes.organization.staffAttendance(orgId)}${langQuery}`,
       labelKey: "navStaffAttendance",
+    },
+    {
+      key: "employeeDocuments" as const,
+      href: `${routes.organization.employeeDocuments(orgId)}${langQuery}`,
+      labelKey: "navEmployeeDocuments",
     },
     {
       key: "subjects" as const,

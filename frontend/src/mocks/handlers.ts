@@ -139,6 +139,10 @@ import {
   staffClockEventSchema,
   type StaffClockEvent,
 } from "@/services/staff-attendance";
+import {
+  employeeDocumentSchema,
+  type EmployeeDocument,
+} from "@/services/employee-documents";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -312,6 +316,7 @@ const mockPolicies = new Map<string, OrgPolicy[]>();
 const mockShifts = new Map<string, StaffShift[]>();
 const mockLeaveRequests = new Map<string, LeaveRequest[]>();
 const mockStaffClockEvents = new Map<string, StaffClockEvent[]>();
+const mockEmployeeDocuments = new Map<string, EmployeeDocument[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -527,6 +532,7 @@ function persistMswState() {
         mockShifts: [...mockShifts.entries()],
         mockLeaveRequests: [...mockLeaveRequests.entries()],
         mockStaffClockEvents: [...mockStaffClockEvents.entries()],
+        mockEmployeeDocuments: [...mockEmployeeDocuments.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -863,6 +869,18 @@ function hydrateMswState() {
         mockStaffClockEvents.set(
           entry[0],
           entry[1].map((row) => staffClockEventSchema.parse(row)),
+        );
+      }
+    }
+
+    if (Array.isArray(data.mockEmployeeDocuments)) {
+      mockEmployeeDocuments.clear();
+      for (const entry of data.mockEmployeeDocuments as Array<
+        [string, EmployeeDocument[]]
+      >) {
+        mockEmployeeDocuments.set(
+          entry[0],
+          entry[1].map((row) => employeeDocumentSchema.parse(row)),
         );
       }
     }
@@ -5775,6 +5793,71 @@ export const handlers = [
       });
       mockStaffClockEvents.set(orgId, [
         ...(mockStaffClockEvents.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/employee-documents",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const data = mockEmployeeDocuments.get(orgId) ?? [];
+      return HttpResponse.json({
+        data,
+        meta: {
+          page: 1,
+          pageSize: Math.max(data.length, 1),
+          totalItems: data.length,
+          totalPages: 1,
+        },
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/employee-documents",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        staffDisplayName?: string;
+        title?: string;
+        category?: string;
+        expiresOn?: string | null;
+      };
+      if (
+        !body.staffDisplayName?.trim() ||
+        !body.title?.trim() ||
+        !body.category?.trim()
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "employeeDocuments.validation.title"),
+          { status: 400 },
+        );
+      }
+      const row = employeeDocumentSchema.parse({
+        id: opaqueIdSchema.parse(
+          `edoc_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        staffDisplayName: body.staffDisplayName.trim(),
+        title: body.title.trim(),
+        category: body.category.trim(),
+        status: "active",
+        expiresOn: body.expiresOn?.trim() || null,
+      });
+      mockEmployeeDocuments.set(orgId, [
+        ...(mockEmployeeDocuments.get(orgId) ?? []),
         row,
       ]);
       persistMswState();

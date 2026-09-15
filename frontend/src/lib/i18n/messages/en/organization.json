@@ -83,5 +83,6 @@
   "navPolicies": "Policy center",
   "navShifts": "Shifts & working hours",
   "navLeave": "Staff leave",
-  "navStaffAttendance": "Staff clock-in"
+  "navStaffAttendance": "Staff clock-in",
+  "navEmployeeDocuments": "Employee documents"
 }
