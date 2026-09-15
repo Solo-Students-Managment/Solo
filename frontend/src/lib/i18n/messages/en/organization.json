@@ -18,6 +18,7 @@
   "navHome": "Dashboard",
   "navMembers": "Members",
   "navSubjects": "Subjects",
+  "navStudents": "Students",
   "navSettings": "Settings",
   "navGlobalHome": "Global Home",
   "loadError": "Could not load organization.",

@@ -40,6 +40,12 @@ import {
   type GuardianRelationship,
 } from "@/services/guardian";
 import { subjectSchema, type Subject } from "@/services/subjects";
+import {
+  managedStudentDetailSchema,
+  managedStudentSchema,
+  studentGuardianSchema,
+  type ManagedStudentDetail,
+} from "@/services/students";
 
 export type MockScenario =
   | "success"
@@ -157,6 +163,10 @@ const mockSubjects = new Map<string, Subject>([
     }),
   ],
 ]);
+const mockManagedStudents = new Map<
+  string,
+  ManagedStudentDetail & { phoneE164: string }
+>();
 let pendingPhoneChange: {
   currentChallengeId: string;
   newChallengeId: string;
@@ -1443,4 +1453,152 @@ export const handlers = [
     mockSubjects.set(subjectId, next);
     return HttpResponse.json(next);
   }),
+
+  http.get("/api/organizations/:orgId/students", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = [...mockManagedStudents.values()]
+      .filter((row) => String(row.organizationId) === orgId)
+      .map((row) =>
+        managedStudentSchema.parse({
+          id: row.id,
+          organizationId: row.organizationId,
+          displayName: row.displayName,
+          phoneMasked: row.phoneMasked,
+          status: row.status,
+          guardiansCount: row.guardians.length,
+        }),
+      );
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/students",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        displayName?: string;
+        phoneE164?: string;
+      };
+      if (!body.displayName || !body.phoneE164) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const id = opaqueIdSchema.parse(
+        `stu_${Math.random().toString(36).slice(2, 10)}`,
+      );
+      const record = {
+        id,
+        organizationId: opaqueIdSchema.parse(orgId),
+        displayName: body.displayName,
+        phoneMasked: maskPhoneE164(body.phoneE164),
+        phoneE164: body.phoneE164,
+        status: "invited" as const,
+        guardiansCount: 0,
+        guardians: [],
+        activeSubjectsCount: 0,
+      };
+      mockManagedStudents.set(id, record);
+      return HttpResponse.json(
+        managedStudentSchema.parse({
+          id: record.id,
+          organizationId: record.organizationId,
+          displayName: record.displayName,
+          phoneMasked: record.phoneMasked,
+          status: record.status,
+          guardiansCount: 0,
+        }),
+      );
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/students/:studentId",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = mockManagedStudents.get(String(params.studentId));
+      if (!row || String(row.organizationId) !== String(params.orgId)) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      return HttpResponse.json(
+        managedStudentDetailSchema.parse({
+          id: row.id,
+          organizationId: row.organizationId,
+          displayName: row.displayName,
+          phoneMasked: row.phoneMasked,
+          status: row.status,
+          guardiansCount: row.guardians.length,
+          guardians: row.guardians,
+          activeSubjectsCount: row.activeSubjectsCount,
+        }),
+      );
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/students/:studentId/guardians",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const studentId = String(params.studentId);
+      const row = mockManagedStudents.get(studentId);
+      if (!row || String(row.organizationId) !== String(params.orgId)) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "errors.not_found"),
+          { status: 404 },
+        );
+      }
+      const body = (await request.json()) as {
+        displayName?: string;
+        phoneE164?: string;
+        relationshipLabel?: string;
+      };
+      if (!body.displayName || !body.phoneE164 || !body.relationshipLabel) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "errors.validation"),
+          { status: 400 },
+        );
+      }
+      const guardian = studentGuardianSchema.parse({
+        id: opaqueIdSchema.parse(
+          `grd_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        displayName: body.displayName,
+        phoneMasked: maskPhoneE164(body.phoneE164),
+        relationshipLabel: body.relationshipLabel,
+        status: "pending",
+      });
+      mockManagedStudents.set(studentId, {
+        ...row,
+        guardians: [...row.guardians, guardian],
+        guardiansCount: row.guardians.length + 1,
+      });
+      return HttpResponse.json(guardian);
+    },
+  ),
 ];
