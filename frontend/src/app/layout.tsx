@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Source_Sans_3, Vazirmatn } from "next/font/google";
+import { AppProviders } from "./providers";
 import "./globals.css";
 
 const vazirmatn = Vazirmatn({
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body
         className={`${vazirmatn.variable} ${sourceSans.variable} bg-background text-foreground min-h-dvh font-sans antialiased`}
       >
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );
