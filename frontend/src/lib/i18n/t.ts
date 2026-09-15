@@ -26,6 +26,7 @@ import enFacilities from "./messages/en/facilities.json";
 import enDepartments from "./messages/en/departments.json";
 import enPositions from "./messages/en/positions.json";
 import enPeopleDirectory from "./messages/en/peopleDirectory.json";
+import enRoles from "./messages/en/roles.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -63,6 +64,7 @@ import faFacilities from "./messages/fa/facilities.json";
 import faDepartments from "./messages/fa/departments.json";
 import faPositions from "./messages/fa/positions.json";
 import faPeopleDirectory from "./messages/fa/peopleDirectory.json";
+import faRoles from "./messages/fa/roles.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -106,6 +108,7 @@ export type MessageNamespace =
   | "departments"
   | "positions"
   | "peopleDirectory"
+  | "roles"
   | "messaging"
   | "chat"
   | "notifications"
@@ -151,6 +154,7 @@ const dictionaries: Dictionaries = {
     departments: enDepartments,
     positions: enPositions,
     peopleDirectory: enPeopleDirectory,
+    roles: enRoles,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -190,6 +194,7 @@ const dictionaries: Dictionaries = {
     departments: faDepartments,
     positions: faPositions,
     peopleDirectory: faPeopleDirectory,
+    roles: faRoles,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

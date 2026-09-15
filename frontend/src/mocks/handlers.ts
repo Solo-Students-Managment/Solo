@@ -126,6 +126,12 @@ import {
   presenceStatusSchema,
   type DirectoryPerson,
 } from "@/services/people-directory";
+import {
+  orgRoleSchema as orgRoleDefinitionSchema,
+  permissionsForTemplate,
+  ROLE_TEMPLATE_KEYS,
+  type OrgRoleDefinition,
+} from "@/services/roles";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -294,6 +300,7 @@ const mockDepartments = new Map<string, Department[]>();
 const mockTeams = new Map<string, Team[]>();
 const mockPositions = new Map<string, Position[]>();
 const mockDirectory = new Map<string, DirectoryPerson[]>();
+const mockRoleDefinitions = new Map<string, OrgRoleDefinition[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -504,6 +511,7 @@ function persistMswState() {
         mockTeams: [...mockTeams.entries()],
         mockPositions: [...mockPositions.entries()],
         mockDirectory: [...mockDirectory.entries()],
+        mockRoleDefinitions: [...mockRoleDefinitions.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -785,6 +793,17 @@ function hydrateMswState() {
         mockDirectory.set(
           entry[0],
           entry[1].map((row) => directoryPersonSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockRoleDefinitions)) {
+      mockRoleDefinitions.clear();
+      for (const entry of data.mockRoleDefinitions as Array<
+        [string, OrgRoleDefinition[]]
+      >) {
+        mockRoleDefinitions.set(
+          entry[0],
+          entry[1].map((row) => orgRoleDefinitionSchema.parse(row)),
         );
       }
     }
@@ -5299,4 +5318,88 @@ export const handlers = [
       return HttpResponse.json(updated);
     },
   ),
+
+  http.get("/api/organizations/:orgId/roles", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    let data = mockRoleDefinitions.get(orgId);
+    if (!data) {
+      const seeded: OrgRoleDefinition[] = ROLE_TEMPLATE_KEYS.map((key) =>
+        orgRoleDefinitionSchema.parse({
+          id: opaqueIdSchema.parse(`role_${key}`),
+          organizationId: opaqueIdSchema.parse(orgId),
+          name: key
+            .split("_")
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(" "),
+          templateKey: key,
+          branchScoped: key !== "owner",
+          permissions: permissionsForTemplate(key),
+          isSystem: true,
+        }),
+      );
+      data = seeded;
+      mockRoleDefinitions.set(orgId, seeded);
+      persistMswState();
+    }
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/roles", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      name?: string;
+      templateKey?: string;
+      branchScoped?: boolean;
+      permissions?: string[];
+    };
+    if (!body.name?.trim() || !body.templateKey) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "roles.validation.name"),
+        { status: 400 },
+      );
+    }
+    const templateKey = body.templateKey as
+      (typeof ROLE_TEMPLATE_KEYS)[number] | "custom";
+    const permissions =
+      templateKey === "custom"
+        ? (body.permissions ?? []).filter(Boolean)
+        : permissionsForTemplate(templateKey);
+    if (permissions.length === 0) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "roles.validation.permissions"),
+        { status: 400 },
+      );
+    }
+    const rows = mockRoleDefinitions.get(orgId) ?? [];
+    const row = orgRoleDefinitionSchema.parse({
+      id: opaqueIdSchema.parse(
+        `role_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      name: body.name.trim(),
+      templateKey: templateKey === "custom" ? "custom" : templateKey,
+      branchScoped: Boolean(body.branchScoped),
+      permissions,
+      isSystem: false,
+    });
+    mockRoleDefinitions.set(orgId, [...rows, row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
 ];
