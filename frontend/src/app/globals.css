@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+:root {
+  --solo-bg: #f7f5f1;
+  --solo-bg-elevated: #ffffff;
+  --solo-fg: #1c1917;
+  --solo-fg-muted: #57534e;
+  --solo-border: #e7e5e4;
+  --solo-brand: #0f766e;
+  --solo-brand-fg: #ecfdf5;
+  --solo-accent: #b45309;
+  --solo-ring: #0d9488;
+  --solo-danger: #b91c1c;
+  --font-sans: var(--font-solo-sans), "Segoe UI", sans-serif;
+  --font-display: var(--font-solo-display), var(--font-solo-sans), sans-serif;
+}
+
+.dark {
+  --solo-bg: #0c0a09;
+  --solo-bg-elevated: #1c1917;
+  --solo-fg: #fafaf9;
+  --solo-fg-muted: #a8a29e;
+  --solo-border: #292524;
+  --solo-brand: #2dd4bf;
+  --solo-brand-fg: #042f2e;
+  --solo-accent: #fbbf24;
+  --solo-ring: #5eead4;
+  --solo-danger: #f87171;
+}
+
+@theme inline {
+  --color-background: var(--solo-bg);
+  --color-foreground: var(--solo-fg);
+  --color-muted: var(--solo-fg-muted);
+  --color-border: var(--solo-border);
+  --color-brand: var(--solo-brand);
+  --color-brand-foreground: var(--solo-brand-fg);
+  --color-accent: var(--solo-accent);
+  --color-ring: var(--solo-ring);
+  --color-danger: var(--solo-danger);
+  --color-elevated: var(--solo-bg-elevated);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  background: var(--solo-bg);
+  color: var(--solo-fg);
+  font-family: var(--font-sans);
+}

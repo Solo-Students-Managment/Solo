@@ -1,7 +1,14 @@
 #!/usr/bin/env sh
 
-echo "🔍 Running Prettier + ESLint..."
-npx lint-staged
+if [ ! -d "frontend" ]; then
+  echo "frontend/ missing — skipping hooks"
+  exit 0
+fi
 
-echo "🔍 Running Knip check..."
-npx knip --production || echo "⚠️ Knip found issues (but continuing commit)"
+echo "Running frontend lint-staged via pnpm..."
+pnpm --dir frontend exec lint-staged || {
+  # lint-staged may not be installed until a later quality-gates task
+  echo "lint-staged unavailable; running frontend lint + typecheck"
+  pnpm --dir frontend lint
+  pnpm --dir frontend typecheck
+}

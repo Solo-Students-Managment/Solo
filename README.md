@@ -1,72 +1,53 @@
-# Solo Frontend
+# Solo
 
-A production-ready frontend for Solo, a Persian-first student management platform for private tutors.
+Canonical repository: [Solo-Students-Managment/Solo](https://github.com/Solo-Students-Managment/Solo)
 
-## Overview
+Solo is a general education / student-management platform. Subjects are extensible and can be created by teachers or organizations.
 
-This project is the React + TypeScript + Vite dashboard for Teacher, Student, Parent, and Admin roles. It is built with RTL support, reusable UI components, mock data, and role-based route protection.
+## Repository layout
 
-## Tech stack
+| Path | Purpose |
+| --- | --- |
+| `/frontend` | **Canonical product frontend** — Next.js App Router, TypeScript strict, pnpm |
+| `/backend` | Placeholder for the future NestJS backend (not implemented in Phase 0) |
+| `/docs` | Product, design, and engineering documentation |
+| `/legacy` | Previous Vite + React Router prototype — **reference only** |
 
-- React 19 + React DOM 19
-- TypeScript 6
-- Vite
-- Tailwind CSS v4
-- React Router v7
-- Formik & Yup
-- Recharts, Lucide React, Sonner
+This repository is **not** a Turborepo/Nx or package-based monorepo at this stage. `/frontend` and `/backend` are independent boundaries. The root `package.json` exists only for Husky git hooks and convenience scripts that delegate into `/frontend`.
 
-## Structure
-
-- `src/app/` — app shell, providers, and router
-- `src/components/layout/` — dashboard shell and navigation
-- `src/components/ui/` — reusable UI primitives
-- `src/features/` — feature-specific pages and components
-- `src/lib/` — domain utilities and formatters
-- `src/hooks/` — shared hooks
-- `src/mocks/` — mock data and seed helpers
-- `src/styles/` — global Tailwind and theme styles
-- `src/types/` — shared TypeScript definitions
-
-## How to run
+## Frontend (active development)
 
 ```bash
-npm install
-npm run dev
+cd frontend
+pnpm install
+pnpm dev
 ```
 
-Build for production:
+Useful scripts:
 
 ```bash
-npm run build
-npm run preview
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:e2e
 ```
 
-## Available scripts
+Binding frontend references:
 
-- `dev` — Start the Vite development server
-- `build` — Build production bundles
-- `preview` — Preview the production build
-- `lint` — Run ESLint
-- `lint:fix` — Fix lint issues
-- `format` — Run Prettier formatting
-- `format:check` — Check formatting
-- `knip` — Identify unused exports
+- [`docs/frontend/ENGINEERING_RULES.md`](docs/frontend/ENGINEERING_RULES.md)
+- [`docs/frontend/PROJECT_CONTEXT.md`](docs/frontend/PROJECT_CONTEXT.md)
 
-## Key features
+## Legacy prototype
 
-- RTL Persian dashboard layout
-- Role-based authentication and routing
-- Teacher, Student, Parent, and Admin dashboards
-- Session, attendance, exam, and messaging views
-- Mock service layer for rapid frontend validation
-- Professional project structure and documentation
+The Vite application previously lived at the repository root. It was relocated to `/legacy` by task **F0-001**. Do not evolve it into the product and do not port mock/localStorage business patterns into `/frontend`.
 
-## Docs
+## Documentation
 
-- `docs/PRD/PRD-Frontend-Complete-en.md`
-- `docs/PRD/PRD-Frontend-Complete-fa.md`
+All existing documentation under `/docs` is preserved. Older docs may still describe the Vite prototype or language-school framing; the frozen product scope and engineering rules above are authoritative for new work.
 
-## Notes
+## Phase model
 
-This frontend is intentionally isolated from backend implementation. It uses mock data and role-based route guard logic to simulate the full application experience.
+Implementation is phased: Phase 0 Foundation → Phase 1 Core Solo → Phase 2 Academic Advanced → Phase 3 Organization Operations → Phase 4 Plans & Platform → Phase 5 Marketplace & Commerce → Phase 6 Advanced Platform & Hardening.
+
+Frontend-first: real backend, database, authorization, payments, WebSockets, and storage services remain out of scope until the backend phase.
