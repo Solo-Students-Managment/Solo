@@ -170,6 +170,7 @@ import {
 } from "@/services/knowledge-base";
 import {
   buildConsentSnapshot,
+  canDecideSubmission,
   formSubmissionSchema,
   isValidPublicSlug,
   surveyFormSchema,
@@ -6642,18 +6643,120 @@ export const handlers = [
         id: opaqueIdSchema.parse(
           `sub_${Math.random().toString(36).slice(2, 10)}`,
         ),
+        organizationId: form.organizationId,
         formId: form.id,
+        formTitle: form.title,
         answerText: body.answerText.trim(),
         consentName: body.consentName.trim(),
         consentedAt: new Date().toISOString(),
         consentSnapshot: buildConsentSnapshot(form),
+        reviewStatus: "pending",
+        internalComment: "",
       });
-      mockFormSubmissions.set(slug, [
-        ...(mockFormSubmissions.get(slug) ?? []),
+      const orgId = String(form.organizationId);
+      mockFormSubmissions.set(orgId, [
+        ...(mockFormSubmissions.get(orgId) ?? []),
         row,
       ]);
       persistMswState();
       return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/form-submissions", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockFormSubmissions.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/form-submissions/:submissionId/comment",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const submissionId = String(params.submissionId);
+      const body = (await request.json()) as { comment?: string };
+      const rows = mockFormSubmissions.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === submissionId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "formSubmissions.loadError"),
+          { status: 404 },
+        );
+      }
+      if (!body.comment?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "formSubmissions.validation.comment"),
+          { status: 400 },
+        );
+      }
+      const updated = formSubmissionSchema.parse({
+        ...rows[idx]!,
+        internalComment: body.comment.trim(),
+      });
+      mockFormSubmissions.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/form-submissions/:submissionId/decide",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const submissionId = String(params.submissionId);
+      const body = (await request.json()) as { decision?: string };
+      const rows = mockFormSubmissions.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === submissionId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "formSubmissions.loadError"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      if (
+        !body.decision ||
+        !["approved", "rejected"].includes(body.decision) ||
+        !canDecideSubmission(current.reviewStatus)
+      ) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "formSubmissions.alreadyDecided"),
+          { status: 400 },
+        );
+      }
+      const updated = formSubmissionSchema.parse({
+        ...current,
+        reviewStatus: body.decision,
+      });
+      mockFormSubmissions.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 ];

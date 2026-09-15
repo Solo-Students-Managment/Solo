@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildConsentSnapshot, isValidPublicSlug } from "./client";
+import {
+  buildConsentSnapshot,
+  canDecideSubmission,
+  isValidPublicSlug,
+} from "./client";
 
 describe("forms helpers", () => {
   it("validates public slugs", () => {
@@ -14,5 +18,10 @@ describe("forms helpers", () => {
         questionText: "How was class?",
       }),
     ).toBe("Feedback — How was class?");
+  });
+
+  it("only pending submissions can be decided", () => {
+    expect(canDecideSubmission("pending")).toBe(true);
+    expect(canDecideSubmission("approved")).toBe(false);
   });
 });

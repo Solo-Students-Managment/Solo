@@ -16,15 +16,30 @@ export const surveyFormSchema = z.object({
 export type SurveyForm = z.infer<typeof surveyFormSchema>;
 export const surveyFormsCollectionSchema = collectionSchema(surveyFormSchema);
 
+export const submissionReviewStatusSchema = z.enum([
+  "pending",
+  "approved",
+  "rejected",
+]);
+export type SubmissionReviewStatus = z.infer<
+  typeof submissionReviewStatusSchema
+>;
+
 export const formSubmissionSchema = z.object({
   id: opaqueIdSchema,
+  organizationId: opaqueIdSchema,
   formId: opaqueIdSchema,
+  formTitle: z.string().min(1),
   answerText: z.string().min(1),
   consentName: z.string().min(1),
   consentedAt: z.string().min(1),
   consentSnapshot: z.string().min(1),
+  reviewStatus: submissionReviewStatusSchema,
+  internalComment: z.string(),
 });
 export type FormSubmission = z.infer<typeof formSubmissionSchema>;
+export const formSubmissionsCollectionSchema =
+  collectionSchema(formSubmissionSchema);
 
 export type CreateSurveyFormInput = {
   title: string;
@@ -59,13 +74,44 @@ export type FormsClient = {
     slug: string,
     input: SubmitPublicFormInput,
   ): Promise<FormSubmission>;
+  listSubmissions(organizationId: string): Promise<{
+    data: FormSubmission[];
+    meta: {
+      page: number;
+      pageSize: number;
+      totalItems: number;
+      totalPages: number;
+    };
+  }>;
+  commentSubmission(
+    organizationId: string,
+    submissionId: string,
+    comment: string,
+  ): Promise<FormSubmission>;
+  decideSubmission(
+    organizationId: string,
+    submissionId: string,
+    decision: "approved" | "rejected",
+  ): Promise<FormSubmission>;
 };
 
 const formsMemory = new Map<string, SurveyForm[]>();
-const submissionsBySlug = new Map<string, FormSubmission[]>();
+const submissionsByOrg = new Map<string, FormSubmission[]>();
 const publicIndex = new Map<string, SurveyForm>();
 
-function meta(data: SurveyForm[]) {
+function formMeta(data: SurveyForm[]) {
+  return {
+    data,
+    meta: {
+      page: 1,
+      pageSize: Math.max(data.length, 1),
+      totalItems: data.length,
+      totalPages: 1,
+    },
+  };
+}
+
+function submissionMeta(data: FormSubmission[]) {
   return {
     data,
     meta: {
@@ -85,6 +131,10 @@ export function buildConsentSnapshot(
   form: Pick<SurveyForm, "title" | "questionText">,
 ) {
   return `${form.title} — ${form.questionText}`;
+}
+
+export function canDecideSubmission(status: SubmissionReviewStatus) {
+  return status === "pending";
 }
 
 export function createHttpFormsClient(): FormsClient {
@@ -132,13 +182,41 @@ export function createHttpFormsClient(): FormsClient {
         },
       );
     },
+    async listSubmissions(organizationId) {
+      return apiRequest(
+        `/organizations/${encodeURIComponent(organizationId)}/form-submissions`,
+        {
+          parse: (data) => formSubmissionsCollectionSchema.parse(data),
+        },
+      );
+    },
+    async commentSubmission(organizationId, submissionId, comment) {
+      return apiRequest(
+        `/organizations/${encodeURIComponent(organizationId)}/form-submissions/${encodeURIComponent(submissionId)}/comment`,
+        {
+          method: "POST",
+          body: JSON.stringify({ comment }),
+          parse: (data) => formSubmissionSchema.parse(data),
+        },
+      );
+    },
+    async decideSubmission(organizationId, submissionId, decision) {
+      return apiRequest(
+        `/organizations/${encodeURIComponent(organizationId)}/form-submissions/${encodeURIComponent(submissionId)}/decide`,
+        {
+          method: "POST",
+          body: JSON.stringify({ decision }),
+          parse: (data) => formSubmissionSchema.parse(data),
+        },
+      );
+    },
   };
 }
 
 export function createMockFormsClient(): FormsClient {
   return {
     async list(organizationId) {
-      return meta(formsMemory.get(organizationId) ?? []);
+      return formMeta(formsMemory.get(organizationId) ?? []);
     },
     async create(organizationId, input) {
       if (!isValidPublicSlug(input.slug)) throw new Error("invalid slug");
@@ -188,17 +266,59 @@ export function createMockFormsClient(): FormsClient {
         id: opaqueIdSchema.parse(
           `sub_${Math.random().toString(36).slice(2, 10)}`,
         ),
+        organizationId: form.organizationId,
         formId: form.id,
+        formTitle: form.title,
         answerText: input.answerText.trim(),
         consentName: input.consentName.trim(),
         consentedAt: new Date().toISOString(),
         consentSnapshot: buildConsentSnapshot(form),
+        reviewStatus: "pending",
+        internalComment: "",
       });
-      submissionsBySlug.set(slug, [
-        ...(submissionsBySlug.get(slug) ?? []),
+      const orgId = String(form.organizationId);
+      submissionsByOrg.set(orgId, [
+        ...(submissionsByOrg.get(orgId) ?? []),
         row,
       ]);
       return row;
+    },
+    async listSubmissions(organizationId) {
+      return submissionMeta(submissionsByOrg.get(organizationId) ?? []);
+    },
+    async commentSubmission(organizationId, submissionId, comment) {
+      const rows = submissionsByOrg.get(organizationId) ?? [];
+      const idx = rows.findIndex(
+        (row) => String(row.id) === String(submissionId),
+      );
+      if (idx < 0) throw new Error("not found");
+      const updated = formSubmissionSchema.parse({
+        ...rows[idx]!,
+        internalComment: comment.trim(),
+      });
+      const next = [...rows];
+      next[idx] = updated;
+      submissionsByOrg.set(organizationId, next);
+      return updated;
+    },
+    async decideSubmission(organizationId, submissionId, decision) {
+      const rows = submissionsByOrg.get(organizationId) ?? [];
+      const idx = rows.findIndex(
+        (row) => String(row.id) === String(submissionId),
+      );
+      if (idx < 0) throw new Error("not found");
+      const current = rows[idx]!;
+      if (!canDecideSubmission(current.reviewStatus)) {
+        throw new Error("already decided");
+      }
+      const updated = formSubmissionSchema.parse({
+        ...current,
+        reviewStatus: decision,
+      });
+      const next = [...rows];
+      next[idx] = updated;
+      submissionsByOrg.set(organizationId, next);
+      return updated;
     },
   };
 }
@@ -212,7 +332,7 @@ export function setFormsClient(next: FormsClient) {
 }
 export function __resetMockForms() {
   formsMemory.clear();
-  submissionsBySlug.clear();
+  submissionsByOrg.clear();
   publicIndex.clear();
   client = createMockFormsClient();
 }

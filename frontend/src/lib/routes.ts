@@ -76,6 +76,8 @@ export const routes = {
     knowledgeBase: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/knowledge-base`,
     forms: (orgId: string) => `/org/${encodeURIComponent(orgId)}/forms`,
+    formSubmissions: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/form-submissions`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>
