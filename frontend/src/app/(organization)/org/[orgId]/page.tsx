@@ -1,13 +1,11 @@
-type OrgPageProps = {
-  params: Promise<{ orgId: string }>;
-};
+import { Suspense } from "react";
 
-export default async function OrganizationHomePage({ params }: OrgPageProps) {
-  const { orgId } = await params;
+import { OrganizationDashboardView } from "@/features/organization";
+
+export default function OrganizationHomePage() {
   return (
-    <main className="p-6">
-      <h1 className="font-display text-2xl">Organization</h1>
-      <p className="text-muted tabular-nums">{orgId}</p>
-    </main>
+    <Suspense fallback={null}>
+      <OrganizationDashboardView />
+    </Suspense>
   );
 }
