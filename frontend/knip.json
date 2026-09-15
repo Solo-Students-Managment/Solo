@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/app/**/*.{ts,tsx}", "src/features/**/index.ts", "e2e/**/*.ts"],
+  "project": ["src/**/*.{ts,tsx}", "e2e/**/*.ts"],
+  "ignore": [
+    "src/**/.gitkeep.ts",
+    "src/components/**/.gitkeep.ts",
+    "src/config/.gitkeep.ts",
+    "src/store/.gitkeep.ts",
+    "src/hooks/.gitkeep.ts",
+    "src/services/.gitkeep.ts",
+    "src/schemas/.gitkeep.ts",
+    "src/types/.gitkeep.ts",
+    "src/constants/.gitkeep.ts"
+  ],
+  "ignoreDependencies": [
+    "tailwindcss",
+    "eslint-config-next",
+    "@typescript-eslint/eslint-plugin",
+    "@typescript-eslint/parser",
+    "eslint-plugin-unused-imports",
+    "lint-staged"
+  ]
+}

@@ -5,10 +5,4 @@ if [ ! -d "frontend" ]; then
   exit 0
 fi
 
-echo "Running frontend lint-staged via pnpm..."
-pnpm --dir frontend exec lint-staged || {
-  # lint-staged may not be installed until a later quality-gates task
-  echo "lint-staged unavailable; running frontend lint + typecheck"
-  pnpm --dir frontend lint
-  pnpm --dir frontend typecheck
-}
+pnpm --dir frontend exec lint-staged
