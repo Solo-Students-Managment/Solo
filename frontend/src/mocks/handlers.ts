@@ -143,6 +143,11 @@ import {
   employeeDocumentSchema,
   type EmployeeDocument,
 } from "@/services/employee-documents";
+import {
+  onboardingCaseSchema,
+  nextOnboardingStep,
+  type OnboardingCase,
+} from "@/services/onboarding";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -317,6 +322,7 @@ const mockShifts = new Map<string, StaffShift[]>();
 const mockLeaveRequests = new Map<string, LeaveRequest[]>();
 const mockStaffClockEvents = new Map<string, StaffClockEvent[]>();
 const mockEmployeeDocuments = new Map<string, EmployeeDocument[]>();
+const mockOnboardingCases = new Map<string, OnboardingCase[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -533,6 +539,7 @@ function persistMswState() {
         mockLeaveRequests: [...mockLeaveRequests.entries()],
         mockStaffClockEvents: [...mockStaffClockEvents.entries()],
         mockEmployeeDocuments: [...mockEmployeeDocuments.entries()],
+        mockOnboardingCases: [...mockOnboardingCases.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -881,6 +888,18 @@ function hydrateMswState() {
         mockEmployeeDocuments.set(
           entry[0],
           entry[1].map((row) => employeeDocumentSchema.parse(row)),
+        );
+      }
+    }
+
+    if (Array.isArray(data.mockOnboardingCases)) {
+      mockOnboardingCases.clear();
+      for (const entry of data.mockOnboardingCases as Array<
+        [string, OnboardingCase[]]
+      >) {
+        mockOnboardingCases.set(
+          entry[0],
+          entry[1].map((row) => onboardingCaseSchema.parse(row)),
         );
       }
     }
@@ -5862,6 +5881,94 @@ export const handlers = [
       ]);
       persistMswState();
       return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/onboarding", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockOnboardingCases.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/onboarding",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        staffDisplayName?: string;
+        roleTemplate?: string;
+      };
+      if (!body.staffDisplayName?.trim() || !body.roleTemplate?.trim()) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "onboarding.validation.staff"),
+          { status: 400 },
+        );
+      }
+      const row = onboardingCaseSchema.parse({
+        id: opaqueIdSchema.parse(
+          `onb_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        staffDisplayName: body.staffDisplayName.trim(),
+        roleTemplate: body.roleTemplate.trim(),
+        status: "in_progress",
+        currentStep: "invite",
+      });
+      mockOnboardingCases.set(orgId, [
+        ...(mockOnboardingCases.get(orgId) ?? []),
+        row,
+      ]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/onboarding/:caseId/advance",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const caseId = String(params.caseId);
+      const rows = mockOnboardingCases.get(orgId) ?? [];
+      const idx = rows.findIndex((row) => String(row.id) === caseId);
+      if (idx < 0) {
+        return HttpResponse.json(
+          errorBody(404, "NOT_FOUND", "onboarding.loadError"),
+          { status: 404 },
+        );
+      }
+      const current = rows[idx]!;
+      const next = nextOnboardingStep(current.currentStep);
+      const updated = onboardingCaseSchema.parse({
+        ...current,
+        currentStep: next === "done" ? "activate" : next,
+        status: next === "done" ? "completed" : "in_progress",
+      });
+      mockOnboardingCases.set(
+        orgId,
+        rows.map((row, i) => (i === idx ? updated : row)),
+      );
+      persistMswState();
+      return HttpResponse.json(updated);
     },
   ),
 ];

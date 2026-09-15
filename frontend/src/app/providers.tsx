@@ -95,6 +95,10 @@ import {
   setEmployeeDocumentsClient,
 } from "@/services/employee-documents";
 import {
+  createHttpOnboardingClient,
+  setOnboardingClient,
+} from "@/services/onboarding";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -166,6 +170,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setLeaveClient(createHttpLeaveClient());
           setStaffAttendanceClient(createHttpStaffAttendanceClient());
           setEmployeeDocumentsClient(createHttpEmployeeDocumentsClient());
+          setOnboardingClient(createHttpOnboardingClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

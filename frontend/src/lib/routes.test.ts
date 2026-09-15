@@ -38,6 +38,9 @@ describe("typed routes", () => {
     expect(routes.organization.employeeDocuments("org_1")).toBe(
       "/org/org_1/employee-documents",
     );
+    expect(routes.organization.onboarding("org_1")).toBe(
+      "/org/org_1/onboarding",
+    );
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",
     );
