@@ -13,6 +13,7 @@ type OrgNavKey =
   | "members"
   | "branches"
   | "facilities"
+  | "departments"
   | "subjects"
   | "students"
   | "courses"
@@ -60,6 +61,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "facilities" as const,
       href: `${routes.organization.facilities(orgId)}${langQuery}`,
       labelKey: "navFacilities",
+    },
+    {
+      key: "departments" as const,
+      href: `${routes.organization.departments(orgId)}${langQuery}`,
+      labelKey: "navDepartments",
     },
     {
       key: "subjects" as const,

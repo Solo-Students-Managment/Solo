@@ -114,6 +114,12 @@ import {
   type Equipment,
   type Room,
 } from "@/services/facilities";
+import {
+  departmentSchema,
+  teamSchema,
+  type Department,
+  type Team,
+} from "@/services/departments";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -278,6 +284,8 @@ const mockLessonPlans = new Map<string, LessonPlan[]>();
 const mockBranches = new Map<string, Branch[]>();
 const mockRooms = new Map<string, Room[]>();
 const mockEquipment = new Map<string, Equipment[]>();
+const mockDepartments = new Map<string, Department[]>();
+const mockTeams = new Map<string, Team[]>();
 
 const mockMessageThreads: MessageThread[] = [];
 const mockChatRooms: ChatRoom[] = [];
@@ -484,6 +492,8 @@ function persistMswState() {
         mockBranches: [...mockBranches.entries()],
         mockRooms: [...mockRooms.entries()],
         mockEquipment: [...mockEquipment.entries()],
+        mockDepartments: [...mockDepartments.entries()],
+        mockTeams: [...mockTeams.entries()],
         mockTuition: [...mockTuition.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
@@ -725,6 +735,26 @@ function hydrateMswState() {
         mockEquipment.set(
           entry[0],
           entry[1].map((row) => equipmentSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockDepartments)) {
+      mockDepartments.clear();
+      for (const entry of data.mockDepartments as Array<
+        [string, Department[]]
+      >) {
+        mockDepartments.set(
+          entry[0],
+          entry[1].map((row) => departmentSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockTeams)) {
+      mockTeams.clear();
+      for (const entry of data.mockTeams as Array<[string, Team[]]>) {
+        mockTeams.set(
+          entry[0],
+          entry[1].map((row) => teamSchema.parse(row)),
         );
       }
     }
@@ -4965,4 +4995,111 @@ export const handlers = [
       return HttpResponse.json(row, { status: 201 });
     },
   ),
+
+  http.get("/api/organizations/:orgId/departments", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockDepartments.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/departments",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as {
+        name?: string;
+        code?: string;
+        effectiveFrom?: string;
+      };
+      if (!body.name?.trim() || !body.code?.trim() || !body.effectiveFrom) {
+        return HttpResponse.json(
+          errorBody(400, "VALIDATION", "departments.validation.deptName"),
+          { status: 400 },
+        );
+      }
+      const row = departmentSchema.parse({
+        id: opaqueIdSchema.parse(
+          `dept_${Math.random().toString(36).slice(2, 10)}`,
+        ),
+        organizationId: opaqueIdSchema.parse(orgId),
+        name: body.name.trim(),
+        code: body.code.trim().toUpperCase(),
+        status: "active",
+        effectiveFrom: body.effectiveFrom,
+      });
+      mockDepartments.set(orgId, [...(mockDepartments.get(orgId) ?? []), row]);
+      persistMswState();
+      return HttpResponse.json(row, { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/teams", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const data = mockTeams.get(orgId) ?? [];
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
+
+  http.post("/api/organizations/:orgId/teams", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const body = (await request.json()) as {
+      departmentId?: string;
+      name?: string;
+      code?: string;
+    };
+    const dept = (mockDepartments.get(orgId) ?? []).find(
+      (row) => String(row.id) === String(body.departmentId ?? ""),
+    );
+    if (!dept || !body.name?.trim() || !body.code?.trim()) {
+      return HttpResponse.json(
+        errorBody(400, "VALIDATION", "departments.validation.department"),
+        { status: 400 },
+      );
+    }
+    const row = teamSchema.parse({
+      id: opaqueIdSchema.parse(
+        `team_${Math.random().toString(36).slice(2, 10)}`,
+      ),
+      organizationId: opaqueIdSchema.parse(orgId),
+      departmentId: dept.id,
+      departmentName: dept.name,
+      name: body.name.trim(),
+      code: body.code.trim().toUpperCase(),
+      status: "active",
+    });
+    mockTeams.set(orgId, [...(mockTeams.get(orgId) ?? []), row]);
+    persistMswState();
+    return HttpResponse.json(row, { status: 201 });
+  }),
 ];

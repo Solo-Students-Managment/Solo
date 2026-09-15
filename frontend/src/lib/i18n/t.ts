@@ -23,6 +23,7 @@ import enCurriculum from "./messages/en/curriculum.json";
 import enLessonPlans from "./messages/en/lessonPlans.json";
 import enBranches from "./messages/en/branches.json";
 import enFacilities from "./messages/en/facilities.json";
+import enDepartments from "./messages/en/departments.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -57,6 +58,7 @@ import faCurriculum from "./messages/fa/curriculum.json";
 import faLessonPlans from "./messages/fa/lessonPlans.json";
 import faBranches from "./messages/fa/branches.json";
 import faFacilities from "./messages/fa/facilities.json";
+import faDepartments from "./messages/fa/departments.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -97,6 +99,7 @@ export type MessageNamespace =
   | "lessonPlans"
   | "branches"
   | "facilities"
+  | "departments"
   | "messaging"
   | "chat"
   | "notifications"
@@ -139,6 +142,7 @@ const dictionaries: Dictionaries = {
     lessonPlans: enLessonPlans,
     branches: enBranches,
     facilities: enFacilities,
+    departments: enDepartments,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -175,6 +179,7 @@ const dictionaries: Dictionaries = {
     lessonPlans: faLessonPlans,
     branches: faBranches,
     facilities: faFacilities,
+    departments: faDepartments,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

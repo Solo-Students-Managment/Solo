@@ -23,6 +23,9 @@ describe("typed routes", () => {
     expect(routes.organization.facilities("org_1")).toBe(
       "/org/org_1/facilities",
     );
+    expect(routes.organization.departments("org_1")).toBe(
+      "/org/org_1/departments",
+    );
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",
     );
