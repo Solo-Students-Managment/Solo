@@ -1,13 +1,14 @@
-import type { NextConfig } from "next";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const configDirectory = path.dirname(fileURLToPath(import.meta.url));
+import type { NextConfig } from "next";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-  // Keep tracing scoped to /frontend even when a root lockfile exists for husky.
-  outputFileTracingRoot: configDirectory,
-  allowedDevOrigins: ["127.0.0.1"],
+  reactStrictMode: true,
+  poweredByHeader: false,
+  outputFileTracingRoot: path.join(__dirname),
 };
 
 export default nextConfig;
