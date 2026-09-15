@@ -1,0 +1,23 @@
+{
+  "title": "حضور و غیاب",
+  "subtitle": "حضور آموزشی را ثبت کنید و خلاصه را ببینید.",
+  "sessionLabel": "شناسه جلسه",
+  "studentLabel": "نام دانش‌آموز",
+  "statusLabel": "وضعیت",
+  "markSubmit": "ثبت حضور",
+  "markSuccess": "حضور ذخیره شد.",
+  "loadSession": "بارگذاری حضور جلسه",
+  "statsPresent": "حاضر",
+  "statsAbsent": "غایب",
+  "statsLate": "تأخیر",
+  "statsExcused": "موجه",
+  "status.present": "حاضر",
+  "status.absent": "غایب",
+  "status.late": "تأخیر",
+  "status.excused": "موجه",
+  "empty": "هنوز رکورد حضوری نیست.",
+  "loadError": "بارگذاری حضور ناموفق بود.",
+  "forbidden": "اجازه مدیریت حضور را ندارید.",
+  "validation.session": "شناسه جلسه الزامی است.",
+  "validation.student": "نام دانش‌آموز الزامی است."
+}

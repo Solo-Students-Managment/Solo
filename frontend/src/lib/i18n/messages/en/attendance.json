@@ -1,0 +1,23 @@
+{
+  "title": "Attendance",
+  "subtitle": "Mark educational attendance and review summary counts.",
+  "sessionLabel": "Session id",
+  "studentLabel": "Student name",
+  "statusLabel": "Status",
+  "markSubmit": "Mark attendance",
+  "markSuccess": "Attendance saved.",
+  "loadSession": "Load session attendance",
+  "statsPresent": "Present",
+  "statsAbsent": "Absent",
+  "statsLate": "Late",
+  "statsExcused": "Excused",
+  "status.present": "Present",
+  "status.absent": "Absent",
+  "status.late": "Late",
+  "status.excused": "Excused",
+  "empty": "No attendance records yet.",
+  "loadError": "Could not load attendance.",
+  "forbidden": "You do not have permission to manage attendance.",
+  "validation.session": "Session id is required.",
+  "validation.student": "Student name is required."
+}
