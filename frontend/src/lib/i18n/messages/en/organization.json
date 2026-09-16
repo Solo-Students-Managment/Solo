@@ -105,5 +105,6 @@
   "navBilling": "Billing",
   "navUsage": "Usage",
   "navAddOns": "Add-ons",
-  "navCoupons": "Coupons"
+  "navCoupons": "Coupons",
+  "navCheckout": "Checkout"
 }

@@ -251,6 +251,11 @@ import {
   couponValidationSchema,
   createMockCouponsClient,
 } from "@/services/coupons";
+import {
+  checkoutProviderSchema,
+  checkoutSessionSchema,
+  createMockCheckoutClient,
+} from "@/services/checkout";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -478,6 +483,7 @@ const mswBillingClient = createMockBillingClient();
 const mswUsageClient = createMockUsageClient();
 const mswAddOnsClient = createMockAddOnsClient();
 const mswCouponsClient = createMockCouponsClient();
+const mswCheckoutClient = createMockCheckoutClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8098,4 +8104,91 @@ export const handlers = [
     persistMswState();
     return HttpResponse.json(next);
   }),
+
+  http.get(
+    "/api/organizations/:orgId/checkout/providers",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const providers = await mswCheckoutClient.listProviders(
+        String(params.orgId),
+      );
+      return HttpResponse.json(
+        providers.map((p) => checkoutProviderSchema.parse(p)),
+      );
+    },
+  ),
+
+  http.get(
+    "/api/organizations/:orgId/checkout/sessions",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const sessions = await mswCheckoutClient.listSessions(
+        String(params.orgId),
+      );
+      return HttpResponse.json(
+        sessions.map((s) => checkoutSessionSchema.parse(s)),
+      );
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/checkout/sessions",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        provider?: string;
+        amount?: number;
+      };
+      const session = await mswCheckoutClient.createSession(
+        String(params.orgId),
+        {
+          provider: (body.provider ?? "mock") as "mock" | "stripe" | "zarinpal",
+          amount: body.amount,
+        },
+      );
+      persistMswState();
+      return HttpResponse.json(checkoutSessionSchema.parse(session));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/checkout/sessions/:sessionId/complete",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const session = await mswCheckoutClient.completeSession(
+        String(params.orgId),
+        String(params.sessionId),
+      );
+      persistMswState();
+      return HttpResponse.json(checkoutSessionSchema.parse(session));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/checkout/sessions/:sessionId/cancel",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const session = await mswCheckoutClient.cancelSession(
+        String(params.orgId),
+        String(params.sessionId),
+      );
+      persistMswState();
+      return HttpResponse.json(checkoutSessionSchema.parse(session));
+    },
+  ),
 ];
