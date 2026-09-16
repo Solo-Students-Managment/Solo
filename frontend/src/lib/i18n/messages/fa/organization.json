@@ -111,5 +111,6 @@
   "navCancellation": "لغو اشتراک",
   "navPlanVersions": "نسخه‌های پلن",
   "navManualBilling": "صورتحساب دستی",
-  "navAudit": "گزارش حسابرسی"
+  "navAudit": "گزارش حسابرسی",
+  "navApiKeys": "کلیدهای API"
 }

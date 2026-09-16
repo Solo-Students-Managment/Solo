@@ -49,6 +49,7 @@ type OrgNavKey =
   | "planVersions"
   | "manualBilling"
   | "audit"
+  | "apiKeys"
   | "subjects"
   | "students"
   | "courses"
@@ -276,6 +277,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "audit" as const,
       href: `${routes.organization.audit(orgId)}${langQuery}`,
       labelKey: "navAudit",
+    },
+    {
+      key: "apiKeys" as const,
+      href: `${routes.organization.apiKeys(orgId)}${langQuery}`,
+      labelKey: "navApiKeys",
     },
     {
       key: "subjects" as const,

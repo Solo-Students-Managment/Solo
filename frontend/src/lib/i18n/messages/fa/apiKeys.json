@@ -1,0 +1,17 @@
+{
+  "title": "کلیدهای API",
+  "subtitle": "کلیدهای توسعه‌دهنده (رمز فقط یک‌بار نمایش).",
+  "create": "ایجاد کلید",
+  "createSuccess": "کلید ایجاد شد.",
+  "revoke": "باطل کردن",
+  "revokeSuccess": "کلید باطل شد.",
+  "nameLabel": "نام کلید",
+  "secretOnce": "این رمز را همین حالا کپی کنید — دوباره نمایش داده نمی‌شود.",
+  "colName": "نام",
+  "colPrefix": "پیشوند",
+  "colStatus": "وضعیت",
+  "status.active": "فعال",
+  "status.revoked": "باطل",
+  "empty": "کلیدی نیست.",
+  "forbidden": "اجازه مدیریت کلیدهای API را ندارید."
+}

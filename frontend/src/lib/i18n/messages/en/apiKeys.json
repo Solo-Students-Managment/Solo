@@ -1,0 +1,17 @@
+{
+  "title": "API keys",
+  "subtitle": "Developer API keys (secret shown once).",
+  "create": "Create key",
+  "createSuccess": "API key created.",
+  "revoke": "Revoke",
+  "revokeSuccess": "API key revoked.",
+  "nameLabel": "Key name",
+  "secretOnce": "Copy this secret now \u2014 it will not be shown again.",
+  "colName": "Name",
+  "colPrefix": "Prefix",
+  "colStatus": "Status",
+  "status.active": "Active",
+  "status.revoked": "Revoked",
+  "empty": "No API keys yet.",
+  "forbidden": "You do not have permission to manage API keys."
+}

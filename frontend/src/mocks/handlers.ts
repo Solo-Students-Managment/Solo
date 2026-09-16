@@ -302,6 +302,11 @@ import {
   createMockPrivacyClient,
   privacyRequestSchema,
 } from "@/services/privacy";
+import {
+  apiKeyCreatedSchema,
+  apiKeySchema,
+  createMockApiKeysClient,
+} from "@/services/api-keys";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -542,6 +547,7 @@ const mswAuditClient = createMockAuditClient();
 const mswAnnouncementsClient = createMockAnnouncementsClient();
 const mswIncidentsClient = createMockIncidentsClient();
 const mswPrivacyClient = createMockPrivacyClient();
+const mswApiKeysClient = createMockApiKeysClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8704,4 +8710,43 @@ export const handlers = [
     persistMswState();
     return HttpResponse.json(privacyRequestSchema.parse(row));
   }),
+
+  http.get("/api/organizations/:orgId/api-keys", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswApiKeysClient.list(String(params.orgId));
+    return HttpResponse.json(rows.map((row) => apiKeySchema.parse(row)));
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/api-keys",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { name: string };
+      const row = await mswApiKeysClient.create(String(params.orgId), body);
+      persistMswState();
+      return HttpResponse.json(apiKeyCreatedSchema.parse(row), { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/api-keys/:keyId/revoke",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = await mswApiKeysClient.revoke(
+        String(params.orgId),
+        String(params.keyId),
+      );
+      persistMswState();
+      return HttpResponse.json(apiKeySchema.parse(row));
+    },
+  ),
 ];

@@ -191,6 +191,7 @@ import {
   setIncidentsClient,
 } from "@/services/incidents";
 import { createHttpPrivacyClient, setPrivacyClient } from "@/services/privacy";
+import { createHttpApiKeysClient, setApiKeysClient } from "@/services/api-keys";
 import {
   createHttpMessagingClient,
   setMessagingClient,
@@ -297,6 +298,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setAnnouncementsClient(createHttpAnnouncementsClient());
           setIncidentsClient(createHttpIncidentsClient());
           setPrivacyClient(createHttpPrivacyClient());
+          setApiKeysClient(createHttpApiKeysClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

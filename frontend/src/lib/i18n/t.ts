@@ -68,6 +68,7 @@ import enAudit from "./messages/en/audit.json";
 import enAnnouncements from "./messages/en/announcements.json";
 import enIncidents from "./messages/en/incidents.json";
 import enPrivacy from "./messages/en/privacy.json";
+import enApiKeys from "./messages/en/apiKeys.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -147,6 +148,7 @@ import faAudit from "./messages/fa/audit.json";
 import faAnnouncements from "./messages/fa/announcements.json";
 import faIncidents from "./messages/fa/incidents.json";
 import faPrivacy from "./messages/fa/privacy.json";
+import faApiKeys from "./messages/fa/apiKeys.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -232,6 +234,7 @@ export type MessageNamespace =
   | "announcements"
   | "incidents"
   | "privacy"
+  | "apiKeys"
   | "messaging"
   | "chat"
   | "notifications"
@@ -319,6 +322,7 @@ const dictionaries: Dictionaries = {
     announcements: enAnnouncements,
     incidents: enIncidents,
     privacy: enPrivacy,
+    apiKeys: enApiKeys,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -400,6 +404,7 @@ const dictionaries: Dictionaries = {
     announcements: faAnnouncements,
     incidents: faIncidents,
     privacy: faPrivacy,
+    apiKeys: faApiKeys,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

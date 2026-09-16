@@ -111,5 +111,6 @@
   "navCancellation": "Cancel subscription",
   "navPlanVersions": "Plan versions",
   "navManualBilling": "Manual billing",
-  "navAudit": "Audit log"
+  "navAudit": "Audit log",
+  "navApiKeys": "API keys"
 }

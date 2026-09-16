@@ -107,6 +107,7 @@ export const routes = {
     manualBilling: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/manual-billing`,
     audit: (orgId: string) => `/org/${encodeURIComponent(orgId)}/audit`,
+    apiKeys: (orgId: string) => `/org/${encodeURIComponent(orgId)}/api-keys`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>
