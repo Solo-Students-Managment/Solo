@@ -219,6 +219,13 @@ import {
   pricingCatalogSchema,
   type MarketCode,
 } from "@/services/pricing";
+import {
+  canStartTrial,
+  offersForMarket,
+  teacherPlanCodeSchema,
+  teacherSubscriptionSchema,
+  type TeacherSubscription,
+} from "@/services/teacher-plans";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -439,6 +446,7 @@ const mockCalendarEvents: CalendarEvent[] = [
   },
 ];
 const mockTuition = new Map<string, TuitionRecord[]>();
+const mockTeacherSubscriptions = new Map<string, TeacherSubscription>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
 const mockSearchCatalog: SearchHit[] = [
@@ -644,6 +652,7 @@ function persistMswState() {
         mockAnalyticsGoals: [...mockAnalyticsGoals.entries()],
         mockBulkActions: [...mockBulkActions.entries()],
         mockTuition: [...mockTuition.entries()],
+        mockTeacherSubscriptions: [...mockTeacherSubscriptions.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
         mockMessageThreads,
@@ -1173,6 +1182,17 @@ function hydrateMswState() {
         mockTuition.set(
           entry[0],
           entry[1].map((row) => tuitionRecordSchema.parse(row)),
+        );
+      }
+    }
+    if (Array.isArray(data.mockTeacherSubscriptions)) {
+      mockTeacherSubscriptions.clear();
+      for (const entry of data.mockTeacherSubscriptions as Array<
+        [string, TeacherSubscription]
+      >) {
+        mockTeacherSubscriptions.set(
+          entry[0],
+          teacherSubscriptionSchema.parse(entry[1]),
         );
       }
     }
@@ -7789,5 +7809,75 @@ export const handlers = [
         totalPages: 1,
       },
     });
+  }),
+
+  http.get("/api/teacher/plans/subscription", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const userId = currentSession?.userId ?? "usr_demo";
+    const sub =
+      mockTeacherSubscriptions.get(userId) ??
+      teacherSubscriptionSchema.parse({
+        userId,
+        planCode: "teacher_free",
+        status: "active",
+        trialDaysLeft: null,
+        trialEndsAt: null,
+        marketCode: "IR",
+      });
+    return HttpResponse.json(sub);
+  }),
+
+  http.get("/api/teacher/plans/offers", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const url = new URL(request.url);
+    const market = (url.searchParams.get("market") ?? "IR") as MarketCode;
+    return HttpResponse.json(offersForMarket(market));
+  }),
+
+  http.post("/api/teacher/plans/trial", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const userId = currentSession?.userId ?? "usr_demo";
+    const body = (await request.json()) as { planCode?: string };
+    const planCode = teacherPlanCodeSchema.parse(body.planCode);
+    const current =
+      mockTeacherSubscriptions.get(userId) ??
+      teacherSubscriptionSchema.parse({
+        userId,
+        planCode: "teacher_free",
+        status: "active",
+        trialDaysLeft: null,
+        trialEndsAt: null,
+        marketCode: "IR",
+      });
+    if (!canStartTrial(current, planCode)) {
+      return HttpResponse.json(
+        errorBody(409, "TRIAL_NOT_ALLOWED", "errors.conflict"),
+        { status: 409 },
+      );
+    }
+    const trialDaysLeft = 14;
+    const trialEndsAt = new Date(
+      Date.now() + trialDaysLeft * 86_400_000,
+    ).toISOString();
+    const next = teacherSubscriptionSchema.parse({
+      userId,
+      planCode,
+      status: "trial",
+      trialDaysLeft,
+      trialEndsAt,
+      marketCode: current.marketCode,
+    });
+    mockTeacherSubscriptions.set(userId, next);
+    persistMswState();
+    return HttpResponse.json(next);
   }),
 ];

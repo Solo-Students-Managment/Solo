@@ -133,6 +133,10 @@ import {
 } from "@/services/bulk-actions";
 import { createHttpPricingClient, setPricingClient } from "@/services/pricing";
 import {
+  createHttpTeacherPlansClient,
+  setTeacherPlansClient,
+} from "@/services/teacher-plans";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -218,6 +222,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setAnalyticsClient(createHttpAnalyticsClient());
           setBulkActionsClient(createHttpBulkActionsClient());
           setPricingClient(createHttpPricingClient());
+          setTeacherPlansClient(createHttpTeacherPlansClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

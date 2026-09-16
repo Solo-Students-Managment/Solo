@@ -39,6 +39,7 @@ export const routes = {
   teacher: {
     home: () => "/teacher",
     activate: () => "/teacher/activate",
+    plans: () => "/teacher/plans",
   },
   student: {
     home: () => "/student",

@@ -82,6 +82,7 @@ describe("typed routes", () => {
       "/org/org_1/lesson-plans",
     );
     expect(routes.teacher.activate()).toBe("/teacher/activate");
+    expect(routes.teacher.plans()).toBe("/teacher/plans");
     expect(routes.student.home()).toBe("/student");
     expect(routes.student.activate()).toBe("/student/activate");
     expect(routes.guardian.home()).toBe("/guardian");
