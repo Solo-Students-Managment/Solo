@@ -1,0 +1,15 @@
+{
+  "title": "Usage & quotas",
+  "subtitle": "Track consumption against plan quotas.",
+  "colResource": "Resource",
+  "colUsed": "Used",
+  "colQuota": "Quota",
+  "colStatus": "Status",
+  "overQuota": "Over quota",
+  "withinQuota": "Within quota",
+  "loadError": "Could not load usage.",
+  "forbidden": "You do not have permission to view usage.",
+  "resource.students": "Students",
+  "resource.storage": "Storage",
+  "resource.api_calls": "API calls"
+}

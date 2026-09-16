@@ -241,6 +241,7 @@ import {
   invoiceSchema,
   type Invoice,
 } from "@/services/billing";
+import { createMockUsageClient, usageSnapshotSchema } from "@/services/usage";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -465,6 +466,7 @@ const mockTeacherSubscriptions = new Map<string, TeacherSubscription>();
 const mockOrgSubscriptions = new Map<string, OrganizationSubscription>();
 const mswPlanChangeClient = createMockPlanChangeClient();
 const mswBillingClient = createMockBillingClient();
+const mswUsageClient = createMockUsageClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -7869,6 +7871,16 @@ export const handlers = [
     const url = new URL(request.url);
     const market = (url.searchParams.get("market") ?? "IR") as MarketCode;
     return HttpResponse.json(offersForMarket(market));
+  }),
+
+  http.get("/api/organizations/:orgId/usage", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const snap = await mswUsageClient.get(orgId);
+    return HttpResponse.json(usageSnapshotSchema.parse(snap));
   }),
 
   http.get("/api/organizations/:orgId/billing/invoices", async ({ params }) => {

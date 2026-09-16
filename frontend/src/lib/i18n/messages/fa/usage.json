@@ -1,0 +1,15 @@
+{
+  "title": "مصرف و سهمیه",
+  "subtitle": "مصرف را در برابر سهمیه طرح پیگیری کنید.",
+  "colResource": "منبع",
+  "colUsed": "مصرف",
+  "colQuota": "سهمیه",
+  "colStatus": "وضعیت",
+  "overQuota": "بیش از سهمیه",
+  "withinQuota": "در محدوده",
+  "loadError": "بارگذاری مصرف ممکن نشد.",
+  "forbidden": "مجوز مشاهده مصرف را ندارید.",
+  "resource.students": "دانش‌آموزان",
+  "resource.storage": "فضای ذخیره",
+  "resource.api_calls": "فراخوانی API"
+}

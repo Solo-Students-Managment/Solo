@@ -102,5 +102,6 @@
   "navPricing": "Pricing catalog",
   "navSubscription": "Subscription",
   "navPlanChange": "Plan change",
-  "navBilling": "Billing"
+  "navBilling": "Billing",
+  "navUsage": "Usage"
 }
