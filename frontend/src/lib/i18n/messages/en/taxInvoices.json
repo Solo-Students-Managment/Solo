@@ -1,0 +1,19 @@
+{
+  "title": "Tax & invoices",
+  "subtitle": "VAT, localized invoices, and credit notes.",
+  "issue": "Issue document",
+  "issueSuccess": "Tax document issued.",
+  "typeLabel": "Document type",
+  "localeLabel": "Invoice locale",
+  "vatLabel": "VAT %",
+  "subtotalLabel": "Subtotal (minor units)",
+  "currencyLabel": "Currency",
+  "type.invoice": "Invoice",
+  "type.credit_note": "Credit note",
+  "colNumber": "Number",
+  "colType": "Type",
+  "colLocale": "Locale",
+  "colTotal": "Total",
+  "empty": "No tax documents yet.",
+  "forbidden": "You do not have permission to manage tax invoices."
+}

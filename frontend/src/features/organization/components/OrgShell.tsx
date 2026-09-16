@@ -44,6 +44,7 @@ type OrgNavKey =
   | "addOns"
   | "coupons"
   | "checkout"
+  | "taxInvoices"
   | "subjects"
   | "students"
   | "courses"
@@ -246,6 +247,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "checkout" as const,
       href: `${routes.organization.checkout(orgId)}${langQuery}`,
       labelKey: "navCheckout",
+    },
+    {
+      key: "taxInvoices" as const,
+      href: `${routes.organization.taxInvoices(orgId)}${langQuery}`,
+      labelKey: "navTaxInvoices",
     },
     {
       key: "subjects" as const,

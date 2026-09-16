@@ -68,6 +68,9 @@ describe("typed routes", () => {
     );
     expect(routes.organization.pricing("org_1")).toBe("/org/org_1/pricing");
     expect(routes.organization.checkout("org_1")).toBe("/org/org_1/checkout");
+    expect(routes.organization.taxInvoices("org_1")).toBe(
+      "/org/org_1/tax-invoices",
+    );
     expect(routes.organization.subscription("org_1")).toBe(
       "/org/org_1/subscription",
     );

@@ -256,6 +256,10 @@ import {
   checkoutSessionSchema,
   createMockCheckoutClient,
 } from "@/services/checkout";
+import {
+  createMockTaxInvoicesClient,
+  taxDocumentSchema,
+} from "@/services/tax-invoices";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -484,6 +488,7 @@ const mswUsageClient = createMockUsageClient();
 const mswAddOnsClient = createMockAddOnsClient();
 const mswCouponsClient = createMockCouponsClient();
 const mswCheckoutClient = createMockCheckoutClient();
+const mswTaxInvoicesClient = createMockTaxInvoicesClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8189,6 +8194,35 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(checkoutSessionSchema.parse(session));
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/tax-invoices", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswTaxInvoicesClient.list(String(params.orgId));
+    return HttpResponse.json(rows.map((row) => taxDocumentSchema.parse(row)));
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/tax-invoices",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        type: "invoice" | "credit_note";
+        locale: "en" | "fa";
+        vatRatePercent: number;
+        subtotalAmount: number;
+        currency: "IRR" | "USD";
+      };
+      const row = await mswTaxInvoicesClient.issue(String(params.orgId), body);
+      persistMswState();
+      return HttpResponse.json(taxDocumentSchema.parse(row), { status: 201 });
     },
   ),
 ];

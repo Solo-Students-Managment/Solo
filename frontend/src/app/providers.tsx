@@ -153,6 +153,10 @@ import {
   setCheckoutClient,
 } from "@/services/checkout";
 import {
+  createHttpTaxInvoicesClient,
+  setTaxInvoicesClient,
+} from "@/services/tax-invoices";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -246,6 +250,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setAddOnsClient(createHttpAddOnsClient());
           setCouponsClient(createHttpCouponsClient());
           setCheckoutClient(createHttpCheckoutClient());
+          setTaxInvoicesClient(createHttpTaxInvoicesClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

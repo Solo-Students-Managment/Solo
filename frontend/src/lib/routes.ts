@@ -99,6 +99,8 @@ export const routes = {
     addOns: (orgId: string) => `/org/${encodeURIComponent(orgId)}/add-ons`,
     coupons: (orgId: string) => `/org/${encodeURIComponent(orgId)}/coupons`,
     checkout: (orgId: string) => `/org/${encodeURIComponent(orgId)}/checkout`,
+    taxInvoices: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/tax-invoices`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

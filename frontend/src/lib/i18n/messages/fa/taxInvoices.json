@@ -1,0 +1,19 @@
+{
+  "title": "مالیات و فاکتورها",
+  "subtitle": "مالیات بر ارزش افزوده، فاکتورهای بومی‌سازی‌شده و یادداشت بستانکار.",
+  "issue": "صدور سند",
+  "issueSuccess": "سند مالیاتی صادر شد.",
+  "typeLabel": "نوع سند",
+  "localeLabel": "زبان فاکتور",
+  "vatLabel": "درصد VAT",
+  "subtotalLabel": "جمع جزء (واحد خرد)",
+  "currencyLabel": "ارز",
+  "type.invoice": "فاکتور",
+  "type.credit_note": "یادداشت بستانکار",
+  "colNumber": "شماره",
+  "colType": "نوع",
+  "colLocale": "زبان",
+  "colTotal": "جمع",
+  "empty": "هنوز سند مالیاتی نیست.",
+  "forbidden": "اجازه مدیریت فاکتورهای مالیاتی را ندارید."
+}
