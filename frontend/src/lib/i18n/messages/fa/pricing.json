@@ -1,0 +1,22 @@
+{
+  "title": "کاتالوگ قیمت‌گذاری",
+  "subtitle": "مقایسه پلن‌ها از کتاب‌های قیمت بازار (ایران/تومان و جهانی/دلار).",
+  "demoNote": "مبالغ نمایشی از قرارداد کتاب قیمت هستند — قیمت نهایی تولید نیستند.",
+  "marketLabel": "بازار",
+  "audienceLabel": "مخاطب",
+  "market.IR": "ایران (ریال)",
+  "market.GLOBAL": "جهانی (دلار)",
+  "audience.all": "همه",
+  "audience.teacher": "معلم",
+  "audience.organization": "سازمان",
+  "colName": "پلن",
+  "colAudience": "مخاطب",
+  "colPrice": "ماهانه",
+  "colFeatures": "شامل",
+  "colHighlight": "تأکید",
+  "highlighted": "ویژه",
+  "standard": "عادی",
+  "empty": "پلنی برای این بازار نیست.",
+  "loadError": "بارگذاری کاتالوگ قیمت ممکن نشد.",
+  "forbidden": "اجازه مشاهده قیمت‌گذاری را ندارید."
+}

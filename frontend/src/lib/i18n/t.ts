@@ -46,6 +46,7 @@ import enDataOps from "./messages/en/dataOps.json";
 import enEvents from "./messages/en/events.json";
 import enAnalytics from "./messages/en/analytics.json";
 import enBulkActions from "./messages/en/bulkActions.json";
+import enPricing from "./messages/en/pricing.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -103,6 +104,7 @@ import faDataOps from "./messages/fa/dataOps.json";
 import faEvents from "./messages/fa/events.json";
 import faAnalytics from "./messages/fa/analytics.json";
 import faBulkActions from "./messages/fa/bulkActions.json";
+import faPricing from "./messages/fa/pricing.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -166,6 +168,7 @@ export type MessageNamespace =
   | "events"
   | "analytics"
   | "bulkActions"
+  | "pricing"
   | "messaging"
   | "chat"
   | "notifications"
@@ -231,6 +234,7 @@ const dictionaries: Dictionaries = {
     events: enEvents,
     analytics: enAnalytics,
     bulkActions: enBulkActions,
+    pricing: enPricing,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -290,6 +294,7 @@ const dictionaries: Dictionaries = {
     events: faEvents,
     analytics: faAnalytics,
     bulkActions: faBulkActions,
+    pricing: faPricing,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

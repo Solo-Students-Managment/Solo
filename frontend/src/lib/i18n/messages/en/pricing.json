@@ -1,0 +1,22 @@
+{
+  "title": "Pricing catalog",
+  "subtitle": "Compare plans from market Price Books (Iran/Toman and global/USD).",
+  "demoNote": "Amounts are demo Price Book values for UI contracts — not final production prices.",
+  "marketLabel": "Market",
+  "audienceLabel": "Audience",
+  "market.IR": "Iran (IRR)",
+  "market.GLOBAL": "Global (USD)",
+  "audience.all": "All",
+  "audience.teacher": "Teacher",
+  "audience.organization": "Organization",
+  "colName": "Plan",
+  "colAudience": "Audience",
+  "colPrice": "Monthly",
+  "colFeatures": "Includes",
+  "colHighlight": "Emphasis",
+  "highlighted": "Featured",
+  "standard": "Standard",
+  "empty": "No plans for this market.",
+  "loadError": "Could not load pricing catalog.",
+  "forbidden": "You do not have permission to view pricing."
+}

@@ -88,6 +88,7 @@ export const routes = {
     analytics: (orgId: string) => `/org/${encodeURIComponent(orgId)}/analytics`,
     bulkActions: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/bulk-actions`,
+    pricing: (orgId: string) => `/org/${encodeURIComponent(orgId)}/pricing`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

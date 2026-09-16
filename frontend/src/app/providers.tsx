@@ -131,6 +131,7 @@ import {
   createHttpBulkActionsClient,
   setBulkActionsClient,
 } from "@/services/bulk-actions";
+import { createHttpPricingClient, setPricingClient } from "@/services/pricing";
 import {
   createHttpMessagingClient,
   setMessagingClient,
@@ -216,6 +217,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setEventsClient(createHttpEventsClient());
           setAnalyticsClient(createHttpAnalyticsClient());
           setBulkActionsClient(createHttpBulkActionsClient());
+          setPricingClient(createHttpPricingClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

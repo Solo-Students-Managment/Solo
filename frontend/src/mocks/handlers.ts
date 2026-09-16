@@ -213,6 +213,12 @@ import {
   requiresBulkApproval,
   type BulkJob,
 } from "@/services/bulk-actions";
+import {
+  createMockPricingClient,
+  plansForMarket,
+  pricingCatalogSchema,
+  type MarketCode,
+} from "@/services/pricing";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -7755,4 +7761,33 @@ export const handlers = [
       return HttpResponse.json(updated);
     },
   ),
+
+  http.get("/api/pricing/catalog", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const catalog = await createMockPricingClient().getCatalog();
+    return HttpResponse.json(pricingCatalogSchema.parse(catalog));
+  }),
+
+  http.get("/api/pricing/plans", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const url = new URL(request.url);
+    const market = (url.searchParams.get("market") ?? "IR") as MarketCode;
+    const catalog = await createMockPricingClient().getCatalog();
+    const data = plansForMarket(catalog, market);
+    return HttpResponse.json({
+      data,
+      meta: {
+        page: 1,
+        pageSize: Math.max(data.length, 1),
+        totalItems: data.length,
+        totalPages: 1,
+      },
+    });
+  }),
 ];
