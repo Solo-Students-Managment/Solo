@@ -1,0 +1,16 @@
+{
+  "title": "مدیریت کاربران",
+  "subtitle": "کاربران سراسری و محدودیت حساب.",
+  "restrict": "محدود کردن",
+  "unrestrict": "رفع محدودیت",
+  "restrictSuccess": "حساب محدود شد.",
+  "unrestrictSuccess": "محدودیت برداشته شد.",
+  "reasonLabel": "دلیل محدودیت",
+  "colName": "نام",
+  "colEmail": "ایمیل",
+  "colStatus": "وضعیت",
+  "status.restricted": "محدود",
+  "status.active": "فعال",
+  "empty": "کاربری یافت نشد.",
+  "forbidden": "اجازه مدیریت کاربران را ندارید."
+}

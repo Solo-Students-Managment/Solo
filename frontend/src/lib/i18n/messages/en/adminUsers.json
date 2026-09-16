@@ -1,0 +1,16 @@
+{
+  "title": "User management",
+  "subtitle": "Global users and account restrictions.",
+  "restrict": "Restrict",
+  "unrestrict": "Lift restriction",
+  "restrictSuccess": "Account restricted.",
+  "unrestrictSuccess": "Restriction lifted.",
+  "reasonLabel": "Restriction reason",
+  "colName": "Name",
+  "colEmail": "Email",
+  "colStatus": "Status",
+  "status.restricted": "Restricted",
+  "status.active": "Active",
+  "empty": "No users found.",
+  "forbidden": "You do not have permission to manage users."
+}

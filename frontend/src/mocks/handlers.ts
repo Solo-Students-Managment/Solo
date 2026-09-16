@@ -276,6 +276,10 @@ import {
   createMockAdminDashboardClient,
   platformKpiSchema,
 } from "@/services/admin-dashboard";
+import {
+  adminUserSchema,
+  createMockAdminUsersClient,
+} from "@/services/admin-users";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -509,6 +513,7 @@ const mswCancellationClient = createMockCancellationClient();
 const mswPlanVersionsClient = createMockPlanVersionsClient();
 const mswManualBillingClient = createMockManualBillingClient();
 const mswAdminDashboardClient = createMockAdminDashboardClient();
+const mswAdminUsersClient = createMockAdminUsersClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8435,5 +8440,41 @@ export const handlers = [
     if (unauthorized) return unauthorized;
     const kpis = await mswAdminDashboardClient.getKpis();
     return HttpResponse.json(platformKpiSchema.parse(kpis));
+  }),
+
+  http.get("/api/admin/users", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswAdminUsersClient.list();
+    return HttpResponse.json(rows.map((row) => adminUserSchema.parse(row)));
+  }),
+
+  http.post(
+    "/api/admin/users/:userId/restrict",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { reason: string };
+      const row = await mswAdminUsersClient.restrict(
+        String(params.userId),
+        body.reason,
+      );
+      persistMswState();
+      return HttpResponse.json(adminUserSchema.parse(row));
+    },
+  ),
+
+  http.post("/api/admin/users/:userId/unrestrict", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswAdminUsersClient.unrestrict(String(params.userId));
+    persistMswState();
+    return HttpResponse.json(adminUserSchema.parse(row));
   }),
 ];
