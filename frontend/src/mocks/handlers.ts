@@ -298,6 +298,10 @@ import {
   createMockIncidentsClient,
   incidentSchema,
 } from "@/services/incidents";
+import {
+  createMockPrivacyClient,
+  privacyRequestSchema,
+} from "@/services/privacy";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -537,6 +541,7 @@ const mswVerificationClient = createMockVerificationClient();
 const mswAuditClient = createMockAuditClient();
 const mswAnnouncementsClient = createMockAnnouncementsClient();
 const mswIncidentsClient = createMockIncidentsClient();
+const mswPrivacyClient = createMockPrivacyClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8663,5 +8668,40 @@ export const handlers = [
     );
     persistMswState();
     return HttpResponse.json(incidentSchema.parse(row));
+  }),
+
+  http.get("/api/admin/privacy/requests", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswPrivacyClient.list();
+    return HttpResponse.json(
+      rows.map((row) => privacyRequestSchema.parse(row)),
+    );
+  }),
+
+  http.post("/api/admin/privacy/requests", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      type: "export" | "delete";
+      subjectEmail: string;
+    };
+    const row = await mswPrivacyClient.submit(body);
+    persistMswState();
+    return HttpResponse.json(privacyRequestSchema.parse(row), { status: 201 });
+  }),
+
+  http.post("/api/admin/privacy/requests/:id/complete", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPrivacyClient.complete(String(params.id));
+    persistMswState();
+    return HttpResponse.json(privacyRequestSchema.parse(row));
   }),
 ];

@@ -1,0 +1,17 @@
+{
+  "title": "درخواست‌های حریم خصوصی",
+  "subtitle": "مرکز درخواست داده سوژه.",
+  "submit": "ثبت درخواست",
+  "submitSuccess": "درخواست ثبت شد.",
+  "complete": "علامت تکمیل",
+  "completeSuccess": "درخواست تکمیل شد.",
+  "emailLabel": "ایمیل سوژه",
+  "typeLabel": "نوع درخواست",
+  "type.export": "خروجی",
+  "type.delete": "حذف",
+  "colEmail": "ایمیل",
+  "colType": "نوع",
+  "colStatus": "وضعیت",
+  "empty": "درخواستی نیست.",
+  "forbidden": "اجازه مدیریت درخواست‌های حریم خصوصی را ندارید."
+}

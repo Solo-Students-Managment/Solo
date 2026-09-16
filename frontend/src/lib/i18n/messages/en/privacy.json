@@ -1,0 +1,17 @@
+{
+  "title": "Privacy requests",
+  "subtitle": "Data subject privacy request center.",
+  "submit": "Submit request",
+  "submitSuccess": "Privacy request submitted.",
+  "complete": "Mark completed",
+  "completeSuccess": "Request completed.",
+  "emailLabel": "Subject email",
+  "typeLabel": "Request type",
+  "type.export": "Export",
+  "type.delete": "Delete",
+  "colEmail": "Email",
+  "colType": "Type",
+  "colStatus": "Status",
+  "empty": "No privacy requests.",
+  "forbidden": "You do not have permission to manage privacy requests."
+}
