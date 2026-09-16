@@ -102,6 +102,8 @@ export const routes = {
     taxInvoices: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/tax-invoices`,
     cancel: (orgId: string) => `/org/${encodeURIComponent(orgId)}/cancel`,
+    planVersions: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/plan-versions`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

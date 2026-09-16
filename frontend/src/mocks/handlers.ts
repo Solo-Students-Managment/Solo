@@ -264,6 +264,10 @@ import {
   cancellationSnapshotSchema,
   createMockCancellationClient,
 } from "@/services/cancellation";
+import {
+  createMockPlanVersionsClient,
+  planVersionsSnapshotSchema,
+} from "@/services/plan-versions";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -494,6 +498,7 @@ const mswCouponsClient = createMockCouponsClient();
 const mswCheckoutClient = createMockCheckoutClient();
 const mswTaxInvoicesClient = createMockTaxInvoicesClient();
 const mswCancellationClient = createMockCancellationClient();
+const mswPlanVersionsClient = createMockPlanVersionsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8285,6 +8290,53 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(cancellationSnapshotSchema.parse(snap));
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/plan-versions", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const snap = await mswPlanVersionsClient.get(String(params.orgId));
+    return HttpResponse.json(planVersionsSnapshotSchema.parse(snap));
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/plan-versions/migrations",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        fromVersionId: string;
+        toVersionId: string;
+      };
+      const snap = await mswPlanVersionsClient.startMigration(
+        String(params.orgId),
+        body,
+      );
+      persistMswState();
+      return HttpResponse.json(planVersionsSnapshotSchema.parse(snap), {
+        status: 201,
+      });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/plan-versions/migrations/:campaignId/enroll",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const snap = await mswPlanVersionsClient.enroll(
+        String(params.orgId),
+        String(params.campaignId),
+      );
+      persistMswState();
+      return HttpResponse.json(planVersionsSnapshotSchema.parse(snap));
     },
   ),
 ];

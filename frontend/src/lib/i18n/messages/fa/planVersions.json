@@ -1,0 +1,19 @@
+{
+  "title": "نسخه‌های پلن",
+  "subtitle": "نسخه‌بندی پلن، حفظ نسخه قبلی و کمپین‌های مهاجرت.",
+  "currentLabel": "نسخه فعلی",
+  "versionsTitle": "نسخه‌های موجود",
+  "campaignsTitle": "کمپین‌های مهاجرت",
+  "startMigration": "شروع مهاجرت",
+  "startSuccess": "کمپین مهاجرت شروع شد.",
+  "enroll": "ثبت‌نام الان",
+  "enrollSuccess": "روی نسخه جدید پلن ثبت شدید.",
+  "colCode": "کد",
+  "colLabel": "عنوان",
+  "colGrandfathered": "حفظ‌شده",
+  "colStatus": "وضعیت",
+  "yes": "بله",
+  "no": "خیر",
+  "emptyCampaigns": "هنوز کمپین مهاجرتی نیست.",
+  "forbidden": "اجازه مدیریت نسخه‌های پلن را ندارید."
+}

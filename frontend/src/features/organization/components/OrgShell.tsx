@@ -46,6 +46,7 @@ type OrgNavKey =
   | "checkout"
   | "taxInvoices"
   | "cancellation"
+  | "planVersions"
   | "subjects"
   | "students"
   | "courses"
@@ -258,6 +259,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "cancellation" as const,
       href: `${routes.organization.cancel(orgId)}${langQuery}`,
       labelKey: "navCancellation",
+    },
+    {
+      key: "planVersions" as const,
+      href: `${routes.organization.planVersions(orgId)}${langQuery}`,
+      labelKey: "navPlanVersions",
     },
     {
       key: "subjects" as const,

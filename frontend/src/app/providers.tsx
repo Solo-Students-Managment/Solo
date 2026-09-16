@@ -161,6 +161,10 @@ import {
   setCancellationClient,
 } from "@/services/cancellation";
 import {
+  createHttpPlanVersionsClient,
+  setPlanVersionsClient,
+} from "@/services/plan-versions";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -256,6 +260,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setCheckoutClient(createHttpCheckoutClient());
           setTaxInvoicesClient(createHttpTaxInvoicesClient());
           setCancellationClient(createHttpCancellationClient());
+          setPlanVersionsClient(createHttpPlanVersionsClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

@@ -1,0 +1,19 @@
+{
+  "title": "Plan versions",
+  "subtitle": "Plan versioning, grandfathering, and migration campaigns.",
+  "currentLabel": "Current version",
+  "versionsTitle": "Available versions",
+  "campaignsTitle": "Migration campaigns",
+  "startMigration": "Start migration",
+  "startSuccess": "Migration campaign started.",
+  "enroll": "Enroll now",
+  "enrollSuccess": "Enrolled on new plan version.",
+  "colCode": "Code",
+  "colLabel": "Label",
+  "colGrandfathered": "Grandfathered",
+  "colStatus": "Status",
+  "yes": "Yes",
+  "no": "No",
+  "emptyCampaigns": "No migration campaigns yet.",
+  "forbidden": "You do not have permission to manage plan versions."
+}
