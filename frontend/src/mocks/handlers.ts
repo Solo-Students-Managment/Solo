@@ -260,6 +260,10 @@ import {
   createMockTaxInvoicesClient,
   taxDocumentSchema,
 } from "@/services/tax-invoices";
+import {
+  cancellationSnapshotSchema,
+  createMockCancellationClient,
+} from "@/services/cancellation";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -489,6 +493,7 @@ const mswAddOnsClient = createMockAddOnsClient();
 const mswCouponsClient = createMockCouponsClient();
 const mswCheckoutClient = createMockCheckoutClient();
 const mswTaxInvoicesClient = createMockTaxInvoicesClient();
+const mswCancellationClient = createMockCancellationClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8223,6 +8228,63 @@ export const handlers = [
       const row = await mswTaxInvoicesClient.issue(String(params.orgId), body);
       persistMswState();
       return HttpResponse.json(taxDocumentSchema.parse(row), { status: 201 });
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/cancellation", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const snap = await mswCancellationClient.get(String(params.orgId));
+    return HttpResponse.json(cancellationSnapshotSchema.parse(snap));
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/cancellation/request",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { reason: string };
+      const snap = await mswCancellationClient.requestCancel(
+        String(params.orgId),
+        body,
+      );
+      persistMswState();
+      return HttpResponse.json(cancellationSnapshotSchema.parse(snap));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/cancellation/refund",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const snap = await mswCancellationClient.requestRefund(
+        String(params.orgId),
+      );
+      persistMswState();
+      return HttpResponse.json(cancellationSnapshotSchema.parse(snap));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/cancellation/offers/:offerId/accept",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const snap = await mswCancellationClient.acceptOffer(
+        String(params.orgId),
+        String(params.offerId),
+      );
+      persistMswState();
+      return HttpResponse.json(cancellationSnapshotSchema.parse(snap));
     },
   ),
 ];

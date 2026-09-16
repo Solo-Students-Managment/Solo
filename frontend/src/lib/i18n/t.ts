@@ -56,6 +56,7 @@ import enAddOns from "./messages/en/addOns.json";
 import enCoupons from "./messages/en/coupons.json";
 import enCheckout from "./messages/en/checkout.json";
 import enTaxInvoices from "./messages/en/taxInvoices.json";
+import enCancel from "./messages/en/cancel.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -123,6 +124,7 @@ import faAddOns from "./messages/fa/addOns.json";
 import faCoupons from "./messages/fa/coupons.json";
 import faCheckout from "./messages/fa/checkout.json";
 import faTaxInvoices from "./messages/fa/taxInvoices.json";
+import faCancel from "./messages/fa/cancel.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -196,6 +198,7 @@ export type MessageNamespace =
   | "coupons"
   | "checkout"
   | "taxInvoices"
+  | "cancel"
   | "messaging"
   | "chat"
   | "notifications"
@@ -271,6 +274,7 @@ const dictionaries: Dictionaries = {
     coupons: enCoupons,
     checkout: enCheckout,
     taxInvoices: enTaxInvoices,
+    cancel: enCancel,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -340,6 +344,7 @@ const dictionaries: Dictionaries = {
     coupons: faCoupons,
     checkout: faCheckout,
     taxInvoices: faTaxInvoices,
+    cancel: faCancel,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

@@ -1,0 +1,21 @@
+{
+  "title": "Cancel subscription",
+  "subtitle": "Cancellation, retention offers, and refund requests.",
+  "statusLabel": "Status",
+  "status.active": "Active",
+  "status.pending_cancel": "Pending cancellation",
+  "status.cancelled": "Cancelled",
+  "reasonLabel": "Cancellation reason",
+  "requestCancel": "Request cancellation",
+  "requestCancelSuccess": "Cancellation scheduled.",
+  "requestRefund": "Request refund",
+  "requestRefundSuccess": "Refund requested.",
+  "offersTitle": "Retention offers",
+  "acceptOffer": "Accept offer",
+  "acceptOfferSuccess": "Offer accepted. Subscription stays active.",
+  "noOffers": "No retention offers available.",
+  "refundPending": "Refund pending review",
+  "colOffer": "Offer",
+  "colPercent": "Discount",
+  "forbidden": "You do not have permission to manage cancellation."
+}

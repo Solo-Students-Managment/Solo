@@ -1,0 +1,21 @@
+{
+  "title": "لغو اشتراک",
+  "subtitle": "لغو، پیشنهادهای نگهداشت و درخواست بازپرداخت.",
+  "statusLabel": "وضعیت",
+  "status.active": "فعال",
+  "status.pending_cancel": "در انتظار لغو",
+  "status.cancelled": "لغو شده",
+  "reasonLabel": "دلیل لغو",
+  "requestCancel": "درخواست لغو",
+  "requestCancelSuccess": "لغو زمان‌بندی شد.",
+  "requestRefund": "درخواست بازپرداخت",
+  "requestRefundSuccess": "بازپرداخت درخواست شد.",
+  "offersTitle": "پیشنهادهای نگهداشت",
+  "acceptOffer": "پذیرش پیشنهاد",
+  "acceptOfferSuccess": "پیشنهاد پذیرفته شد. اشتراک فعال می‌ماند.",
+  "noOffers": "پیشنهاد نگهداشتی موجود نیست.",
+  "refundPending": "بازپرداخت در انتظار بررسی",
+  "colOffer": "پیشنهاد",
+  "colPercent": "تخفیف",
+  "forbidden": "اجازه مدیریت لغو اشتراک را ندارید."
+}

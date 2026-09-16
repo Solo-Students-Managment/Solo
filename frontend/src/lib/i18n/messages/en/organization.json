@@ -107,5 +107,6 @@
   "navAddOns": "Add-ons",
   "navCoupons": "Coupons",
   "navCheckout": "Checkout",
-  "navTaxInvoices": "Tax & invoices"
+  "navTaxInvoices": "Tax & invoices",
+  "navCancellation": "Cancel subscription"
 }

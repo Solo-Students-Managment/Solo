@@ -101,6 +101,7 @@ export const routes = {
     checkout: (orgId: string) => `/org/${encodeURIComponent(orgId)}/checkout`,
     taxInvoices: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/tax-invoices`,
+    cancel: (orgId: string) => `/org/${encodeURIComponent(orgId)}/cancel`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

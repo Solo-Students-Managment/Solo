@@ -71,6 +71,7 @@ describe("typed routes", () => {
     expect(routes.organization.taxInvoices("org_1")).toBe(
       "/org/org_1/tax-invoices",
     );
+    expect(routes.organization.cancel("org_1")).toBe("/org/org_1/cancel");
     expect(routes.organization.subscription("org_1")).toBe(
       "/org/org_1/subscription",
     );
