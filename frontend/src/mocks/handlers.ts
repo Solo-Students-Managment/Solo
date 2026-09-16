@@ -294,6 +294,10 @@ import {
   announcementSchema,
   createMockAnnouncementsClient,
 } from "@/services/announcements";
+import {
+  createMockIncidentsClient,
+  incidentSchema,
+} from "@/services/incidents";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -532,6 +536,7 @@ const mswSupportClient = createMockSupportClient();
 const mswVerificationClient = createMockVerificationClient();
 const mswAuditClient = createMockAuditClient();
 const mswAnnouncementsClient = createMockAnnouncementsClient();
+const mswIncidentsClient = createMockIncidentsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8619,5 +8624,44 @@ export const handlers = [
     const row = await mswAnnouncementsClient.publish(String(params.id));
     persistMswState();
     return HttpResponse.json(announcementSchema.parse(row));
+  }),
+
+  http.get("/api/admin/incidents", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswIncidentsClient.list();
+    return HttpResponse.json(rows.map((row) => incidentSchema.parse(row)));
+  }),
+
+  http.post("/api/admin/incidents", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      title: string;
+      severity: "low" | "medium" | "high" | "critical";
+    };
+    const row = await mswIncidentsClient.create(body);
+    persistMswState();
+    return HttpResponse.json(incidentSchema.parse(row), { status: 201 });
+  }),
+
+  http.post("/api/admin/incidents/:id/status", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      status: "investigating" | "identified" | "monitoring" | "resolved";
+    };
+    const row = await mswIncidentsClient.updateStatus(
+      String(params.id),
+      body.status,
+    );
+    persistMswState();
+    return HttpResponse.json(incidentSchema.parse(row));
   }),
 ];

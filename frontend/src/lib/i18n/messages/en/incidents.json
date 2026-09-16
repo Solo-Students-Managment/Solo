@@ -1,0 +1,14 @@
+{
+  "title": "Incidents",
+  "subtitle": "Incident and system status management.",
+  "create": "Create incident",
+  "createSuccess": "Incident opened.",
+  "resolve": "Mark resolved",
+  "resolveSuccess": "Incident resolved.",
+  "titleLabel": "Title",
+  "colTitle": "Title",
+  "colSeverity": "Severity",
+  "colStatus": "Status",
+  "empty": "No incidents.",
+  "forbidden": "You do not have permission to manage incidents."
+}

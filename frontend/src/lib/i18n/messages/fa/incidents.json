@@ -1,0 +1,14 @@
+{
+  "title": "حوادث",
+  "subtitle": "مدیریت حوادث و وضعیت سیستم.",
+  "create": "ایجاد حادثه",
+  "createSuccess": "حادثه باز شد.",
+  "resolve": "علامت رفع‌شده",
+  "resolveSuccess": "حادثه رفع شد.",
+  "titleLabel": "عنوان",
+  "colTitle": "عنوان",
+  "colSeverity": "شدت",
+  "colStatus": "وضعیت",
+  "empty": "حادثه‌ای نیست.",
+  "forbidden": "اجازه مدیریت حوادث را ندارید."
+}
