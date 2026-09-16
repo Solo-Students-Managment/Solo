@@ -1,0 +1,21 @@
+{
+  "title": "تغییر طرح",
+  "subtitle": "اثر ارتقا یا تنزل را پیش‌نمایش کنید. داده‌های شما حفظ می‌شوند — بدون حذف داده در تنزل.",
+  "targetPlan": "طرح مقصد",
+  "preview": "پیش‌نمایش اثر",
+  "apply": "اعمال تغییر",
+  "direction.upgrade": "ارتقا",
+  "direction.downgrade": "تنزل",
+  "noDataLoss": "هیچ داده‌ای حذف نمی‌شود. منابع بیش از حد تا ارتقا یا کاهش مصرف فقط خواندنی می‌مانند.",
+  "overLimitTitle": "بیش از حد پس از تغییر",
+  "colResource": "منبع",
+  "colCurrent": "فعلی",
+  "colLimit": "سقف جدید",
+  "colExcess": "مازاد",
+  "applied": "تغییر طرح اعمال شد.",
+  "loadError": "بارگذاری تغییر طرح ممکن نشد.",
+  "forbidden": "مجوز تغییر طرح را ندارید.",
+  "plan.org_starter": "Starter",
+  "plan.org_pro": "Pro",
+  "plan.org_enterprise": "Enterprise"
+}

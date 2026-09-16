@@ -1,0 +1,21 @@
+{
+  "title": "Plan change",
+  "subtitle": "Preview upgrade or downgrade impact. Your data is retained — no data loss on downgrade.",
+  "targetPlan": "Target plan",
+  "preview": "Preview impact",
+  "apply": "Apply change",
+  "direction.upgrade": "Upgrade",
+  "direction.downgrade": "Downgrade",
+  "noDataLoss": "No data will be deleted. Over-limit resources stay read-only until you upgrade or reduce usage.",
+  "overLimitTitle": "Over-limit after change",
+  "colResource": "Resource",
+  "colCurrent": "Current",
+  "colLimit": "New limit",
+  "colExcess": "Over by",
+  "applied": "Plan change applied.",
+  "loadError": "Could not load plan change.",
+  "forbidden": "You do not have permission to change plans.",
+  "plan.org_starter": "Starter",
+  "plan.org_pro": "Pro",
+  "plan.org_enterprise": "Enterprise"
+}

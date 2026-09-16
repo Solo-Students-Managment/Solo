@@ -228,8 +228,13 @@ import {
 } from "@/services/teacher-plans";
 import {
   organizationSubscriptionSchema,
+  orgPlanCodeSchema,
   type OrganizationSubscription,
 } from "@/services/subscription";
+import {
+  createMockPlanChangeClient,
+  planChangePreviewSchema,
+} from "@/services/plan-change";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -452,6 +457,7 @@ const mockCalendarEvents: CalendarEvent[] = [
 const mockTuition = new Map<string, TuitionRecord[]>();
 const mockTeacherSubscriptions = new Map<string, TeacherSubscription>();
 const mockOrgSubscriptions = new Map<string, OrganizationSubscription>();
+const mswPlanChangeClient = createMockPlanChangeClient();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
 const mockSearchCatalog: SearchHit[] = [
@@ -7856,6 +7862,46 @@ export const handlers = [
     const market = (url.searchParams.get("market") ?? "IR") as MarketCode;
     return HttpResponse.json(offersForMarket(market));
   }),
+
+  http.post(
+    "/api/organizations/:orgId/plan-change/preview",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as { targetPlanCode?: string };
+      const targetPlanCode = orgPlanCodeSchema.parse(body.targetPlanCode);
+      const preview = await mswPlanChangeClient.preview(orgId, targetPlanCode);
+      return HttpResponse.json(planChangePreviewSchema.parse(preview));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/plan-change",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as { targetPlanCode?: string };
+      const targetPlanCode = orgPlanCodeSchema.parse(body.targetPlanCode);
+      const result = await mswPlanChangeClient.apply(orgId, targetPlanCode);
+      const existing = mockOrgSubscriptions.get(orgId);
+      if (existing) {
+        mockOrgSubscriptions.set(orgId, {
+          ...existing,
+          planCode: targetPlanCode,
+          state: "active",
+          trialDaysLeft: null,
+        });
+      }
+      persistMswState();
+      return HttpResponse.json(planChangePreviewSchema.parse(result));
+    },
+  ),
 
   http.get("/api/organizations/:orgId/subscription", async ({ params }) => {
     const failed = await maybeFail();

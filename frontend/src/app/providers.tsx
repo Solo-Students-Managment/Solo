@@ -141,6 +141,10 @@ import {
   setSubscriptionClient,
 } from "@/services/subscription";
 import {
+  createHttpPlanChangeClient,
+  setPlanChangeClient,
+} from "@/services/plan-change";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -228,6 +232,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setPricingClient(createHttpPricingClient());
           setTeacherPlansClient(createHttpTeacherPlansClient());
           setSubscriptionClient(createHttpSubscriptionClient());
+          setPlanChangeClient(createHttpPlanChangeClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());
