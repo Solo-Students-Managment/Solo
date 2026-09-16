@@ -226,6 +226,10 @@ import {
   teacherSubscriptionSchema,
   type TeacherSubscription,
 } from "@/services/teacher-plans";
+import {
+  organizationSubscriptionSchema,
+  type OrganizationSubscription,
+} from "@/services/subscription";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -447,6 +451,7 @@ const mockCalendarEvents: CalendarEvent[] = [
 ];
 const mockTuition = new Map<string, TuitionRecord[]>();
 const mockTeacherSubscriptions = new Map<string, TeacherSubscription>();
+const mockOrgSubscriptions = new Map<string, OrganizationSubscription>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
 const mockSearchCatalog: SearchHit[] = [
@@ -653,6 +658,7 @@ function persistMswState() {
         mockBulkActions: [...mockBulkActions.entries()],
         mockTuition: [...mockTuition.entries()],
         mockTeacherSubscriptions: [...mockTeacherSubscriptions.entries()],
+        mockOrgSubscriptions: [...mockOrgSubscriptions.entries()],
         mockResources: [...mockResources.entries()],
         mockReports: [...mockReports.entries()],
         mockMessageThreads,
@@ -1193,6 +1199,17 @@ function hydrateMswState() {
         mockTeacherSubscriptions.set(
           entry[0],
           teacherSubscriptionSchema.parse(entry[1]),
+        );
+      }
+    }
+    if (Array.isArray(data.mockOrgSubscriptions)) {
+      mockOrgSubscriptions.clear();
+      for (const entry of data.mockOrgSubscriptions as Array<
+        [string, OrganizationSubscription]
+      >) {
+        mockOrgSubscriptions.set(
+          entry[0],
+          organizationSubscriptionSchema.parse(entry[1]),
         );
       }
     }
@@ -7838,6 +7855,26 @@ export const handlers = [
     const url = new URL(request.url);
     const market = (url.searchParams.get("market") ?? "IR") as MarketCode;
     return HttpResponse.json(offersForMarket(market));
+  }),
+
+  http.get("/api/organizations/:orgId/subscription", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const sub =
+      mockOrgSubscriptions.get(orgId) ??
+      organizationSubscriptionSchema.parse({
+        organizationId: orgId,
+        planCode: "org_starter",
+        state: "trial",
+        trialDaysLeft: 14,
+        graceDaysLeft: null,
+        limitedReason: null,
+        renewsAt: null,
+      });
+    return HttpResponse.json(sub);
   }),
 
   http.post("/api/teacher/plans/trial", async ({ request }) => {

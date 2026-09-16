@@ -37,6 +37,7 @@ type OrgNavKey =
   | "analytics"
   | "bulkActions"
   | "pricing"
+  | "subscription"
   | "subjects"
   | "students"
   | "courses"
@@ -204,6 +205,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "pricing" as const,
       href: `${routes.organization.pricing(orgId)}${langQuery}`,
       labelKey: "navPricing",
+    },
+    {
+      key: "subscription" as const,
+      href: `${routes.organization.subscription(orgId)}${langQuery}`,
+      labelKey: "navSubscription",
     },
     {
       key: "subjects" as const,

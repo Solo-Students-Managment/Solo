@@ -1,0 +1,22 @@
+{
+  "title": "اشتراک",
+  "subtitle": "وضعیت‌های آزمایشی، مهلت، محدود و فعال برای این سازمان.",
+  "stateLabel": "وضعیت",
+  "planLabel": "طرح",
+  "trialDaysLeft": "روز باقی‌مانده آزمایشی",
+  "graceDaysLeft": "روز باقی‌مانده مهلت",
+  "limitedReason": "دلیل دسترسی محدود",
+  "renewsAt": "تمدید در",
+  "state.trial": "آزمایشی",
+  "state.grace": "دوره مهلت",
+  "state.limited": "محدود",
+  "state.active": "فعال",
+  "state.canceled": "لغو شده",
+  "plan.org_starter": "Starter",
+  "plan.org_pro": "Pro",
+  "plan.org_enterprise": "Enterprise",
+  "restrictedNotice": "تا رفع وضعیت صورتحساب، برخی قابلیت‌ها محدود می‌مانند.",
+  "upgradeNotice": "برای بازگرداندن دسترسی کامل، ارتقا دهید یا محدودیت مصرف را رفع کنید.",
+  "loadError": "بارگذاری اشتراک ممکن نشد.",
+  "forbidden": "مجوز مشاهده اشتراک را ندارید."
+}

@@ -99,5 +99,6 @@
   "navEvents": "Events",
   "navAnalytics": "Analytics",
   "navBulkActions": "Bulk actions",
-  "navPricing": "Pricing catalog"
+  "navPricing": "Pricing catalog",
+  "navSubscription": "Subscription"
 }

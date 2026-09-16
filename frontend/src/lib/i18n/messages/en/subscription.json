@@ -1,0 +1,22 @@
+{
+  "title": "Subscription",
+  "subtitle": "Trial, grace, limited, and active subscription states for this organization.",
+  "stateLabel": "State",
+  "planLabel": "Plan",
+  "trialDaysLeft": "Trial days left",
+  "graceDaysLeft": "Grace days left",
+  "limitedReason": "Limited access reason",
+  "renewsAt": "Renews at",
+  "state.trial": "Trial",
+  "state.grace": "Grace period",
+  "state.limited": "Limited",
+  "state.active": "Active",
+  "state.canceled": "Canceled",
+  "plan.org_starter": "Starter",
+  "plan.org_pro": "Pro",
+  "plan.org_enterprise": "Enterprise",
+  "restrictedNotice": "Some features may be restricted until billing is resolved.",
+  "upgradeNotice": "Upgrade or resolve usage limits to restore full access.",
+  "loadError": "Could not load subscription.",
+  "forbidden": "You do not have permission to view subscription."
+}

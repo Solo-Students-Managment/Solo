@@ -48,6 +48,7 @@ import enAnalytics from "./messages/en/analytics.json";
 import enBulkActions from "./messages/en/bulkActions.json";
 import enPricing from "./messages/en/pricing.json";
 import enTeacherPlans from "./messages/en/teacherPlans.json";
+import enSubscription from "./messages/en/subscription.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -107,6 +108,7 @@ import faAnalytics from "./messages/fa/analytics.json";
 import faBulkActions from "./messages/fa/bulkActions.json";
 import faPricing from "./messages/fa/pricing.json";
 import faTeacherPlans from "./messages/fa/teacherPlans.json";
+import faSubscription from "./messages/fa/subscription.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -172,6 +174,7 @@ export type MessageNamespace =
   | "bulkActions"
   | "pricing"
   | "teacherPlans"
+  | "subscription"
   | "messaging"
   | "chat"
   | "notifications"
@@ -239,6 +242,7 @@ const dictionaries: Dictionaries = {
     bulkActions: enBulkActions,
     pricing: enPricing,
     teacherPlans: enTeacherPlans,
+    subscription: enSubscription,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -300,6 +304,7 @@ const dictionaries: Dictionaries = {
     bulkActions: faBulkActions,
     pricing: faPricing,
     teacherPlans: faTeacherPlans,
+    subscription: faSubscription,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

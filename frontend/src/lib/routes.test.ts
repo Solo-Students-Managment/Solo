@@ -67,6 +67,9 @@ describe("typed routes", () => {
       "/org/org_1/bulk-actions",
     );
     expect(routes.organization.pricing("org_1")).toBe("/org/org_1/pricing");
+    expect(routes.organization.subscription("org_1")).toBe(
+      "/org/org_1/subscription",
+    );
     expect(routes.public.form("parent-feedback")).toBe("/f/parent-feedback");
     expect(routes.organization.evaluations("org_1")).toBe(
       "/org/org_1/evaluations",
