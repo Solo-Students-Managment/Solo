@@ -1,0 +1,15 @@
+{
+  "title": "Support tickets",
+  "subtitle": "Support tickets and time-limited support mode.",
+  "openTicket": "Open ticket",
+  "subjectLabel": "Subject",
+  "openSuccess": "Ticket opened.",
+  "enterMode": "Enter support mode",
+  "exitMode": "Exit support mode",
+  "modeActive": "Support mode active",
+  "modeInactive": "Support mode off",
+  "colSubject": "Subject",
+  "colStatus": "Status",
+  "empty": "No tickets yet.",
+  "forbidden": "You do not have permission to manage support."
+}

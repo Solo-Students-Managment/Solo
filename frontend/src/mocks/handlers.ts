@@ -280,6 +280,11 @@ import {
   adminUserSchema,
   createMockAdminUsersClient,
 } from "@/services/admin-users";
+import {
+  createMockSupportClient,
+  supportModeSchema,
+  supportTicketSchema,
+} from "@/services/support";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -514,6 +519,7 @@ const mswPlanVersionsClient = createMockPlanVersionsClient();
 const mswManualBillingClient = createMockManualBillingClient();
 const mswAdminDashboardClient = createMockAdminDashboardClient();
 const mswAdminUsersClient = createMockAdminUsersClient();
+const mswSupportClient = createMockSupportClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8476,5 +8482,58 @@ export const handlers = [
     const row = await mswAdminUsersClient.unrestrict(String(params.userId));
     persistMswState();
     return HttpResponse.json(adminUserSchema.parse(row));
+  }),
+
+  http.get("/api/admin/support/tickets", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswSupportClient.listTickets();
+    return HttpResponse.json(rows.map((row) => supportTicketSchema.parse(row)));
+  }),
+
+  http.post("/api/admin/support/tickets", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { subject: string };
+    const row = await mswSupportClient.openTicket(body);
+    persistMswState();
+    return HttpResponse.json(supportTicketSchema.parse(row), { status: 201 });
+  }),
+
+  http.get("/api/admin/support/mode", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const mode = await mswSupportClient.getSupportMode();
+    return HttpResponse.json(supportModeSchema.parse(mode));
+  }),
+
+  http.post("/api/admin/support/mode/enter", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      targetOrgId: string;
+      minutes: number;
+    };
+    const mode = await mswSupportClient.enterSupportMode(body);
+    persistMswState();
+    return HttpResponse.json(supportModeSchema.parse(mode));
+  }),
+
+  http.post("/api/admin/support/mode/exit", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const mode = await mswSupportClient.exitSupportMode();
+    persistMswState();
+    return HttpResponse.json(supportModeSchema.parse(mode));
   }),
 ];
