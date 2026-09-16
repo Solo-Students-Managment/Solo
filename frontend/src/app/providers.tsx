@@ -165,6 +165,10 @@ import {
   setPlanVersionsClient,
 } from "@/services/plan-versions";
 import {
+  createHttpManualBillingClient,
+  setManualBillingClient,
+} from "@/services/manual-billing";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -261,6 +265,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setTaxInvoicesClient(createHttpTaxInvoicesClient());
           setCancellationClient(createHttpCancellationClient());
           setPlanVersionsClient(createHttpPlanVersionsClient());
+          setManualBillingClient(createHttpManualBillingClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

@@ -109,5 +109,6 @@
   "navCheckout": "Checkout",
   "navTaxInvoices": "Tax & invoices",
   "navCancellation": "Cancel subscription",
-  "navPlanVersions": "Plan versions"
+  "navPlanVersions": "Plan versions",
+  "navManualBilling": "Manual billing"
 }

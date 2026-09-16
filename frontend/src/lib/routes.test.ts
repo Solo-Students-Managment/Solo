@@ -75,6 +75,9 @@ describe("typed routes", () => {
     expect(routes.organization.planVersions("org_1")).toBe(
       "/org/org_1/plan-versions",
     );
+    expect(routes.organization.manualBilling("org_1")).toBe(
+      "/org/org_1/manual-billing",
+    );
     expect(routes.organization.subscription("org_1")).toBe(
       "/org/org_1/subscription",
     );

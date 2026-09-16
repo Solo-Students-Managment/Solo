@@ -268,6 +268,10 @@ import {
   createMockPlanVersionsClient,
   planVersionsSnapshotSchema,
 } from "@/services/plan-versions";
+import {
+  createMockManualBillingClient,
+  manualInvoiceSchema,
+} from "@/services/manual-billing";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -499,6 +503,7 @@ const mswCheckoutClient = createMockCheckoutClient();
 const mswTaxInvoicesClient = createMockTaxInvoicesClient();
 const mswCancellationClient = createMockCancellationClient();
 const mswPlanVersionsClient = createMockPlanVersionsClient();
+const mswManualBillingClient = createMockManualBillingClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8337,6 +8342,84 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(planVersionsSnapshotSchema.parse(snap));
+    },
+  ),
+
+  http.get("/api/organizations/:orgId/manual-billing", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswManualBillingClient.list(String(params.orgId));
+    return HttpResponse.json(rows.map((row) => manualInvoiceSchema.parse(row)));
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/manual-billing",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        amount: number;
+        currency: "IRR" | "USD";
+        dueDays?: number;
+      };
+      const row = await mswManualBillingClient.create(
+        String(params.orgId),
+        body,
+      );
+      persistMswState();
+      return HttpResponse.json(manualInvoiceSchema.parse(row), { status: 201 });
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/manual-billing/:invoiceId/send",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = await mswManualBillingClient.send(
+        String(params.orgId),
+        String(params.invoiceId),
+      );
+      persistMswState();
+      return HttpResponse.json(manualInvoiceSchema.parse(row));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/manual-billing/:invoiceId/escalate",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = await mswManualBillingClient.escalate(
+        String(params.orgId),
+        String(params.invoiceId),
+      );
+      persistMswState();
+      return HttpResponse.json(manualInvoiceSchema.parse(row));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/manual-billing/:invoiceId/pay",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = await mswManualBillingClient.markPaid(
+        String(params.orgId),
+        String(params.invoiceId),
+      );
+      persistMswState();
+      return HttpResponse.json(manualInvoiceSchema.parse(row));
     },
   ),
 ];
