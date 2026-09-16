@@ -307,6 +307,10 @@ import {
   apiKeySchema,
   createMockApiKeysClient,
 } from "@/services/api-keys";
+import {
+  createMockFeatureFlagsClient,
+  featureFlagSchema,
+} from "@/services/feature-flags";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -548,6 +552,7 @@ const mswAnnouncementsClient = createMockAnnouncementsClient();
 const mswIncidentsClient = createMockIncidentsClient();
 const mswPrivacyClient = createMockPrivacyClient();
 const mswApiKeysClient = createMockApiKeysClient();
+const mswFeatureFlagsClient = createMockFeatureFlagsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8747,6 +8752,49 @@ export const handlers = [
       );
       persistMswState();
       return HttpResponse.json(apiKeySchema.parse(row));
+    },
+  ),
+
+  http.get("/api/admin/feature-flags", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswFeatureFlagsClient.list();
+    return HttpResponse.json(rows.map((row) => featureFlagSchema.parse(row)));
+  }),
+
+  http.post(
+    "/api/admin/feature-flags/:id/toggle",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { enabled: boolean };
+      const row = await mswFeatureFlagsClient.toggle(
+        String(params.id),
+        body.enabled,
+      );
+      persistMswState();
+      return HttpResponse.json(featureFlagSchema.parse(row));
+    },
+  ),
+
+  http.post(
+    "/api/admin/feature-flags/:id/early-access",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { earlyAccess: boolean };
+      const row = await mswFeatureFlagsClient.setEarlyAccess(
+        String(params.id),
+        body.earlyAccess,
+      );
+      persistMswState();
+      return HttpResponse.json(featureFlagSchema.parse(row));
     },
   ),
 ];

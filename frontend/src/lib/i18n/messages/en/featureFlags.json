@@ -1,0 +1,15 @@
+{
+  "title": "Feature flags",
+  "subtitle": "Feature flags and early access admin.",
+  "enable": "Enable",
+  "disable": "Disable",
+  "toggleSuccess": "Flag updated.",
+  "colKey": "Key",
+  "colLabel": "Label",
+  "colEnabled": "Enabled",
+  "colEarly": "Early access",
+  "yes": "Yes",
+  "no": "No",
+  "empty": "No flags.",
+  "forbidden": "You do not have permission to manage feature flags."
+}
