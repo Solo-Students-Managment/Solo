@@ -1,0 +1,12 @@
+{
+  "title": "Coupons",
+  "subtitle": "Apply promotion codes to your subscription.",
+  "codeLabel": "Coupon code",
+  "validate": "Validate",
+  "apply": "Apply coupon",
+  "valid": "Coupon is valid.",
+  "invalid": "Coupon is not valid.",
+  "applied": "Coupon applied.",
+  "forbidden": "You do not have permission to manage coupons.",
+  "percentOff": "Discount"
+}

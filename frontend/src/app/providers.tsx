@@ -147,6 +147,7 @@ import {
 import { createHttpBillingClient, setBillingClient } from "@/services/billing";
 import { createHttpUsageClient, setUsageClient } from "@/services/usage";
 import { createHttpAddOnsClient, setAddOnsClient } from "@/services/add-ons";
+import { createHttpCouponsClient, setCouponsClient } from "@/services/coupons";
 import {
   createHttpMessagingClient,
   setMessagingClient,
@@ -239,6 +240,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setBillingClient(createHttpBillingClient());
           setUsageClient(createHttpUsageClient());
           setAddOnsClient(createHttpAddOnsClient());
+          setCouponsClient(createHttpCouponsClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

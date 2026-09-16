@@ -247,6 +247,10 @@ import {
   addOnsBundleSchema,
   createMockAddOnsClient,
 } from "@/services/add-ons";
+import {
+  couponValidationSchema,
+  createMockCouponsClient,
+} from "@/services/coupons";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -473,6 +477,7 @@ const mswPlanChangeClient = createMockPlanChangeClient();
 const mswBillingClient = createMockBillingClient();
 const mswUsageClient = createMockUsageClient();
 const mswAddOnsClient = createMockAddOnsClient();
+const mswCouponsClient = createMockCouponsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -7878,6 +7883,39 @@ export const handlers = [
     const market = (url.searchParams.get("market") ?? "IR") as MarketCode;
     return HttpResponse.json(offersForMarket(market));
   }),
+
+  http.post(
+    "/api/organizations/:orgId/coupons/validate",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { code?: string };
+      const result = await mswCouponsClient.validate(
+        String(params.orgId),
+        body.code ?? "",
+      );
+      return HttpResponse.json(couponValidationSchema.parse(result));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/coupons/apply",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { code?: string };
+      const result = await mswCouponsClient.apply(
+        String(params.orgId),
+        body.code ?? "",
+      );
+      persistMswState();
+      return HttpResponse.json(couponValidationSchema.parse(result));
+    },
+  ),
 
   http.get("/api/organizations/:orgId/add-ons", async ({ params }) => {
     const failed = await maybeFail();
