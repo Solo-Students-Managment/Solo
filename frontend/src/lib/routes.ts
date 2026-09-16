@@ -106,6 +106,7 @@ export const routes = {
       `/org/${encodeURIComponent(orgId)}/plan-versions`,
     manualBilling: (orgId: string) =>
       `/org/${encodeURIComponent(orgId)}/manual-billing`,
+    audit: (orgId: string) => `/org/${encodeURIComponent(orgId)}/audit`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

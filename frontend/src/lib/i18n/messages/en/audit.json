@@ -1,0 +1,10 @@
+{
+  "title": "Audit log",
+  "subtitle": "Immutable audit log viewer (read-only).",
+  "colAction": "Action",
+  "colTarget": "Target",
+  "colActor": "Actor",
+  "colWhen": "When",
+  "empty": "No audit entries.",
+  "forbidden": "You do not have permission to view audit logs."
+}

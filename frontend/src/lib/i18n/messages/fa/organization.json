@@ -110,5 +110,6 @@
   "navTaxInvoices": "مالیات و فاکتورها",
   "navCancellation": "لغو اشتراک",
   "navPlanVersions": "نسخه‌های پلن",
-  "navManualBilling": "صورتحساب دستی"
+  "navManualBilling": "صورتحساب دستی",
+  "navAudit": "گزارش حسابرسی"
 }

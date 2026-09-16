@@ -110,5 +110,6 @@
   "navTaxInvoices": "Tax & invoices",
   "navCancellation": "Cancel subscription",
   "navPlanVersions": "Plan versions",
-  "navManualBilling": "Manual billing"
+  "navManualBilling": "Manual billing",
+  "navAudit": "Audit log"
 }

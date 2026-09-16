@@ -64,6 +64,7 @@ import enAdminDashboard from "./messages/en/adminDashboard.json";
 import enAdminUsers from "./messages/en/adminUsers.json";
 import enSupport from "./messages/en/support.json";
 import enVerification from "./messages/en/verification.json";
+import enAudit from "./messages/en/audit.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -139,6 +140,7 @@ import faAdminDashboard from "./messages/fa/adminDashboard.json";
 import faAdminUsers from "./messages/fa/adminUsers.json";
 import faSupport from "./messages/fa/support.json";
 import faVerification from "./messages/fa/verification.json";
+import faAudit from "./messages/fa/audit.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -220,6 +222,7 @@ export type MessageNamespace =
   | "adminUsers"
   | "support"
   | "verification"
+  | "audit"
   | "messaging"
   | "chat"
   | "notifications"
@@ -303,6 +306,7 @@ const dictionaries: Dictionaries = {
     adminUsers: enAdminUsers,
     support: enSupport,
     verification: enVerification,
+    audit: enAudit,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -380,6 +384,7 @@ const dictionaries: Dictionaries = {
     adminUsers: faAdminUsers,
     support: faSupport,
     verification: faVerification,
+    audit: faAudit,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

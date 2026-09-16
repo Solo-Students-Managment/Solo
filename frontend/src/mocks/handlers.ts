@@ -289,6 +289,7 @@ import {
   createMockVerificationClient,
   verificationRequestSchema,
 } from "@/services/verification";
+import { auditEntrySchema, createMockAuditClient } from "@/services/audit";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -525,6 +526,7 @@ const mswAdminDashboardClient = createMockAdminDashboardClient();
 const mswAdminUsersClient = createMockAdminUsersClient();
 const mswSupportClient = createMockSupportClient();
 const mswVerificationClient = createMockVerificationClient();
+const mswAuditClient = createMockAuditClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8571,5 +8573,16 @@ export const handlers = [
     const row = await mswVerificationClient.reject(String(params.id));
     persistMswState();
     return HttpResponse.json(verificationRequestSchema.parse(row));
+  }),
+
+  http.get("/api/audit", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const url = new URL(request.url);
+    const organizationId = url.searchParams.get("organizationId");
+    const rows = await mswAuditClient.list({ organizationId });
+    return HttpResponse.json(rows.map((row) => auditEntrySchema.parse(row)));
   }),
 ];
