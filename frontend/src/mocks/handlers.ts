@@ -311,6 +311,11 @@ import {
   createMockFeatureFlagsClient,
   featureFlagSchema,
 } from "@/services/feature-flags";
+import {
+  createMockStorageAdminClient,
+  storageFileSchema,
+  storageQuotaSchema,
+} from "@/services/storage-admin";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -553,6 +558,7 @@ const mswIncidentsClient = createMockIncidentsClient();
 const mswPrivacyClient = createMockPrivacyClient();
 const mswApiKeysClient = createMockApiKeysClient();
 const mswFeatureFlagsClient = createMockFeatureFlagsClient();
+const mswStorageAdminClient = createMockStorageAdminClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8797,4 +8803,42 @@ export const handlers = [
       return HttpResponse.json(featureFlagSchema.parse(row));
     },
   ),
+
+  http.get("/api/admin/storage/quota", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const quota = await mswStorageAdminClient.getQuota();
+    return HttpResponse.json(storageQuotaSchema.parse(quota));
+  }),
+
+  http.get("/api/admin/storage/files", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswStorageAdminClient.listFiles();
+    return HttpResponse.json(rows.map((row) => storageFileSchema.parse(row)));
+  }),
+
+  http.post("/api/admin/storage/files/:id/quarantine", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswStorageAdminClient.quarantine(String(params.id));
+    persistMswState();
+    return HttpResponse.json(storageFileSchema.parse(row));
+  }),
+
+  http.post("/api/admin/storage/files/:id/release", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswStorageAdminClient.release(String(params.id));
+    persistMswState();
+    return HttpResponse.json(storageFileSchema.parse(row));
+  }),
 ];

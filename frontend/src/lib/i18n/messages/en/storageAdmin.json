@@ -1,0 +1,17 @@
+{
+  "title": "Storage admin",
+  "subtitle": "Storage quota and file security administration.",
+  "quotaLabel": "Quota usage",
+  "quarantinedLabel": "Quarantined files",
+  "quarantine": "Quarantine",
+  "release": "Release",
+  "quarantineSuccess": "File quarantined.",
+  "releaseSuccess": "File released.",
+  "colName": "Name",
+  "colSize": "Size",
+  "colStatus": "Status",
+  "status.ok": "OK",
+  "status.quarantined": "Quarantined",
+  "empty": "No files.",
+  "forbidden": "You do not have permission to manage storage."
+}

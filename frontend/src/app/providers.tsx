@@ -197,6 +197,10 @@ import {
   setFeatureFlagsClient,
 } from "@/services/feature-flags";
 import {
+  createHttpStorageAdminClient,
+  setStorageAdminClient,
+} from "@/services/storage-admin";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -304,6 +308,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setPrivacyClient(createHttpPrivacyClient());
           setApiKeysClient(createHttpApiKeysClient());
           setFeatureFlagsClient(createHttpFeatureFlagsClient());
+          setStorageAdminClient(createHttpStorageAdminClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

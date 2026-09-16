@@ -1,0 +1,17 @@
+{
+  "title": "مدیریت فضای ذخیره‌سازی",
+  "subtitle": "سهمیه و امنیت فایل.",
+  "quotaLabel": "مصرف سهمیه",
+  "quarantinedLabel": "فایل‌های قرنطینه",
+  "quarantine": "قرنطینه",
+  "release": "آزادسازی",
+  "quarantineSuccess": "فایل قرنطینه شد.",
+  "releaseSuccess": "فایل آزاد شد.",
+  "colName": "نام",
+  "colSize": "حجم",
+  "colStatus": "وضعیت",
+  "status.ok": "سالم",
+  "status.quarantined": "قرنطینه",
+  "empty": "فایلی نیست.",
+  "forbidden": "اجازه مدیریت فضای ذخیره‌سازی را ندارید."
+}

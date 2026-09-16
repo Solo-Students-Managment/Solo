@@ -70,6 +70,7 @@ import enIncidents from "./messages/en/incidents.json";
 import enPrivacy from "./messages/en/privacy.json";
 import enApiKeys from "./messages/en/apiKeys.json";
 import enFeatureFlags from "./messages/en/featureFlags.json";
+import enStorageAdmin from "./messages/en/storageAdmin.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -151,6 +152,7 @@ import faIncidents from "./messages/fa/incidents.json";
 import faPrivacy from "./messages/fa/privacy.json";
 import faApiKeys from "./messages/fa/apiKeys.json";
 import faFeatureFlags from "./messages/fa/featureFlags.json";
+import faStorageAdmin from "./messages/fa/storageAdmin.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -238,6 +240,7 @@ export type MessageNamespace =
   | "privacy"
   | "apiKeys"
   | "featureFlags"
+  | "storageAdmin"
   | "messaging"
   | "chat"
   | "notifications"
@@ -327,6 +330,7 @@ const dictionaries: Dictionaries = {
     privacy: enPrivacy,
     apiKeys: enApiKeys,
     featureFlags: enFeatureFlags,
+    storageAdmin: enStorageAdmin,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -410,6 +414,7 @@ const dictionaries: Dictionaries = {
     privacy: faPrivacy,
     apiKeys: faApiKeys,
     featureFlags: faFeatureFlags,
+    storageAdmin: faStorageAdmin,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,
