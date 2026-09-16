@@ -290,6 +290,10 @@ import {
   verificationRequestSchema,
 } from "@/services/verification";
 import { auditEntrySchema, createMockAuditClient } from "@/services/audit";
+import {
+  announcementSchema,
+  createMockAnnouncementsClient,
+} from "@/services/announcements";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -527,6 +531,7 @@ const mswAdminUsersClient = createMockAdminUsersClient();
 const mswSupportClient = createMockSupportClient();
 const mswVerificationClient = createMockVerificationClient();
 const mswAuditClient = createMockAuditClient();
+const mswAnnouncementsClient = createMockAnnouncementsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8584,5 +8589,35 @@ export const handlers = [
     const organizationId = url.searchParams.get("organizationId");
     const rows = await mswAuditClient.list({ organizationId });
     return HttpResponse.json(rows.map((row) => auditEntrySchema.parse(row)));
+  }),
+
+  http.get("/api/admin/announcements", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswAnnouncementsClient.list();
+    return HttpResponse.json(rows.map((row) => announcementSchema.parse(row)));
+  }),
+
+  http.post("/api/admin/announcements", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { title: string; body: string };
+    const row = await mswAnnouncementsClient.create(body);
+    persistMswState();
+    return HttpResponse.json(announcementSchema.parse(row), { status: 201 });
+  }),
+
+  http.post("/api/admin/announcements/:id/publish", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswAnnouncementsClient.publish(String(params.id));
+    persistMswState();
+    return HttpResponse.json(announcementSchema.parse(row));
   }),
 ];

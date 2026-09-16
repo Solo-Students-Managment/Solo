@@ -1,0 +1,14 @@
+{
+  "title": "Announcements",
+  "subtitle": "Global announcement center.",
+  "create": "Create announcement",
+  "createSuccess": "Draft created.",
+  "publish": "Publish",
+  "publishSuccess": "Announcement published.",
+  "titleLabel": "Title",
+  "bodyLabel": "Body",
+  "colTitle": "Title",
+  "colStatus": "Status",
+  "empty": "No announcements.",
+  "forbidden": "You do not have permission to manage announcements."
+}

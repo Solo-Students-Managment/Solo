@@ -183,6 +183,10 @@ import {
 } from "@/services/verification";
 import { createHttpAuditClient, setAuditClient } from "@/services/audit";
 import {
+  createHttpAnnouncementsClient,
+  setAnnouncementsClient,
+} from "@/services/announcements";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -285,6 +289,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setSupportClient(createHttpSupportClient());
           setVerificationClient(createHttpVerificationClient());
           setAuditClient(createHttpAuditClient());
+          setAnnouncementsClient(createHttpAnnouncementsClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

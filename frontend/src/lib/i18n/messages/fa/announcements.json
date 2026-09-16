@@ -1,0 +1,14 @@
+{
+  "title": "اعلان‌ها",
+  "subtitle": "مرکز اعلان سراسری.",
+  "create": "ایجاد اعلان",
+  "createSuccess": "پیش‌نویس ساخته شد.",
+  "publish": "انتشار",
+  "publishSuccess": "اعلان منتشر شد.",
+  "titleLabel": "عنوان",
+  "bodyLabel": "متن",
+  "colTitle": "عنوان",
+  "colStatus": "وضعیت",
+  "empty": "اعلانی نیست.",
+  "forbidden": "اجازه مدیریت اعلان‌ها را ندارید."
+}
