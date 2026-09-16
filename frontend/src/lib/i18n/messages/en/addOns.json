@@ -1,0 +1,20 @@
+{
+  "title": "Add-ons",
+  "subtitle": "Optional add-ons, credit packs, and overage opt-in (off by default).",
+  "overageOptIn": "Allow usage overage billing",
+  "overageHelp": "When off, over-quota usage is blocked instead of billed.",
+  "addOnsTitle": "Add-ons",
+  "creditPacksTitle": "Credit packs",
+  "colName": "Name",
+  "colPrice": "Price",
+  "colStatus": "Status",
+  "colCredits": "Credits",
+  "active": "Active",
+  "inactive": "Inactive",
+  "enable": "Enable",
+  "disable": "Disable",
+  "updated": "Add-on updated.",
+  "overageUpdated": "Overage preference saved.",
+  "forbidden": "You do not have permission to manage add-ons.",
+  "loadError": "Could not load add-ons."
+}

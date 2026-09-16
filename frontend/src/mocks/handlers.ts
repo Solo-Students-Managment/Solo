@@ -467,6 +467,7 @@ const mockOrgSubscriptions = new Map<string, OrganizationSubscription>();
 const mswPlanChangeClient = createMockPlanChangeClient();
 const mswBillingClient = createMockBillingClient();
 const mswUsageClient = createMockUsageClient();
+const mswAddOnsClient = createMockAddOnsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -7872,6 +7873,53 @@ export const handlers = [
     const market = (url.searchParams.get("market") ?? "IR") as MarketCode;
     return HttpResponse.json(offersForMarket(market));
   }),
+
+  http.get("/api/organizations/:orgId/add-ons", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const bundle = await mswAddOnsClient.get(orgId);
+    return HttpResponse.json(addOnsBundleSchema.parse(bundle));
+  }),
+
+  http.patch(
+    "/api/organizations/:orgId/add-ons/overage",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as { enabled?: boolean };
+      const bundle = await mswAddOnsClient.setOverageOptIn(
+        orgId,
+        Boolean(body.enabled),
+      );
+      persistMswState();
+      return HttpResponse.json(addOnsBundleSchema.parse(bundle));
+    },
+  ),
+
+  http.patch(
+    "/api/organizations/:orgId/add-ons/:addOnId",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const orgId = String(params.orgId);
+      const body = (await request.json()) as { active?: boolean };
+      const addon = await mswAddOnsClient.toggleAddOn(
+        orgId,
+        String(params.addOnId),
+        Boolean(body.active),
+      );
+      persistMswState();
+      return HttpResponse.json(addOnSchema.parse(addon));
+    },
+  ),
 
   http.get("/api/organizations/:orgId/usage", async ({ params }) => {
     const failed = await maybeFail();

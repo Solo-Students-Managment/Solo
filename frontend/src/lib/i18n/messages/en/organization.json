@@ -103,5 +103,6 @@
   "navSubscription": "Subscription",
   "navPlanChange": "Plan change",
   "navBilling": "Billing",
-  "navUsage": "Usage"
+  "navUsage": "Usage",
+  "navAddOns": "Add-ons"
 }

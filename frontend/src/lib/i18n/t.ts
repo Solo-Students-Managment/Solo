@@ -52,6 +52,7 @@ import enSubscription from "./messages/en/subscription.json";
 import enPlanChange from "./messages/en/planChange.json";
 import enBilling from "./messages/en/billing.json";
 import enUsage from "./messages/en/usage.json";
+import enAddOns from "./messages/en/addOns.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -115,6 +116,7 @@ import faSubscription from "./messages/fa/subscription.json";
 import faPlanChange from "./messages/fa/planChange.json";
 import faBilling from "./messages/fa/billing.json";
 import faUsage from "./messages/fa/usage.json";
+import faAddOns from "./messages/fa/addOns.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -184,6 +186,7 @@ export type MessageNamespace =
   | "planChange"
   | "billing"
   | "usage"
+  | "addOns"
   | "messaging"
   | "chat"
   | "notifications"
@@ -255,6 +258,7 @@ const dictionaries: Dictionaries = {
     planChange: enPlanChange,
     billing: enBilling,
     usage: enUsage,
+    addOns: enAddOns,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -320,6 +324,7 @@ const dictionaries: Dictionaries = {
     planChange: faPlanChange,
     billing: faBilling,
     usage: faUsage,
+    addOns: faAddOns,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

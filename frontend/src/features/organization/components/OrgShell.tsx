@@ -41,6 +41,7 @@ type OrgNavKey =
   | "planChange"
   | "billing"
   | "usage"
+  | "addOns"
   | "subjects"
   | "students"
   | "courses"
@@ -228,6 +229,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "usage" as const,
       href: `${routes.organization.usage(orgId)}${langQuery}`,
       labelKey: "navUsage",
+    },
+    {
+      key: "addOns" as const,
+      href: `${routes.organization.addOns(orgId)}${langQuery}`,
+      labelKey: "navAddOns",
     },
     {
       key: "subjects" as const,
