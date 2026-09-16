@@ -242,6 +242,11 @@ import {
   type Invoice,
 } from "@/services/billing";
 import { createMockUsageClient, usageSnapshotSchema } from "@/services/usage";
+import {
+  addOnSchema,
+  addOnsBundleSchema,
+  createMockAddOnsClient,
+} from "@/services/add-ons";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {

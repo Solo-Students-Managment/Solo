@@ -10,7 +10,7 @@ test.describe("add-ons smoke", () => {
     if (!orgId) throw new Error("missing org id");
     await page.goto(`/org/${orgId}/add-ons?lang=en`);
     await expect(
-      page.getByRole("heading", { name: "Add-ons", exact: true }),
+      page.getByRole("heading", { name: "Add-ons", exact: true, level: 1 }),
     ).toBeVisible({ timeout: 20_000 });
     await expect(
       page.getByLabel("Allow usage overage billing"),
