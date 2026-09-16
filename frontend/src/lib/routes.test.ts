@@ -78,6 +78,10 @@ describe("typed routes", () => {
     expect(routes.organization.manualBilling("org_1")).toBe(
       "/org/org_1/manual-billing",
     );
+    expect(routes.admin.home()).toBe("/admin");
+    expect(routes.admin.users()).toBe("/admin/users");
+    expect(routes.admin.featureFlags()).toBe("/admin/feature-flags");
+
     expect(routes.organization.subscription("org_1")).toBe(
       "/org/org_1/subscription",
     );

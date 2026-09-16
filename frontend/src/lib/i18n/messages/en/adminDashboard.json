@@ -1,0 +1,9 @@
+{
+  "title": "Platform KPIs",
+  "subtitle": "Admin Solo dashboard with platform KPIs.",
+  "orgs": "Organizations",
+  "users": "Active users",
+  "mrr": "MRR",
+  "tickets": "Open tickets",
+  "forbidden": "You do not have permission to view platform KPIs."
+}

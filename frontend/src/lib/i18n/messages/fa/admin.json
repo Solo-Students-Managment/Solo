@@ -1,0 +1,14 @@
+{
+  "shellTitle": "ادمین سولو",
+  "navLabel": "ادمین",
+  "navDashboard": "شاخص‌های پلتفرم",
+  "navUsers": "مدیریت کاربران",
+  "navSupport": "تیکت‌های پشتیبانی",
+  "navVerification": "مرکز تأیید هویت",
+  "navAudit": "گزارش حسابرسی",
+  "navAnnouncements": "اعلان‌ها",
+  "navIncidents": "حوادث",
+  "navPrivacy": "درخواست‌های حریم خصوصی",
+  "navFeatureFlags": "پرچم‌های قابلیت",
+  "navStorage": "مدیریت فضای ذخیره‌سازی"
+}

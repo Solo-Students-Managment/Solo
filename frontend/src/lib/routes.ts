@@ -151,6 +151,15 @@ export const routes = {
   },
   admin: {
     home: () => "/admin",
+    users: () => "/admin/users",
+    support: () => "/admin/support",
+    verification: () => "/admin/verification",
+    audit: () => "/admin/audit",
+    announcements: () => "/admin/announcements",
+    incidents: () => "/admin/incidents",
+    privacy: () => "/admin/privacy",
+    featureFlags: () => "/admin/feature-flags",
+    storage: () => "/admin/storage",
   },
   public: {
     profile: (slug: string) => `/p/${encodeURIComponent(slug)}`,

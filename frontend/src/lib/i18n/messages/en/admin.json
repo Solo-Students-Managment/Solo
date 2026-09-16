@@ -1,0 +1,14 @@
+{
+  "shellTitle": "Admin Solo",
+  "navLabel": "Admin",
+  "navDashboard": "Platform KPIs",
+  "navUsers": "User management",
+  "navSupport": "Support tickets",
+  "navVerification": "Verification center",
+  "navAudit": "Audit log",
+  "navAnnouncements": "Announcements",
+  "navIncidents": "Incidents",
+  "navPrivacy": "Privacy requests",
+  "navFeatureFlags": "Feature flags",
+  "navStorage": "Storage admin"
+}

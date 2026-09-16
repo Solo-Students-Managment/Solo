@@ -169,6 +169,10 @@ import {
   setManualBillingClient,
 } from "@/services/manual-billing";
 import {
+  createHttpAdminDashboardClient,
+  setAdminDashboardClient,
+} from "@/services/admin-dashboard";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -266,6 +270,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setCancellationClient(createHttpCancellationClient());
           setPlanVersionsClient(createHttpPlanVersionsClient());
           setManualBillingClient(createHttpManualBillingClient());
+          setAdminDashboardClient(createHttpAdminDashboardClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

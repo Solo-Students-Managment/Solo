@@ -272,6 +272,10 @@ import {
   createMockManualBillingClient,
   manualInvoiceSchema,
 } from "@/services/manual-billing";
+import {
+  createMockAdminDashboardClient,
+  platformKpiSchema,
+} from "@/services/admin-dashboard";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -504,6 +508,7 @@ const mswTaxInvoicesClient = createMockTaxInvoicesClient();
 const mswCancellationClient = createMockCancellationClient();
 const mswPlanVersionsClient = createMockPlanVersionsClient();
 const mswManualBillingClient = createMockManualBillingClient();
+const mswAdminDashboardClient = createMockAdminDashboardClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8422,4 +8427,13 @@ export const handlers = [
       return HttpResponse.json(manualInvoiceSchema.parse(row));
     },
   ),
+
+  http.get("/api/admin/dashboard/kpis", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const kpis = await mswAdminDashboardClient.getKpis();
+    return HttpResponse.json(platformKpiSchema.parse(kpis));
+  }),
 ];

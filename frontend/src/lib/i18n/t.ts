@@ -59,6 +59,8 @@ import enTaxInvoices from "./messages/en/taxInvoices.json";
 import enCancel from "./messages/en/cancel.json";
 import enPlanVersions from "./messages/en/planVersions.json";
 import enManualBilling from "./messages/en/manualBilling.json";
+import enAdmin from "./messages/en/admin.json";
+import enAdminDashboard from "./messages/en/adminDashboard.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -129,6 +131,8 @@ import faTaxInvoices from "./messages/fa/taxInvoices.json";
 import faCancel from "./messages/fa/cancel.json";
 import faPlanVersions from "./messages/fa/planVersions.json";
 import faManualBilling from "./messages/fa/manualBilling.json";
+import faAdmin from "./messages/fa/admin.json";
+import faAdminDashboard from "./messages/fa/adminDashboard.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -205,6 +209,8 @@ export type MessageNamespace =
   | "cancel"
   | "planVersions"
   | "manualBilling"
+  | "admin"
+  | "adminDashboard"
   | "messaging"
   | "chat"
   | "notifications"
@@ -283,6 +289,8 @@ const dictionaries: Dictionaries = {
     cancel: enCancel,
     planVersions: enPlanVersions,
     manualBilling: enManualBilling,
+    admin: enAdmin,
+    adminDashboard: enAdminDashboard,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -355,6 +363,8 @@ const dictionaries: Dictionaries = {
     cancel: faCancel,
     planVersions: faPlanVersions,
     manualBilling: faManualBilling,
+    admin: faAdmin,
+    adminDashboard: faAdminDashboard,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,
