@@ -285,6 +285,10 @@ import {
   supportModeSchema,
   supportTicketSchema,
 } from "@/services/support";
+import {
+  createMockVerificationClient,
+  verificationRequestSchema,
+} from "@/services/verification";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -520,6 +524,7 @@ const mswManualBillingClient = createMockManualBillingClient();
 const mswAdminDashboardClient = createMockAdminDashboardClient();
 const mswAdminUsersClient = createMockAdminUsersClient();
 const mswSupportClient = createMockSupportClient();
+const mswVerificationClient = createMockVerificationClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8535,5 +8540,36 @@ export const handlers = [
     const mode = await mswSupportClient.exitSupportMode();
     persistMswState();
     return HttpResponse.json(supportModeSchema.parse(mode));
+  }),
+
+  http.get("/api/admin/verification", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswVerificationClient.list();
+    return HttpResponse.json(
+      rows.map((row) => verificationRequestSchema.parse(row)),
+    );
+  }),
+
+  http.post("/api/admin/verification/:id/approve", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswVerificationClient.approve(String(params.id));
+    persistMswState();
+    return HttpResponse.json(verificationRequestSchema.parse(row));
+  }),
+
+  http.post("/api/admin/verification/:id/reject", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswVerificationClient.reject(String(params.id));
+    persistMswState();
+    return HttpResponse.json(verificationRequestSchema.parse(row));
   }),
 ];

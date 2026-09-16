@@ -1,0 +1,13 @@
+{
+  "title": "Verification center",
+  "subtitle": "Teacher, school, and institute verification queue.",
+  "approve": "Approve",
+  "reject": "Reject",
+  "approveSuccess": "Verification approved.",
+  "rejectSuccess": "Verification rejected.",
+  "colName": "Name",
+  "colKind": "Kind",
+  "colStatus": "Status",
+  "empty": "No verification requests.",
+  "forbidden": "You do not have permission to manage verification."
+}

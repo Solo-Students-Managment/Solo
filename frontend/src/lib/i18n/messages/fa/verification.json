@@ -1,0 +1,13 @@
+{
+  "title": "مرکز تأیید هویت",
+  "subtitle": "صف تأیید معلم، مدرسه و مؤسسه.",
+  "approve": "تأیید",
+  "reject": "رد",
+  "approveSuccess": "تأیید شد.",
+  "rejectSuccess": "رد شد.",
+  "colName": "نام",
+  "colKind": "نوع",
+  "colStatus": "وضعیت",
+  "empty": "درخواستی نیست.",
+  "forbidden": "اجازه مدیریت تأیید هویت را ندارید."
+}
