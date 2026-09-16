@@ -316,6 +316,10 @@ import {
   storageFileSchema,
   storageQuotaSchema,
 } from "@/services/storage-admin";
+import {
+  createMockOrgLifecycleClient,
+  lifecycleSnapshotSchema,
+} from "@/services/org-lifecycle";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -559,6 +563,7 @@ const mswPrivacyClient = createMockPrivacyClient();
 const mswApiKeysClient = createMockApiKeysClient();
 const mswFeatureFlagsClient = createMockFeatureFlagsClient();
 const mswStorageAdminClient = createMockStorageAdminClient();
+const mswOrgLifecycleClient = createMockOrgLifecycleClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8841,4 +8846,58 @@ export const handlers = [
     persistMswState();
     return HttpResponse.json(storageFileSchema.parse(row));
   }),
+
+  http.get("/api/organizations/:orgId/lifecycle", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const snap = await mswOrgLifecycleClient.get(String(params.orgId));
+    return HttpResponse.json(lifecycleSnapshotSchema.parse(snap));
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/lifecycle/archive",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const snap = await mswOrgLifecycleClient.archive(String(params.orgId));
+      persistMswState();
+      return HttpResponse.json(lifecycleSnapshotSchema.parse(snap));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/lifecycle/delete",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const snap = await mswOrgLifecycleClient.requestDelete(
+        String(params.orgId),
+      );
+      persistMswState();
+      return HttpResponse.json(lifecycleSnapshotSchema.parse(snap));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/lifecycle/transfer",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { newOwnerUserId: string };
+      const snap = await mswOrgLifecycleClient.transferOwnership(
+        String(params.orgId),
+        body.newOwnerUserId,
+      );
+      persistMswState();
+      return HttpResponse.json(lifecycleSnapshotSchema.parse(snap));
+    },
+  ),
 ];

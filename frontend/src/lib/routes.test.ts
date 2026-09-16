@@ -80,6 +80,7 @@ describe("typed routes", () => {
     );
     expect(routes.organization.audit("org_1")).toBe("/org/org_1/audit");
     expect(routes.organization.apiKeys("org_1")).toBe("/org/org_1/api-keys");
+    expect(routes.organization.lifecycle("org_1")).toBe("/org/org_1/lifecycle");
     expect(routes.admin.audit()).toBe("/admin/audit");
     expect(routes.admin.home()).toBe("/admin");
     expect(routes.admin.users()).toBe("/admin/users");

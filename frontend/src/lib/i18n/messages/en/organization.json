@@ -112,5 +112,6 @@
   "navPlanVersions": "Plan versions",
   "navManualBilling": "Manual billing",
   "navAudit": "Audit log",
-  "navApiKeys": "API keys"
+  "navApiKeys": "API keys",
+  "navOrgLifecycle": "Organization lifecycle"
 }

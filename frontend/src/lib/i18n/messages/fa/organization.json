@@ -112,5 +112,6 @@
   "navPlanVersions": "نسخه‌های پلن",
   "navManualBilling": "صورتحساب دستی",
   "navAudit": "گزارش حسابرسی",
-  "navApiKeys": "کلیدهای API"
+  "navApiKeys": "کلیدهای API",
+  "navOrgLifecycle": "چرخه عمر سازمان"
 }

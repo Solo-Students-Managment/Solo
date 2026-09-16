@@ -1,0 +1,18 @@
+{
+  "title": "Organization lifecycle",
+  "subtitle": "Archive, delete, and ownership transfer with impact preview.",
+  "stateLabel": "State",
+  "impactTitle": "Impact preview",
+  "archive": "Archive organization",
+  "archiveSuccess": "Organization archived.",
+  "delete": "Request delete",
+  "deleteSuccess": "Delete requested.",
+  "transfer": "Transfer ownership",
+  "transferSuccess": "Ownership transferred.",
+  "ownerLabel": "New owner user id",
+  "members": "Members",
+  "students": "Students",
+  "files": "Files",
+  "billingOpen": "Open billing",
+  "forbidden": "You do not have permission to manage organization lifecycle."
+}

@@ -201,6 +201,10 @@ import {
   setStorageAdminClient,
 } from "@/services/storage-admin";
 import {
+  createHttpOrgLifecycleClient,
+  setOrgLifecycleClient,
+} from "@/services/org-lifecycle";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -309,6 +313,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setApiKeysClient(createHttpApiKeysClient());
           setFeatureFlagsClient(createHttpFeatureFlagsClient());
           setStorageAdminClient(createHttpStorageAdminClient());
+          setOrgLifecycleClient(createHttpOrgLifecycleClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());
