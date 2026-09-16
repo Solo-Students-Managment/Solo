@@ -101,5 +101,6 @@
   "navBulkActions": "Bulk actions",
   "navPricing": "Pricing catalog",
   "navSubscription": "Subscription",
-  "navPlanChange": "Plan change"
+  "navPlanChange": "Plan change",
+  "navBilling": "Billing"
 }

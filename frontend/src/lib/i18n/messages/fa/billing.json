@@ -1,0 +1,21 @@
+{
+  "title": "مرکز صورتحساب",
+  "subtitle": "فاکتورها، روش پرداخت و صورتحساب بعدی.",
+  "nextBill": "صورتحساب بعدی",
+  "nextBillAmount": "مبلغ",
+  "paymentMethod": "روش پرداخت",
+  "noPaymentMethod": "روش پرداخت ثبت نشده (نمایشی).",
+  "invoicesTitle": "فاکتورها",
+  "colNumber": "شماره",
+  "colStatus": "وضعیت",
+  "colTotal": "جمع",
+  "colIssued": "صدور",
+  "colDue": "سررسید",
+  "status.draft": "پیش‌نویس",
+  "status.open": "باز",
+  "status.paid": "پرداخت‌شده",
+  "status.void": "باطل",
+  "loadError": "بارگذاری صورتحساب ممکن نشد.",
+  "forbidden": "مجوز مشاهده صورتحساب را ندارید.",
+  "empty": "فاکتوری وجود ندارد."
+}

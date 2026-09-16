@@ -235,6 +235,12 @@ import {
   createMockPlanChangeClient,
   planChangePreviewSchema,
 } from "@/services/plan-change";
+import {
+  billingSummarySchema,
+  createMockBillingClient,
+  invoiceSchema,
+  type Invoice,
+} from "@/services/billing";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -458,6 +464,8 @@ const mockTuition = new Map<string, TuitionRecord[]>();
 const mockTeacherSubscriptions = new Map<string, TeacherSubscription>();
 const mockOrgSubscriptions = new Map<string, OrganizationSubscription>();
 const mswPlanChangeClient = createMockPlanChangeClient();
+const mswBillingClient = createMockBillingClient();
+const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
 const mockSearchCatalog: SearchHit[] = [
@@ -7861,6 +7869,30 @@ export const handlers = [
     const url = new URL(request.url);
     const market = (url.searchParams.get("market") ?? "IR") as MarketCode;
     return HttpResponse.json(offersForMarket(market));
+  }),
+
+  http.get("/api/organizations/:orgId/billing/invoices", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const result = await mswBillingClient.listInvoices(orgId);
+    mockBillingInvoices.set(orgId, result.data);
+    return HttpResponse.json({
+      data: result.data.map((row) => invoiceSchema.parse(row)),
+      meta: result.meta,
+    });
+  }),
+
+  http.get("/api/organizations/:orgId/billing/summary", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const orgId = String(params.orgId);
+    const summary = await mswBillingClient.getSummary(orgId);
+    return HttpResponse.json(billingSummarySchema.parse(summary));
   }),
 
   http.post(

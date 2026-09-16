@@ -1,0 +1,21 @@
+{
+  "title": "Billing center",
+  "subtitle": "Invoices, payment method, and next bill.",
+  "nextBill": "Next bill",
+  "nextBillAmount": "Amount",
+  "paymentMethod": "Payment method",
+  "noPaymentMethod": "No payment method on file (stub).",
+  "invoicesTitle": "Invoices",
+  "colNumber": "Number",
+  "colStatus": "Status",
+  "colTotal": "Total",
+  "colIssued": "Issued",
+  "colDue": "Due",
+  "status.draft": "Draft",
+  "status.open": "Open",
+  "status.paid": "Paid",
+  "status.void": "Void",
+  "loadError": "Could not load billing.",
+  "forbidden": "You do not have permission to view billing.",
+  "empty": "No invoices yet."
+}

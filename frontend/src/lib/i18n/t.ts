@@ -50,6 +50,7 @@ import enPricing from "./messages/en/pricing.json";
 import enTeacherPlans from "./messages/en/teacherPlans.json";
 import enSubscription from "./messages/en/subscription.json";
 import enPlanChange from "./messages/en/planChange.json";
+import enBilling from "./messages/en/billing.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -111,6 +112,7 @@ import faPricing from "./messages/fa/pricing.json";
 import faTeacherPlans from "./messages/fa/teacherPlans.json";
 import faSubscription from "./messages/fa/subscription.json";
 import faPlanChange from "./messages/fa/planChange.json";
+import faBilling from "./messages/fa/billing.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -178,6 +180,7 @@ export type MessageNamespace =
   | "teacherPlans"
   | "subscription"
   | "planChange"
+  | "billing"
   | "messaging"
   | "chat"
   | "notifications"
@@ -247,6 +250,7 @@ const dictionaries: Dictionaries = {
     teacherPlans: enTeacherPlans,
     subscription: enSubscription,
     planChange: enPlanChange,
+    billing: enBilling,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -310,6 +314,7 @@ const dictionaries: Dictionaries = {
     teacherPlans: faTeacherPlans,
     subscription: faSubscription,
     planChange: faPlanChange,
+    billing: faBilling,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,
