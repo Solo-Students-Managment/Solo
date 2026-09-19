@@ -1,0 +1,12 @@
+{
+  "title": "نمره‌دهی هوش مصنوعی",
+  "subtitle": "پیشنهادها نیاز به تأیید انسانی دارند.",
+  "listLabel": "پیشنهادها",
+  "emptyTitle": "پیشنهادی نیست",
+  "errorTitle": "بارگذاری ممکن نیست",
+  "signInRequired": "ورود لازم است",
+  "approve": "تأیید پیشنهاد",
+  "approveSuccess": "نمره تأیید شد.",
+  "scoreLabel": "نمره پیشنهادی",
+  "similarityLabel": "شباهت"
+}

@@ -1,0 +1,12 @@
+{
+  "title": "AI grading",
+  "subtitle": "Suggestions require human approval. Similarity is heuristic, not proof.",
+  "listLabel": "Suggestions",
+  "emptyTitle": "No suggestions",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "approve": "Approve suggestion",
+  "approveSuccess": "Grade approved.",
+  "scoreLabel": "Suggested score",
+  "similarityLabel": "Similarity"
+}

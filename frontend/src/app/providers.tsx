@@ -290,6 +290,58 @@ import {
   setAiDraftsClient,
 } from "@/services/ai-drafts";
 import {
+  createHttpAiGradingClient,
+  setAiGradingClient,
+} from "@/services/ai-grading";
+import {
+  createHttpAiPrivacyClient,
+  setAiPrivacyClient,
+} from "@/services/ai-privacy";
+import {
+  createHttpOfflineSyncClient,
+  setOfflineSyncClient,
+} from "@/services/offline-sync";
+import {
+  createHttpCollabEditingClient,
+  setCollabEditingClient,
+} from "@/services/collab-editing";
+import {
+  createHttpPresenceCalendarClient,
+  setPresenceCalendarClient,
+} from "@/services/presence-calendar";
+import {
+  createHttpGamificationClient,
+  setGamificationClient,
+} from "@/services/gamification";
+import {
+  createHttpAdvancedAutomationClient,
+  setAdvancedAutomationClient,
+} from "@/services/advanced-automation";
+import {
+  createHttpIntegrationCenterClient,
+  setIntegrationCenterClient,
+} from "@/services/integration-center";
+import {
+  createHttpA11yAccommodationsClient,
+  setA11yAccommodationsClient,
+} from "@/services/a11y-accommodations";
+import {
+  createHttpPwaHardeningClient,
+  setPwaHardeningClient,
+} from "@/services/pwa-hardening";
+import {
+  createHttpSecurityHardeningClient,
+  setSecurityHardeningClient,
+} from "@/services/security-hardening";
+import {
+  createHttpReleaseReadinessClient,
+  setReleaseReadinessClient,
+} from "@/services/release-readiness";
+import {
+  createHttpLegacyClosureClient,
+  setLegacyClosureClient,
+} from "@/services/legacy-closure";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -425,6 +477,19 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           );
           setAiAssistantClient(createHttpAiAssistantClient());
           setAiDraftsClient(createHttpAiDraftsClient());
+          setAiGradingClient(createHttpAiGradingClient());
+          setAiPrivacyClient(createHttpAiPrivacyClient());
+          setOfflineSyncClient(createHttpOfflineSyncClient());
+          setCollabEditingClient(createHttpCollabEditingClient());
+          setPresenceCalendarClient(createHttpPresenceCalendarClient());
+          setGamificationClient(createHttpGamificationClient());
+          setAdvancedAutomationClient(createHttpAdvancedAutomationClient());
+          setIntegrationCenterClient(createHttpIntegrationCenterClient());
+          setA11yAccommodationsClient(createHttpA11yAccommodationsClient());
+          setPwaHardeningClient(createHttpPwaHardeningClient());
+          setSecurityHardeningClient(createHttpSecurityHardeningClient());
+          setReleaseReadinessClient(createHttpReleaseReadinessClient());
+          setLegacyClosureClient(createHttpLegacyClosureClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

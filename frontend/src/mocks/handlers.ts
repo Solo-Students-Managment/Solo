@@ -422,6 +422,59 @@ import {
   aiPersonaSchema,
 } from "@/services/ai-assistant";
 import { createMockAiDraftsClient, aiDraftSchema } from "@/services/ai-drafts";
+import {
+  createMockAiGradingClient,
+  gradingSuggestionSchema,
+} from "@/services/ai-grading";
+import {
+  createMockAiPrivacyClient,
+  aiPrivacyItemSchema,
+} from "@/services/ai-privacy";
+import {
+  createMockOfflineSyncClient,
+  offlineSyncItemSchema,
+} from "@/services/offline-sync";
+import {
+  createMockCollabEditingClient,
+  collabEditingItemSchema,
+} from "@/services/collab-editing";
+import {
+  createMockPresenceCalendarClient,
+  presenceCalendarItemSchema,
+} from "@/services/presence-calendar";
+import {
+  createMockGamificationClient,
+  gamificationItemSchema,
+} from "@/services/gamification";
+import {
+  createMockAdvancedAutomationClient,
+  advancedAutomationItemSchema,
+} from "@/services/advanced-automation";
+import {
+  createMockIntegrationCenterClient,
+  integrationCenterItemSchema,
+} from "@/services/integration-center";
+import {
+  createMockA11yAccommodationsClient,
+  a11yAccommodationsItemSchema,
+} from "@/services/a11y-accommodations";
+import {
+  createMockPwaHardeningClient,
+  pwaHardeningItemSchema,
+} from "@/services/pwa-hardening";
+import {
+  createMockSecurityHardeningClient,
+  securityHardeningItemSchema,
+} from "@/services/security-hardening";
+import {
+  createMockReleaseReadinessClient,
+  releaseReadinessItemSchema,
+} from "@/services/release-readiness";
+import {
+  createMockLegacyClosureClient,
+  legacyClosureItemSchema,
+} from "@/services/legacy-closure";
+
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
   chatMessageSchema,
@@ -688,6 +741,19 @@ const mswSellerAnalyticsClient = createMockSellerAnalyticsClient();
 const mswMarketplaceModerationClient = createMockMarketplaceModerationClient();
 const mswAiAssistantClient = createMockAiAssistantClient();
 const mswAiDraftsClient = createMockAiDraftsClient();
+const mswAiGradingClient = createMockAiGradingClient();
+const mswAiPrivacyClient = createMockAiPrivacyClient();
+const mswOfflineSyncClient = createMockOfflineSyncClient();
+const mswCollabEditingClient = createMockCollabEditingClient();
+const mswPresenceCalendarClient = createMockPresenceCalendarClient();
+const mswGamificationClient = createMockGamificationClient();
+const mswAdvancedAutomationClient = createMockAdvancedAutomationClient();
+const mswIntegrationCenterClient = createMockIntegrationCenterClient();
+const mswA11yAccommodationsClient = createMockA11yAccommodationsClient();
+const mswPwaHardeningClient = createMockPwaHardeningClient();
+const mswSecurityHardeningClient = createMockSecurityHardeningClient();
+const mswReleaseReadinessClient = createMockReleaseReadinessClient();
+const mswLegacyClosureClient = createMockLegacyClosureClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -10451,5 +10517,260 @@ export const handlers = [
     );
     persistMswState();
     return HttpResponse.json(aiDraftSchema.parse(row));
+  }),
+
+  http.get("/api/ai/grading", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswAiGradingClient.list();
+    return HttpResponse.json(rows.map((r) => gradingSuggestionSchema.parse(r)));
+  }),
+  http.post("/api/ai/grading/:id/approve", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswAiGradingClient.approve(String(params.id));
+    persistMswState();
+    return HttpResponse.json(gradingSuggestionSchema.parse(row));
+  }),
+  http.post("/api/ai/grading/:id/reject", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswAiGradingClient.reject(String(params.id));
+    persistMswState();
+    return HttpResponse.json(gradingSuggestionSchema.parse(row));
+  }),
+
+  http.get("/api/ai/privacy", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswAiPrivacyClient.list();
+    return HttpResponse.json(rows.map((r) => aiPrivacyItemSchema.parse(r)));
+  }),
+  http.post("/api/ai/privacy/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswAiPrivacyClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(aiPrivacyItemSchema.parse(row));
+  }),
+
+  http.get("/api/offline/sync", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswOfflineSyncClient.list();
+    return HttpResponse.json(rows.map((r) => offlineSyncItemSchema.parse(r)));
+  }),
+  http.post("/api/offline/sync/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswOfflineSyncClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(offlineSyncItemSchema.parse(row));
+  }),
+
+  http.get("/api/collab/sessions", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswCollabEditingClient.list();
+    return HttpResponse.json(rows.map((r) => collabEditingItemSchema.parse(r)));
+  }),
+  http.post("/api/collab/sessions/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswCollabEditingClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(collabEditingItemSchema.parse(row));
+  }),
+
+  http.get("/api/presence/calendar", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswPresenceCalendarClient.list();
+    return HttpResponse.json(
+      rows.map((r) => presenceCalendarItemSchema.parse(r)),
+    );
+  }),
+  http.post("/api/presence/calendar/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPresenceCalendarClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(presenceCalendarItemSchema.parse(row));
+  }),
+
+  http.get("/api/gamification", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswGamificationClient.list();
+    return HttpResponse.json(rows.map((r) => gamificationItemSchema.parse(r)));
+  }),
+  http.post("/api/gamification/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswGamificationClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(gamificationItemSchema.parse(row));
+  }),
+
+  http.get("/api/automation/advanced", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswAdvancedAutomationClient.list();
+    return HttpResponse.json(
+      rows.map((r) => advancedAutomationItemSchema.parse(r)),
+    );
+  }),
+  http.post("/api/automation/advanced/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswAdvancedAutomationClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(advancedAutomationItemSchema.parse(row));
+  }),
+
+  http.get("/api/integrations", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswIntegrationCenterClient.list();
+    return HttpResponse.json(
+      rows.map((r) => integrationCenterItemSchema.parse(r)),
+    );
+  }),
+  http.post("/api/integrations/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswIntegrationCenterClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(integrationCenterItemSchema.parse(row));
+  }),
+
+  http.get("/api/accessibility/preferences", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswA11yAccommodationsClient.list();
+    return HttpResponse.json(
+      rows.map((r) => a11yAccommodationsItemSchema.parse(r)),
+    );
+  }),
+  http.post("/api/accessibility/preferences/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswA11yAccommodationsClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(a11yAccommodationsItemSchema.parse(row));
+  }),
+
+  http.get("/api/pwa/status", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswPwaHardeningClient.list();
+    return HttpResponse.json(rows.map((r) => pwaHardeningItemSchema.parse(r)));
+  }),
+  http.post("/api/pwa/status/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPwaHardeningClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(pwaHardeningItemSchema.parse(row));
+  }),
+
+  http.get("/api/security/review", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswSecurityHardeningClient.list();
+    return HttpResponse.json(
+      rows.map((r) => securityHardeningItemSchema.parse(r)),
+    );
+  }),
+  http.post("/api/security/review/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswSecurityHardeningClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(securityHardeningItemSchema.parse(row));
+  }),
+
+  http.get("/api/release/readiness", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswReleaseReadinessClient.list();
+    return HttpResponse.json(
+      rows.map((r) => releaseReadinessItemSchema.parse(r)),
+    );
+  }),
+  http.post("/api/release/readiness/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswReleaseReadinessClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(releaseReadinessItemSchema.parse(row));
+  }),
+
+  http.get("/api/legacy/closure", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswLegacyClosureClient.list();
+    return HttpResponse.json(rows.map((r) => legacyClosureItemSchema.parse(r)));
+  }),
+  http.post("/api/legacy/closure/:id/pass", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswLegacyClosureClient.markPass(String(params.id));
+    persistMswState();
+    return HttpResponse.json(legacyClosureItemSchema.parse(row));
   }),
 ];

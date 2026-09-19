@@ -94,6 +94,19 @@ import enSellerAnalytics from "./messages/en/sellerAnalytics.json";
 import enMarketplaceModeration from "./messages/en/marketplaceModeration.json";
 import enAiAssistant from "./messages/en/aiAssistant.json";
 import enAiDrafts from "./messages/en/aiDrafts.json";
+import enAiGrading from "./messages/en/aiGrading.json";
+import enAiPrivacy from "./messages/en/aiPrivacy.json";
+import enOfflineSync from "./messages/en/offlineSync.json";
+import enCollabEditing from "./messages/en/collabEditing.json";
+import enPresenceCalendar from "./messages/en/presenceCalendar.json";
+import enGamification from "./messages/en/gamification.json";
+import enAdvancedAutomation from "./messages/en/advancedAutomation.json";
+import enIntegrationCenter from "./messages/en/integrationCenter.json";
+import enA11yAccommodations from "./messages/en/a11yAccommodations.json";
+import enPwaHardening from "./messages/en/pwaHardening.json";
+import enSecurityHardening from "./messages/en/securityHardening.json";
+import enReleaseReadiness from "./messages/en/releaseReadiness.json";
+import enLegacyClosure from "./messages/en/legacyClosure.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -199,6 +212,19 @@ import faSellerAnalytics from "./messages/fa/sellerAnalytics.json";
 import faMarketplaceModeration from "./messages/fa/marketplaceModeration.json";
 import faAiAssistant from "./messages/fa/aiAssistant.json";
 import faAiDrafts from "./messages/fa/aiDrafts.json";
+import faAiGrading from "./messages/fa/aiGrading.json";
+import faAiPrivacy from "./messages/fa/aiPrivacy.json";
+import faOfflineSync from "./messages/fa/offlineSync.json";
+import faCollabEditing from "./messages/fa/collabEditing.json";
+import faPresenceCalendar from "./messages/fa/presenceCalendar.json";
+import faGamification from "./messages/fa/gamification.json";
+import faAdvancedAutomation from "./messages/fa/advancedAutomation.json";
+import faIntegrationCenter from "./messages/fa/integrationCenter.json";
+import faA11yAccommodations from "./messages/fa/a11yAccommodations.json";
+import faPwaHardening from "./messages/fa/pwaHardening.json";
+import faSecurityHardening from "./messages/fa/securityHardening.json";
+import faReleaseReadiness from "./messages/fa/releaseReadiness.json";
+import faLegacyClosure from "./messages/fa/legacyClosure.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -310,6 +336,19 @@ export type MessageNamespace =
   | "marketplaceModeration"
   | "aiAssistant"
   | "aiDrafts"
+  | "aiGrading"
+  | "aiPrivacy"
+  | "offlineSync"
+  | "collabEditing"
+  | "presenceCalendar"
+  | "gamification"
+  | "advancedAutomation"
+  | "integrationCenter"
+  | "a11yAccommodations"
+  | "pwaHardening"
+  | "securityHardening"
+  | "releaseReadiness"
+  | "legacyClosure"
   | "messaging"
   | "chat"
   | "notifications"
@@ -423,6 +462,19 @@ const dictionaries: Dictionaries = {
     marketplaceModeration: enMarketplaceModeration,
     aiAssistant: enAiAssistant,
     aiDrafts: enAiDrafts,
+    aiGrading: enAiGrading,
+    aiPrivacy: enAiPrivacy,
+    offlineSync: enOfflineSync,
+    collabEditing: enCollabEditing,
+    presenceCalendar: enPresenceCalendar,
+    gamification: enGamification,
+    advancedAutomation: enAdvancedAutomation,
+    integrationCenter: enIntegrationCenter,
+    a11yAccommodations: enA11yAccommodations,
+    pwaHardening: enPwaHardening,
+    securityHardening: enSecurityHardening,
+    releaseReadiness: enReleaseReadiness,
+    legacyClosure: enLegacyClosure,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -530,6 +582,19 @@ const dictionaries: Dictionaries = {
     marketplaceModeration: faMarketplaceModeration,
     aiAssistant: faAiAssistant,
     aiDrafts: faAiDrafts,
+    aiGrading: faAiGrading,
+    aiPrivacy: faAiPrivacy,
+    offlineSync: faOfflineSync,
+    collabEditing: faCollabEditing,
+    presenceCalendar: faPresenceCalendar,
+    gamification: faGamification,
+    advancedAutomation: faAdvancedAutomation,
+    integrationCenter: faIntegrationCenter,
+    a11yAccommodations: faA11yAccommodations,
+    pwaHardening: faPwaHardening,
+    securityHardening: faSecurityHardening,
+    releaseReadiness: faReleaseReadiness,
+    legacyClosure: faLegacyClosure,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,
