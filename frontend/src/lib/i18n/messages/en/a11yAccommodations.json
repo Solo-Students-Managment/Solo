@@ -1,0 +1,11 @@
+{
+  "title": "Accessibility accommodations",
+  "subtitle": "Reduce motion, contrast, text size and reader hints.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
