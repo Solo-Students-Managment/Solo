@@ -1,0 +1,11 @@
+{
+  "title": "Collaborative editing",
+  "subtitle": "Presence, section locks and mock realtime collaboration.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
