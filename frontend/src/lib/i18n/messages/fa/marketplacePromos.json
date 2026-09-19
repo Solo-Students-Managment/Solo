@@ -1,0 +1,14 @@
+{
+  "title": "تخفیف و علاقه‌مندی",
+  "subtitle": "کوپن، علاقه‌مندی، مقایسه و همکاری.",
+  "couponLabel": "کد تخفیف",
+  "applyCoupon": "اعمال کوپن",
+  "wishlistLabel": "علاقه‌مندی",
+  "compareLabel": "مقایسه",
+  "affiliateLabel": "کد همکاری",
+  "toggleWishlist": "تغییر علاقه‌مندی",
+  "addCompare": "افزودن به مقایسه",
+  "couponSuccess": "کوپن اعمال شد.",
+  "signInRequired": "ورود لازم است",
+  "errorTitle": "بارگذاری تخفیف ناموفق بود"
+}

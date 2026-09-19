@@ -1,0 +1,14 @@
+{
+  "title": "Promos & wishlist",
+  "subtitle": "Coupons, wishlist, compare and affiliate.",
+  "couponLabel": "Coupon code",
+  "applyCoupon": "Apply coupon",
+  "wishlistLabel": "Wishlist",
+  "compareLabel": "Compare",
+  "affiliateLabel": "Affiliate code",
+  "toggleWishlist": "Toggle wishlist",
+  "addCompare": "Add to compare",
+  "couponSuccess": "Coupon applied.",
+  "signInRequired": "Sign in required",
+  "errorTitle": "Could not load promos"
+}
