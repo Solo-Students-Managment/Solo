@@ -1,0 +1,13 @@
+{
+  "title": "نظارت بازار",
+  "subtitle": "صف بررسی، تأیید/رد و تجدیدنظر.",
+  "queueLabel": "صف نظارت",
+  "emptyTitle": "صف خالی است",
+  "errorTitle": "بارگذاری صف ناموفق بود",
+  "approve": "تأیید",
+  "reject": "رد",
+  "appeal": "ثبت تجدیدنظر",
+  "approveSuccess": "مورد تأیید شد.",
+  "rejectSuccess": "مورد رد شد.",
+  "signInRequired": "دسترسی مدیر لازم است"
+}

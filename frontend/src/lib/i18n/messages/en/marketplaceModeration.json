@@ -1,0 +1,13 @@
+{
+  "title": "Marketplace moderation",
+  "subtitle": "Review queue, approve/reject and appeals.",
+  "queueLabel": "Moderation queue",
+  "emptyTitle": "Queue is empty",
+  "errorTitle": "Could not load queue",
+  "approve": "Approve",
+  "reject": "Reject",
+  "appeal": "Submit appeal",
+  "approveSuccess": "Item approved.",
+  "rejectSuccess": "Item rejected.",
+  "signInRequired": "Admin access required"
+}
