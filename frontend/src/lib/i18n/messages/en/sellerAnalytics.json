@@ -1,0 +1,11 @@
+{
+  "title": "Seller analytics",
+  "subtitle": "Orders, revenue, conversion and restrictions.",
+  "metricsLabel": "Metrics",
+  "restrictionsLabel": "Restrictions",
+  "orders": "Orders",
+  "revenue": "Revenue",
+  "conversion": "Conversion",
+  "signInRequired": "Sign in required",
+  "errorTitle": "Could not load analytics"
+}

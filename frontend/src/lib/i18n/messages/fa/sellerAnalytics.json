@@ -1,0 +1,11 @@
+{
+  "title": "تحلیل فروشنده",
+  "subtitle": "سفارش، درآمد، تبدیل و محدودیت‌ها.",
+  "metricsLabel": "شاخص‌ها",
+  "restrictionsLabel": "محدودیت‌ها",
+  "orders": "سفارش‌ها",
+  "revenue": "درآمد",
+  "conversion": "نرخ تبدیل",
+  "signInRequired": "ورود لازم است",
+  "errorTitle": "بارگذاری تحلیل ناموفق بود"
+}
