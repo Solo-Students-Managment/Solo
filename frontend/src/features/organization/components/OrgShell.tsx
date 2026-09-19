@@ -51,6 +51,7 @@ type OrgNavKey =
   | "audit"
   | "apiKeys"
   | "orgLifecycle"
+  | "publicProfile"
   | "subjects"
   | "students"
   | "courses"
@@ -288,6 +289,11 @@ function navItems(orgId: string, langQuery: string) {
       key: "orgLifecycle" as const,
       href: `${routes.organization.lifecycle(orgId)}${langQuery}`,
       labelKey: "navOrgLifecycle",
+    },
+    {
+      key: "publicProfile" as const,
+      href: `${routes.organization.publicProfile(orgId)}${langQuery}`,
+      labelKey: "navPublicProfile",
     },
     {
       key: "subjects" as const,

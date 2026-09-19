@@ -1,0 +1,22 @@
+{
+  "title": "Public school profile",
+  "subtitle": "School and institute public profiles. Unpublished by default.",
+  "statusLabel": "Visibility",
+  "status.unpublished": "Unpublished",
+  "status.published": "Published",
+  "status.moderated": "Under moderation",
+  "publish": "Publish profile",
+  "unpublish": "Unpublish",
+  "publishSuccess": "School profile published.",
+  "unpublishSuccess": "School profile unpublished.",
+  "about": "About",
+  "city": "City",
+  "kind.school": "School",
+  "kind.institute": "Institute",
+  "unpublishedTitle": "This profile is not public",
+  "unpublishedBody": "This school has not published a public profile yet.",
+  "moderatedTitle": "Profile unavailable",
+  "moderatedBody": "This profile is under moderation.",
+  "notFoundTitle": "Profile not found",
+  "forbidden": "You do not have permission to manage this profile."
+}

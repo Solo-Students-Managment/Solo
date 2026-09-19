@@ -110,6 +110,8 @@ export const routes = {
     audit: (orgId: string) => `/org/${encodeURIComponent(orgId)}/audit`,
     apiKeys: (orgId: string) => `/org/${encodeURIComponent(orgId)}/api-keys`,
     lifecycle: (orgId: string) => `/org/${encodeURIComponent(orgId)}/lifecycle`,
+    publicProfile: (orgId: string) =>
+      `/org/${encodeURIComponent(orgId)}/public-profile`,
     subjects: (orgId: string) => `/org/${encodeURIComponent(orgId)}/subjects`,
     students: (orgId: string) => `/org/${encodeURIComponent(orgId)}/students`,
     student: (orgId: string, studentId: string) =>

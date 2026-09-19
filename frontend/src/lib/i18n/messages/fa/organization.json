@@ -113,5 +113,6 @@
   "navManualBilling": "صورتحساب دستی",
   "navAudit": "گزارش حسابرسی",
   "navApiKeys": "کلیدهای API",
-  "navOrgLifecycle": "چرخه عمر سازمان"
+  "navOrgLifecycle": "چرخه عمر سازمان",
+  "navPublicProfile": "پروفایل عمومی"
 }

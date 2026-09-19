@@ -1,5 +1,5 @@
-import { PublicTeacherProfileView } from "@/features/public-teacher-profile";
+import { PublicProfileDispatchView } from "@/features/public-school-profile";
 
 export default function PublicProfilePage() {
-  return <PublicTeacherProfileView />;
+  return <PublicProfileDispatchView />;
 }

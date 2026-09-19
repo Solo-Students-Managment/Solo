@@ -1,0 +1,22 @@
+{
+  "title": "پروفایل عمومی مدرسه",
+  "subtitle": "پروفایل عمومی مدرسه و مؤسسه. به‌صورت پیش‌فرض منتشر نشده.",
+  "statusLabel": "نمایش",
+  "status.unpublished": "منتشرنشده",
+  "status.published": "منتشرشده",
+  "status.moderated": "در حال بررسی",
+  "publish": "انتشار پروفایل",
+  "unpublish": "لغو انتشار",
+  "publishSuccess": "پروفایل مدرسه منتشر شد.",
+  "unpublishSuccess": "انتشار لغو شد.",
+  "about": "درباره",
+  "city": "شهر",
+  "kind.school": "مدرسه",
+  "kind.institute": "مؤسسه",
+  "unpublishedTitle": "این پروفایل عمومی نیست",
+  "unpublishedBody": "این مدرسه هنوز پروفایل عمومی منتشر نکرده است.",
+  "moderatedTitle": "پروفایل در دسترس نیست",
+  "moderatedBody": "این پروفایل در حال بررسی است.",
+  "notFoundTitle": "پروفایل یافت نشد",
+  "forbidden": "اجازه مدیریت این پروفایل را ندارید."
+}

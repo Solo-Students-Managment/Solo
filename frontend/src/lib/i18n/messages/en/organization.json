@@ -113,5 +113,6 @@
   "navManualBilling": "Manual billing",
   "navAudit": "Audit log",
   "navApiKeys": "API keys",
-  "navOrgLifecycle": "Organization lifecycle"
+  "navOrgLifecycle": "Organization lifecycle",
+  "navPublicProfile": "Public profile"
 }

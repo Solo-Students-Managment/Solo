@@ -324,6 +324,10 @@ import {
   createMockPublicTeacherProfileClient,
   publicTeacherProfileSchema,
 } from "@/services/public-teacher-profile";
+import {
+  createMockPublicSchoolProfileClient,
+  publicSchoolProfileSchema,
+} from "@/services/public-school-profile";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -569,6 +573,7 @@ const mswFeatureFlagsClient = createMockFeatureFlagsClient();
 const mswStorageAdminClient = createMockStorageAdminClient();
 const mswOrgLifecycleClient = createMockOrgLifecycleClient();
 const mswPublicTeacherProfileClient = createMockPublicTeacherProfileClient();
+const mswPublicSchoolProfileClient = createMockPublicSchoolProfileClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8974,4 +8979,69 @@ export const handlers = [
     persistMswState();
     return HttpResponse.json(publicTeacherProfileSchema.parse(row));
   }),
+
+  http.get("/api/public/schools/:slug", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    try {
+      const row = await mswPublicSchoolProfileClient.getBySlug(
+        String(params.slug),
+      );
+      return HttpResponse.json(publicSchoolProfileSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "not_found";
+      const status = message === "not_found" ? 404 : 403;
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey:
+            message === "not_found" ? "errors.not_found" : "errors.forbidden",
+          status,
+          fieldErrors: {},
+        },
+        { status },
+      );
+    }
+  }),
+
+  http.get("/api/organizations/:orgId/public-profile", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPublicSchoolProfileClient.getForOrg(
+      String(params.orgId),
+    );
+    return HttpResponse.json(publicSchoolProfileSchema.parse(row));
+  }),
+
+  http.post(
+    "/api/organizations/:orgId/public-profile/publish",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = await mswPublicSchoolProfileClient.publish(
+        String(params.orgId),
+      );
+      persistMswState();
+      return HttpResponse.json(publicSchoolProfileSchema.parse(row));
+    },
+  ),
+
+  http.post(
+    "/api/organizations/:orgId/public-profile/unpublish",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = await mswPublicSchoolProfileClient.unpublish(
+        String(params.orgId),
+      );
+      persistMswState();
+      return HttpResponse.json(publicSchoolProfileSchema.parse(row));
+    },
+  ),
 ];

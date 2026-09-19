@@ -73,6 +73,7 @@ import enFeatureFlags from "./messages/en/featureFlags.json";
 import enStorageAdmin from "./messages/en/storageAdmin.json";
 import enOrgLifecycle from "./messages/en/orgLifecycle.json";
 import enPublicTeacherProfile from "./messages/en/publicTeacherProfile.json";
+import enPublicSchoolProfile from "./messages/en/publicSchoolProfile.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -157,6 +158,7 @@ import faFeatureFlags from "./messages/fa/featureFlags.json";
 import faStorageAdmin from "./messages/fa/storageAdmin.json";
 import faOrgLifecycle from "./messages/fa/orgLifecycle.json";
 import faPublicTeacherProfile from "./messages/fa/publicTeacherProfile.json";
+import faPublicSchoolProfile from "./messages/fa/publicSchoolProfile.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -247,6 +249,7 @@ export type MessageNamespace =
   | "storageAdmin"
   | "orgLifecycle"
   | "publicTeacherProfile"
+  | "publicSchoolProfile"
   | "messaging"
   | "chat"
   | "notifications"
@@ -339,6 +342,7 @@ const dictionaries: Dictionaries = {
     storageAdmin: enStorageAdmin,
     orgLifecycle: enOrgLifecycle,
     publicTeacherProfile: enPublicTeacherProfile,
+    publicSchoolProfile: enPublicSchoolProfile,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -425,6 +429,7 @@ const dictionaries: Dictionaries = {
     storageAdmin: faStorageAdmin,
     orgLifecycle: faOrgLifecycle,
     publicTeacherProfile: faPublicTeacherProfile,
+    publicSchoolProfile: faPublicSchoolProfile,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,
