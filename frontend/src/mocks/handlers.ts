@@ -421,7 +421,7 @@ import {
   aiThreadSchema,
   aiPersonaSchema,
 } from "@/services/ai-assistant";
-
+import { createMockAiDraftsClient, aiDraftSchema } from "@/services/ai-drafts";
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
   chatMessageSchema,
@@ -687,6 +687,7 @@ const mswArticlesFeedClient = createMockArticlesFeedClient();
 const mswSellerAnalyticsClient = createMockSellerAnalyticsClient();
 const mswMarketplaceModerationClient = createMockMarketplaceModerationClient();
 const mswAiAssistantClient = createMockAiAssistantClient();
+const mswAiDraftsClient = createMockAiDraftsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -10390,5 +10391,65 @@ export const handlers = [
         { status: 404 },
       );
     }
+  }),
+
+  http.get("/api/ai/drafts", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswAiDraftsClient.list();
+    return HttpResponse.json(rows.map((r) => aiDraftSchema.parse(r)));
+  }),
+  http.post("/api/ai/drafts", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      type?: string;
+      title?: string;
+      content?: string;
+    };
+    const row = await mswAiDraftsClient.create({
+      type:
+        (body.type as "lesson" | "feedback" | "report" | "question") ??
+        "lesson",
+      title: String(body.title ?? ""),
+      content: String(body.content ?? ""),
+    });
+    persistMswState();
+    return HttpResponse.json(aiDraftSchema.parse(row));
+  }),
+  http.post("/api/ai/drafts/:id/submit", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswAiDraftsClient.submitForReview(String(params.id));
+    persistMswState();
+    return HttpResponse.json(aiDraftSchema.parse(row));
+  }),
+  http.post("/api/ai/drafts/:id/approve", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswAiDraftsClient.approve(String(params.id));
+    persistMswState();
+    return HttpResponse.json(aiDraftSchema.parse(row));
+  }),
+  http.post("/api/ai/drafts/:id/reject", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { reason?: string };
+    const row = await mswAiDraftsClient.reject(
+      String(params.id),
+      String(body.reason ?? ""),
+    );
+    persistMswState();
+    return HttpResponse.json(aiDraftSchema.parse(row));
   }),
 ];

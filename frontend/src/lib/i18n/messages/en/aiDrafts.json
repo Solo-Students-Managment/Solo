@@ -1,0 +1,16 @@
+{
+  "title": "AI drafts",
+  "subtitle": "Draft lessons, feedback, reports and questions. Human approval required before publish.",
+  "reviewNote": "AI never auto-publishes sensitive output.",
+  "titleLabel": "Title",
+  "contentLabel": "Content",
+  "create": "Create draft",
+  "submit": "Submit for review",
+  "approve": "Approve",
+  "createSuccess": "Draft created.",
+  "approveSuccess": "Draft approved.",
+  "listLabel": "Drafts",
+  "emptyTitle": "No drafts yet",
+  "errorTitle": "Could not load drafts",
+  "signInRequired": "Sign in to manage AI drafts"
+}

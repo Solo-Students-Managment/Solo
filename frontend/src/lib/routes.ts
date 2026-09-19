@@ -45,6 +45,7 @@ export const routes = {
     shipping: () => "/personal/shipping",
     wallet: () => "/personal/wallet",
     ai: () => "/personal/ai",
+    aiDrafts: () => "/personal/ai/drafts",
   },
   teacher: {
     home: () => "/teacher",
