@@ -1,0 +1,11 @@
+{
+  "title": "Advanced automation",
+  "subtitle": "Multi-step automations with risk-based human gates.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
