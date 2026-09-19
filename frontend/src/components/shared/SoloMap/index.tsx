@@ -11,16 +11,26 @@ import {
 type SoloMapProps = {
   provider?: SoloMapProvider;
   query?: string;
+  /** When provided, render these points instead of geocoding `query`. */
+  points?: MapPoint[];
+  "aria-label"?: string;
 };
 
 export function SoloMap({
   provider = createMockMapProvider(),
   query = "",
+  points: pointsProp,
+  "aria-label": ariaLabel = "Map results",
 }: SoloMapProps) {
-  const [points, setPoints] = useState<MapPoint[]>([]);
+  const [points, setPoints] = useState<MapPoint[]>(pointsProp ?? []);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (pointsProp !== undefined) {
+      setPoints(pointsProp);
+      setError(null);
+      return;
+    }
     let cancelled = false;
     provider
       .geocode(query)
@@ -33,7 +43,7 @@ export function SoloMap({
     return () => {
       cancelled = true;
     };
-  }, [provider, query]);
+  }, [provider, query, pointsProp]);
 
   if (error) {
     return (
@@ -51,7 +61,7 @@ export function SoloMap({
       >
         Map canvas ({provider.id})
       </div>
-      <ul aria-label="Map results">
+      <ul aria-label={ariaLabel}>
         {points.map((point) => (
           <li key={point.id} className="text-sm">
             {point.label} ({point.lat}, {point.lng})

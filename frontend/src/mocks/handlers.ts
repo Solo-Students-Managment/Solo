@@ -332,6 +332,12 @@ import {
   createMockPublicStudentPortfolioClient,
   publicStudentPortfolioSchema,
 } from "@/services/public-student-portfolio";
+import {
+  createMockMarketplaceDiscoveryClient,
+  discoveryItemSchema,
+  discoveryKindSchema,
+  savedItemSchema,
+} from "@/services/marketplace-discovery";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -580,6 +586,7 @@ const mswPublicTeacherProfileClient = createMockPublicTeacherProfileClient();
 const mswPublicSchoolProfileClient = createMockPublicSchoolProfileClient();
 const mswPublicStudentPortfolioClient =
   createMockPublicStudentPortfolioClient();
+const mswMarketplaceDiscoveryClient = createMockMarketplaceDiscoveryClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9102,5 +9109,72 @@ export const handlers = [
     const row = await mswPublicStudentPortfolioClient.unpublish();
     persistMswState();
     return HttpResponse.json(publicStudentPortfolioSchema.parse(row));
+  }),
+
+  http.get("/api/public/discovery", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const url = new URL(request.url);
+    const kindRaw = url.searchParams.get("kind");
+    const kindParsed = kindRaw
+      ? discoveryKindSchema.safeParse(kindRaw)
+      : undefined;
+    const nearLat = url.searchParams.get("nearLat");
+    const nearLng = url.searchParams.get("nearLng");
+    const radiusKm = url.searchParams.get("radiusKm");
+    const rows = await mswMarketplaceDiscoveryClient.search({
+      q: url.searchParams.get("q") ?? undefined,
+      kind: kindParsed?.success ? kindParsed.data : undefined,
+      subject: url.searchParams.get("subject") ?? undefined,
+      city: url.searchParams.get("city") ?? undefined,
+      nearLat: nearLat ? Number(nearLat) : undefined,
+      nearLng: nearLng ? Number(nearLng) : undefined,
+      radiusKm: radiusKm ? Number(radiusKm) : undefined,
+    });
+    return HttpResponse.json(rows.map((row) => discoveryItemSchema.parse(row)));
+  }),
+
+  http.get("/api/marketplace/saved-items", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswMarketplaceDiscoveryClient.listSaved();
+    return HttpResponse.json(rows.map((row) => savedItemSchema.parse(row)));
+  }),
+
+  http.post("/api/marketplace/saved-items", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { discoveryItemId?: string };
+    try {
+      const row = await mswMarketplaceDiscoveryClient.save(
+        String(body.discoveryItemId ?? ""),
+      );
+      persistMswState();
+      return HttpResponse.json(savedItemSchema.parse(row));
+    } catch {
+      return HttpResponse.json(
+        {
+          code: "NOT_FOUND",
+          messageKey: "errors.not_found",
+          status: 404,
+          fieldErrors: {},
+        },
+        { status: 404 },
+      );
+    }
+  }),
+
+  http.delete("/api/marketplace/saved-items/:id", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    await mswMarketplaceDiscoveryClient.unsave(String(params.id));
+    persistMswState();
+    return new HttpResponse(null, { status: 204 });
   }),
 ];

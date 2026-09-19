@@ -171,6 +171,7 @@ export const routes = {
   public: {
     profile: (slug: string) => `/p/${encodeURIComponent(slug)}`,
     form: (slug: string) => `/f/${encodeURIComponent(slug)}`,
+    discovery: () => "/discover",
   },
   states: {
     notFound: () => "/state/not-found",

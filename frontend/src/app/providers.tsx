@@ -217,6 +217,10 @@ import {
   setPublicStudentPortfolioClient,
 } from "@/services/public-student-portfolio";
 import {
+  createHttpMarketplaceDiscoveryClient,
+  setMarketplaceDiscoveryClient,
+} from "@/services/marketplace-discovery";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -331,6 +335,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setPublicStudentPortfolioClient(
             createHttpPublicStudentPortfolioClient(),
           );
+          setMarketplaceDiscoveryClient(createHttpMarketplaceDiscoveryClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

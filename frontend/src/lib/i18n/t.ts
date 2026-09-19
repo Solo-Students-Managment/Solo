@@ -75,6 +75,7 @@ import enOrgLifecycle from "./messages/en/orgLifecycle.json";
 import enPublicTeacherProfile from "./messages/en/publicTeacherProfile.json";
 import enPublicSchoolProfile from "./messages/en/publicSchoolProfile.json";
 import enPublicStudentPortfolio from "./messages/en/publicStudentPortfolio.json";
+import enMarketplaceDiscovery from "./messages/en/marketplaceDiscovery.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -161,6 +162,7 @@ import faOrgLifecycle from "./messages/fa/orgLifecycle.json";
 import faPublicTeacherProfile from "./messages/fa/publicTeacherProfile.json";
 import faPublicSchoolProfile from "./messages/fa/publicSchoolProfile.json";
 import faPublicStudentPortfolio from "./messages/fa/publicStudentPortfolio.json";
+import faMarketplaceDiscovery from "./messages/fa/marketplaceDiscovery.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -253,6 +255,7 @@ export type MessageNamespace =
   | "publicTeacherProfile"
   | "publicSchoolProfile"
   | "publicStudentPortfolio"
+  | "marketplaceDiscovery"
   | "messaging"
   | "chat"
   | "notifications"
@@ -347,6 +350,7 @@ const dictionaries: Dictionaries = {
     publicTeacherProfile: enPublicTeacherProfile,
     publicSchoolProfile: enPublicSchoolProfile,
     publicStudentPortfolio: enPublicStudentPortfolio,
+    marketplaceDiscovery: enMarketplaceDiscovery,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -435,6 +439,7 @@ const dictionaries: Dictionaries = {
     publicTeacherProfile: faPublicTeacherProfile,
     publicSchoolProfile: faPublicSchoolProfile,
     publicStudentPortfolio: faPublicStudentPortfolio,
+    marketplaceDiscovery: faMarketplaceDiscovery,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,
