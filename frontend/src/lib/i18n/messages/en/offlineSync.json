@@ -1,0 +1,11 @@
+{
+  "title": "Offline sync center",
+  "subtitle": "Review queued mutations and resolve sync conflicts.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
