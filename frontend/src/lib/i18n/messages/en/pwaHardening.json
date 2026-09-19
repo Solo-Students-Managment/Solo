@@ -1,0 +1,11 @@
+{
+  "title": "PWA & performance",
+  "subtitle": "Installability, service worker and performance budgets.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
