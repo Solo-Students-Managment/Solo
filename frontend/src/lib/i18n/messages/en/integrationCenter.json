@@ -1,0 +1,11 @@
+{
+  "title": "Integration center",
+  "subtitle": "API developer experience, masked keys and webhooks.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
