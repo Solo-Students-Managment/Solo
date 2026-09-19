@@ -1,0 +1,13 @@
+{
+  "title": "Shopping cart",
+  "subtitle": "Multi-seller cart grouped by seller.",
+  "listLabel": "Cart items",
+  "emptyTitle": "Your cart is empty",
+  "errorTitle": "Could not load cart",
+  "signInRequired": "Sign in required",
+  "checkout": "Checkout",
+  "remove": "Remove",
+  "total": "Total",
+  "checkoutSuccess": "Checkout complete.",
+  "sellerGroup": "Seller"
+}

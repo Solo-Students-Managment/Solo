@@ -364,6 +364,57 @@ import {
   createMockProductVariantsClient,
   productVariantSchema,
 } from "@/services/product-variants";
+import {
+  createMockMarketplaceCartClient,
+  cartSchema,
+  checkoutResultSchema,
+} from "@/services/marketplace-cart";
+import {
+  createMockMarketplaceOrdersClient,
+  marketplaceOrderSchema,
+} from "@/services/marketplace-orders";
+import {
+  createMockSellerBalanceClient,
+  sellerBalanceSchema,
+  payoutRequestSchema,
+  disputeSchema,
+} from "@/services/seller-balance";
+import {
+  createMockShippingReturnsClient,
+  shippingAddressSchema,
+  returnRequestSchema,
+} from "@/services/shipping-returns";
+import {
+  createMockMarketplacePromosClient,
+  wishlistItemSchema,
+  compareItemSchema,
+  affiliateInfoSchema,
+} from "@/services/marketplace-promos";
+import {
+  createMockMarketplaceTaxonomyClient,
+  taxonomyEntrySchema,
+  priceHistoryEntrySchema,
+} from "@/services/marketplace-taxonomy";
+import {
+  createMockWalletClient,
+  walletBalanceSchema,
+  ledgerEntrySchema,
+  applyCreditResultSchema,
+} from "@/services/wallet";
+import {
+  createMockArticlesFeedClient,
+  articleSummarySchema,
+  articleDetailSchema,
+  articleCommentSchema,
+} from "@/services/articles-feed";
+import {
+  createMockSellerAnalyticsClient,
+  sellerAnalyticsSchema,
+} from "@/services/seller-analytics";
+import {
+  createMockMarketplaceModerationClient,
+  moderationQueueItemSchema,
+} from "@/services/marketplace-moderation";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -619,6 +670,16 @@ const mswVerifiedReviewsClient = createMockVerifiedReviewsClient();
 const mswSellerOnboardingClient = createMockSellerOnboardingClient();
 const mswProductAuthoringClient = createMockProductAuthoringClient();
 const mswProductVariantsClient = createMockProductVariantsClient();
+const mswMarketplaceCartClient = createMockMarketplaceCartClient();
+const mswMarketplaceOrdersClient = createMockMarketplaceOrdersClient();
+const mswSellerBalanceClient = createMockSellerBalanceClient();
+const mswShippingReturnsClient = createMockShippingReturnsClient();
+const mswMarketplacePromosClient = createMockMarketplacePromosClient();
+const mswMarketplaceTaxonomyClient = createMockMarketplaceTaxonomyClient();
+const mswWalletClient = createMockWalletClient();
+const mswArticlesFeedClient = createMockArticlesFeedClient();
+const mswSellerAnalyticsClient = createMockSellerAnalyticsClient();
+const mswMarketplaceModerationClient = createMockMarketplaceModerationClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9633,4 +9694,600 @@ export const handlers = [
     persistMswState();
     return HttpResponse.json(productVariantSchema.parse(row));
   }),
+  // --- F5-011 marketplace cart ---
+  http.get("/api/marketplace/cart", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswMarketplaceCartClient.list();
+    return HttpResponse.json(cartSchema.parse(row));
+  }),
+  http.post("/api/marketplace/cart/items", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      sellerId?: string;
+      sellerName?: string;
+      variantId?: string;
+      productTitle?: string;
+      quantity?: number;
+      unitPrice?: { amount: number; currency: "IRR" | "USD" | "EUR" };
+    };
+    const row = await mswMarketplaceCartClient.add({
+      sellerId: String(body.sellerId ?? ""),
+      sellerName: String(body.sellerName ?? ""),
+      variantId: String(body.variantId ?? ""),
+      productTitle: String(body.productTitle ?? ""),
+      quantity: Number(body.quantity ?? 1),
+      unitPrice: body.unitPrice ?? { amount: 0, currency: "IRR" },
+    });
+    persistMswState();
+    return HttpResponse.json(cartSchema.parse(row));
+  }),
+  http.delete("/api/marketplace/cart/items/:id", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswMarketplaceCartClient.remove(String(params.id));
+    persistMswState();
+    return HttpResponse.json(cartSchema.parse(row));
+  }),
+  http.post("/api/marketplace/cart/checkout", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswMarketplaceCartClient.checkout();
+    persistMswState();
+    return HttpResponse.json(checkoutResultSchema.parse(row));
+  }),
+
+  // --- F5-012 marketplace orders ---
+  http.get("/api/marketplace/orders", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswMarketplaceOrdersClient.listBuyer();
+    return HttpResponse.json(rows.map((r) => marketplaceOrderSchema.parse(r)));
+  }),
+  http.get("/api/seller/orders", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswMarketplaceOrdersClient.listSeller();
+    return HttpResponse.json(rows.map((r) => marketplaceOrderSchema.parse(r)));
+  }),
+  http.post("/api/seller/orders/:id/fulfill", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    try {
+      const row = await mswMarketplaceOrdersClient.fulfill(String(params.id));
+      persistMswState();
+      return HttpResponse.json(marketplaceOrderSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "forbidden";
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: "errors.forbidden",
+          status: 403,
+          fieldErrors: {},
+        },
+        { status: 403 },
+      );
+    }
+  }),
+
+  // --- F5-013 seller balance ---
+  http.get("/api/seller/balance", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswSellerBalanceClient.getBalance();
+    return HttpResponse.json(sellerBalanceSchema.parse(row));
+  }),
+  http.get("/api/seller/balance/payouts", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswSellerBalanceClient.listPayouts();
+    return HttpResponse.json(rows.map((r) => payoutRequestSchema.parse(r)));
+  }),
+  http.post("/api/seller/balance/payouts", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { amount?: number };
+    const row = await mswSellerBalanceClient.requestPayout(
+      Number(body.amount ?? 0),
+    );
+    persistMswState();
+    return HttpResponse.json(payoutRequestSchema.parse(row));
+  }),
+  http.get("/api/seller/balance/disputes", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswSellerBalanceClient.listDisputes();
+    return HttpResponse.json(rows.map((r) => disputeSchema.parse(r)));
+  }),
+  http.post("/api/seller/balance/disputes", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      orderId?: string;
+      reason?: string;
+    };
+    const row = await mswSellerBalanceClient.openDispute(
+      String(body.orderId ?? ""),
+      String(body.reason ?? ""),
+    );
+    persistMswState();
+    return HttpResponse.json(disputeSchema.parse(row));
+  }),
+
+  // --- F5-014 shipping returns ---
+  http.get("/api/personal/shipping-addresses", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswShippingReturnsClient.listAddresses();
+    return HttpResponse.json(rows.map((r) => shippingAddressSchema.parse(r)));
+  }),
+  http.post("/api/personal/shipping-addresses", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as Record<string, unknown>;
+    const row = await mswShippingReturnsClient.createAddress(body as never);
+    persistMswState();
+    return HttpResponse.json(shippingAddressSchema.parse(row));
+  }),
+  http.patch(
+    "/api/personal/shipping-addresses/:id",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as Record<string, unknown>;
+      const row = await mswShippingReturnsClient.updateAddress(
+        String(params.id),
+        body as never,
+      );
+      persistMswState();
+      return HttpResponse.json(shippingAddressSchema.parse(row));
+    },
+  ),
+  http.delete("/api/personal/shipping-addresses/:id", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    await mswShippingReturnsClient.deleteAddress(String(params.id));
+    persistMswState();
+    return new HttpResponse(null, { status: 204 });
+  }),
+  http.get("/api/personal/returns", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswShippingReturnsClient.listReturns();
+    return HttpResponse.json(rows.map((r) => returnRequestSchema.parse(r)));
+  }),
+  http.post("/api/personal/returns", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      orderId?: string;
+      reason?: string;
+      type?: string;
+    };
+    const row =
+      body.type === "exchange"
+        ? await mswShippingReturnsClient.requestExchange(
+            String(body.orderId ?? ""),
+            String(body.reason ?? ""),
+          )
+        : await mswShippingReturnsClient.requestReturn(
+            String(body.orderId ?? ""),
+            String(body.reason ?? ""),
+          );
+    persistMswState();
+    return HttpResponse.json(returnRequestSchema.parse(row));
+  }),
+
+  // --- F5-015 promos ---
+  http.post("/api/marketplace/promos/coupon", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const body = (await request.json()) as { code?: string };
+    try {
+      const row = await mswMarketplacePromosClient.applyCoupon(
+        String(body.code ?? ""),
+      );
+      return HttpResponse.json(row);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "invalid";
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: "errors.validation",
+          status: 400,
+          fieldErrors: {},
+        },
+        { status: 400 },
+      );
+    }
+  }),
+  http.get("/api/marketplace/promos/wishlist", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswMarketplacePromosClient.listWishlist();
+    return HttpResponse.json(rows.map((r) => wishlistItemSchema.parse(r)));
+  }),
+  http.post("/api/marketplace/promos/wishlist/toggle", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      productId?: string;
+      title?: string;
+      productTitle?: string;
+    };
+    const rows = await mswMarketplacePromosClient.toggleWishlist(
+      String(body.productId ?? ""),
+      String(body.productTitle ?? body.title ?? ""),
+    );
+    persistMswState();
+    return HttpResponse.json(rows.map((r) => wishlistItemSchema.parse(r)));
+  }),
+  http.get("/api/marketplace/promos/compare", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const rows = await mswMarketplacePromosClient.listCompare();
+    return HttpResponse.json(rows.map((r) => compareItemSchema.parse(r)));
+  }),
+  http.post("/api/marketplace/promos/compare", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const body = (await request.json()) as {
+      productId?: string;
+      title?: string;
+      productTitle?: string;
+      price?: { amount: number; currency: "IRR" | "USD" | "EUR" };
+    };
+    try {
+      const rows = await mswMarketplacePromosClient.addToCompare(
+        String(body.productId ?? ""),
+        String(body.productTitle ?? body.title ?? ""),
+        body.price ?? { amount: 0, currency: "IRR" },
+      );
+      persistMswState();
+      return HttpResponse.json(rows.map((r) => compareItemSchema.parse(r)));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "limit";
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: "errors.validation",
+          status: 400,
+          fieldErrors: {},
+        },
+        { status: 400 },
+      );
+    }
+  }),
+  http.delete(
+    "/api/marketplace/promos/compare/:productId",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const rows = await mswMarketplacePromosClient.removeFromCompare(
+        String(params.productId),
+      );
+      persistMswState();
+      return HttpResponse.json(rows.map((r) => compareItemSchema.parse(r)));
+    },
+  ),
+  http.get("/api/marketplace/promos/affiliate", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const row = await mswMarketplacePromosClient.getAffiliate();
+    return HttpResponse.json(affiliateInfoSchema.parse(row));
+  }),
+
+  // --- F5-016 taxonomy ---
+  http.get("/api/seller/taxonomy/categories", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswMarketplaceTaxonomyClient.listCategories();
+    return HttpResponse.json(rows.map((r) => taxonomyEntrySchema.parse(r)));
+  }),
+  http.post("/api/seller/taxonomy/categories", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { name?: string };
+    const row = await mswMarketplaceTaxonomyClient.createCategory(
+      String(body.name ?? ""),
+    );
+    persistMswState();
+    return HttpResponse.json(taxonomyEntrySchema.parse(row));
+  }),
+  http.get("/api/seller/taxonomy/brands", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswMarketplaceTaxonomyClient.listBrands();
+    return HttpResponse.json(rows.map((r) => taxonomyEntrySchema.parse(r)));
+  }),
+  http.post("/api/seller/taxonomy/brands", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { name?: string };
+    const row = await mswMarketplaceTaxonomyClient.createBrand(
+      String(body.name ?? ""),
+    );
+    persistMswState();
+    return HttpResponse.json(taxonomyEntrySchema.parse(row));
+  }),
+  http.get("/api/seller/taxonomy/publishers", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswMarketplaceTaxonomyClient.listPublishers();
+    return HttpResponse.json(rows.map((r) => taxonomyEntrySchema.parse(r)));
+  }),
+  http.post("/api/seller/taxonomy/publishers", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { name?: string };
+    const row = await mswMarketplaceTaxonomyClient.createPublisher(
+      String(body.name ?? ""),
+    );
+    persistMswState();
+    return HttpResponse.json(taxonomyEntrySchema.parse(row));
+  }),
+  http.get(
+    "/api/seller/taxonomy/products/:productId/price-history",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const rows = await mswMarketplaceTaxonomyClient.listPriceHistory(
+        String(params.productId),
+      );
+      return HttpResponse.json(
+        rows.map((r) => priceHistoryEntrySchema.parse(r)),
+      );
+    },
+  ),
+  http.post(
+    "/api/seller/taxonomy/products/:productId/price-history",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        amount?: number;
+        currency?: "IRR" | "USD" | "EUR";
+        price?: { amount: number; currency: "IRR" | "USD" | "EUR" };
+      };
+      const price = body.price ?? {
+        amount: Number(body.amount ?? 0),
+        currency: body.currency ?? "IRR",
+      };
+      const row = await mswMarketplaceTaxonomyClient.addPriceHistory(
+        String(params.productId),
+        price,
+      );
+      persistMswState();
+      return HttpResponse.json(priceHistoryEntrySchema.parse(row));
+    },
+  ),
+
+  // --- F5-017 wallet ---
+  http.get("/api/personal/wallet", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswWalletClient.getBalance();
+    return HttpResponse.json(walletBalanceSchema.parse(row));
+  }),
+  http.get("/api/personal/wallet/ledger", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswWalletClient.listLedger();
+    return HttpResponse.json(rows.map((r) => ledgerEntrySchema.parse(r)));
+  }),
+  http.post("/api/personal/wallet/apply-credit", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { amount?: number };
+    try {
+      const row = await mswWalletClient.applyCreditAtCheckout(
+        Number(body.amount ?? 0),
+      );
+      persistMswState();
+      return HttpResponse.json(applyCreditResultSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "forbidden";
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: "errors.forbidden",
+          status: 403,
+          fieldErrors: {},
+        },
+        { status: 403 },
+      );
+    }
+  }),
+
+  // --- F5-018 articles ---
+  http.get("/api/public/articles", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const rows = await mswArticlesFeedClient.list();
+    return HttpResponse.json(rows.map((r) => articleSummarySchema.parse(r)));
+  }),
+  http.get("/api/public/articles/:slug", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    try {
+      const row = await mswArticlesFeedClient.getBySlug(String(params.slug));
+      return HttpResponse.json(articleDetailSchema.parse(row));
+    } catch {
+      return HttpResponse.json(
+        {
+          code: "NOT_FOUND",
+          messageKey: "errors.not_found",
+          status: 404,
+          fieldErrors: {},
+        },
+        { status: 404 },
+      );
+    }
+  }),
+  http.get("/api/public/articles/:articleId/comments", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const rows = await mswArticlesFeedClient.listComments(
+      String(params.articleId),
+    );
+    return HttpResponse.json(rows.map((r) => articleCommentSchema.parse(r)));
+  }),
+  http.post(
+    "/api/public/articles/:articleId/comments",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { body?: string };
+      const row = await mswArticlesFeedClient.addComment(
+        String(params.articleId),
+        String(body.body ?? ""),
+      );
+      persistMswState();
+      return HttpResponse.json(articleCommentSchema.parse(row));
+    },
+  ),
+  http.post("/api/public/articles/:articleId/bookmark", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswArticlesFeedClient.toggleBookmark(
+      String(params.articleId),
+    );
+    persistMswState();
+    return HttpResponse.json(row);
+  }),
+
+  // --- F5-019 seller analytics ---
+  http.get("/api/seller/analytics", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswSellerAnalyticsClient.get();
+    return HttpResponse.json(sellerAnalyticsSchema.parse(row));
+  }),
+
+  // --- F5-020 moderation ---
+  http.get("/api/admin/marketplace-moderation/queue", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswMarketplaceModerationClient.listQueue();
+    return HttpResponse.json(
+      rows.map((r) => moderationQueueItemSchema.parse(r)),
+    );
+  }),
+  http.post(
+    "/api/admin/marketplace-moderation/queue/:id/approve",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = await mswMarketplaceModerationClient.approve(
+        String(params.id),
+      );
+      persistMswState();
+      return HttpResponse.json(moderationQueueItemSchema.parse(row));
+    },
+  ),
+  http.post(
+    "/api/admin/marketplace-moderation/queue/:id/reject",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const row = await mswMarketplaceModerationClient.reject(
+        String(params.id),
+        "policy",
+      );
+      persistMswState();
+      return HttpResponse.json(moderationQueueItemSchema.parse(row));
+    },
+  ),
+  http.post(
+    "/api/admin/marketplace-moderation/queue/:id/appeal",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { note?: string; reason?: string };
+      const row = await mswMarketplaceModerationClient.submitAppeal(
+        String(params.id),
+        String(body.reason ?? body.note ?? ""),
+      );
+      persistMswState();
+      return HttpResponse.json(moderationQueueItemSchema.parse(row));
+    },
+  ),
 ];

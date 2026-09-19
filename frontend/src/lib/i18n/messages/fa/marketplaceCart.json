@@ -1,0 +1,13 @@
+{
+  "title": "سبد خرید",
+  "subtitle": "سبد چند فروشنده‌ای گروه‌بندی‌شده.",
+  "listLabel": "اقلام سبد",
+  "emptyTitle": "سبد خرید خالی است",
+  "errorTitle": "بارگذاری سبد ناموفق بود",
+  "signInRequired": "ورود لازم است",
+  "checkout": "تسویه",
+  "remove": "حذف",
+  "total": "جمع",
+  "checkoutSuccess": "تسویه انجام شد.",
+  "sellerGroup": "فروشنده"
+}

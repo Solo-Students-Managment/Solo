@@ -38,6 +38,12 @@ export const routes = {
     seller: () => "/personal/seller",
     sellerProducts: () => "/personal/seller/products",
     sellerVariants: () => "/personal/seller/variants",
+    sellerOrders: () => "/personal/seller/orders",
+    sellerBalance: () => "/personal/seller/balance",
+    sellerTaxonomy: () => "/personal/seller/taxonomy",
+    sellerAnalytics: () => "/personal/seller/analytics",
+    shipping: () => "/personal/shipping",
+    wallet: () => "/personal/wallet",
   },
   teacher: {
     home: () => "/teacher",
@@ -170,6 +176,12 @@ export const routes = {
     privacy: () => "/admin/privacy",
     featureFlags: () => "/admin/feature-flags",
     storage: () => "/admin/storage",
+    marketplaceModeration: () => "/admin/marketplace-moderation",
+  },
+  marketplace: {
+    cart: () => "/cart",
+    orders: () => "/orders",
+    promos: () => "/promos",
   },
   public: {
     profile: (slug: string) => `/p/${encodeURIComponent(slug)}`,
@@ -179,6 +191,8 @@ export const routes = {
     catalogDetail: (slug: string) => `/catalog/${encodeURIComponent(slug)}`,
     trials: () => "/trials",
     reviews: () => "/reviews",
+    articles: () => "/articles",
+    articlesDetail: (slug: string) => `/articles/${encodeURIComponent(slug)}`,
   },
   states: {
     notFound: () => "/state/not-found",

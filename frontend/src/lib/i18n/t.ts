@@ -82,6 +82,16 @@ import enVerifiedReviews from "./messages/en/verifiedReviews.json";
 import enSellerOnboarding from "./messages/en/sellerOnboarding.json";
 import enProductAuthoring from "./messages/en/productAuthoring.json";
 import enProductVariants from "./messages/en/productVariants.json";
+import enMarketplaceCart from "./messages/en/marketplaceCart.json";
+import enMarketplaceOrders from "./messages/en/marketplaceOrders.json";
+import enSellerBalance from "./messages/en/sellerBalance.json";
+import enShippingReturns from "./messages/en/shippingReturns.json";
+import enMarketplacePromos from "./messages/en/marketplacePromos.json";
+import enMarketplaceTaxonomy from "./messages/en/marketplaceTaxonomy.json";
+import enWallet from "./messages/en/wallet.json";
+import enArticlesFeed from "./messages/en/articlesFeed.json";
+import enSellerAnalytics from "./messages/en/sellerAnalytics.json";
+import enMarketplaceModeration from "./messages/en/marketplaceModeration.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -175,6 +185,16 @@ import faVerifiedReviews from "./messages/fa/verifiedReviews.json";
 import faSellerOnboarding from "./messages/fa/sellerOnboarding.json";
 import faProductAuthoring from "./messages/fa/productAuthoring.json";
 import faProductVariants from "./messages/fa/productVariants.json";
+import faMarketplaceCart from "./messages/fa/marketplaceCart.json";
+import faMarketplaceOrders from "./messages/fa/marketplaceOrders.json";
+import faSellerBalance from "./messages/fa/sellerBalance.json";
+import faShippingReturns from "./messages/fa/shippingReturns.json";
+import faMarketplacePromos from "./messages/fa/marketplacePromos.json";
+import faMarketplaceTaxonomy from "./messages/fa/marketplaceTaxonomy.json";
+import faWallet from "./messages/fa/wallet.json";
+import faArticlesFeed from "./messages/fa/articlesFeed.json";
+import faSellerAnalytics from "./messages/fa/sellerAnalytics.json";
+import faMarketplaceModeration from "./messages/fa/marketplaceModeration.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -274,6 +294,16 @@ export type MessageNamespace =
   | "sellerOnboarding"
   | "productAuthoring"
   | "productVariants"
+  | "marketplaceCart"
+  | "marketplaceOrders"
+  | "sellerBalance"
+  | "shippingReturns"
+  | "marketplacePromos"
+  | "marketplaceTaxonomy"
+  | "wallet"
+  | "articlesFeed"
+  | "sellerAnalytics"
+  | "marketplaceModeration"
   | "messaging"
   | "chat"
   | "notifications"
@@ -375,6 +405,16 @@ const dictionaries: Dictionaries = {
     sellerOnboarding: enSellerOnboarding,
     productAuthoring: enProductAuthoring,
     productVariants: enProductVariants,
+    marketplaceCart: enMarketplaceCart,
+    marketplaceOrders: enMarketplaceOrders,
+    sellerBalance: enSellerBalance,
+    shippingReturns: enShippingReturns,
+    marketplacePromos: enMarketplacePromos,
+    marketplaceTaxonomy: enMarketplaceTaxonomy,
+    wallet: enWallet,
+    articlesFeed: enArticlesFeed,
+    sellerAnalytics: enSellerAnalytics,
+    marketplaceModeration: enMarketplaceModeration,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -470,6 +510,16 @@ const dictionaries: Dictionaries = {
     sellerOnboarding: faSellerOnboarding,
     productAuthoring: faProductAuthoring,
     productVariants: faProductVariants,
+    marketplaceCart: faMarketplaceCart,
+    marketplaceOrders: faMarketplaceOrders,
+    sellerBalance: faSellerBalance,
+    shippingReturns: faShippingReturns,
+    marketplacePromos: faMarketplacePromos,
+    marketplaceTaxonomy: faMarketplaceTaxonomy,
+    wallet: faWallet,
+    articlesFeed: faArticlesFeed,
+    sellerAnalytics: faSellerAnalytics,
+    marketplaceModeration: faMarketplaceModeration,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

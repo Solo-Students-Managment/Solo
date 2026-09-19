@@ -245,6 +245,43 @@ import {
   setProductVariantsClient,
 } from "@/services/product-variants";
 import {
+  createHttpMarketplaceCartClient,
+  setMarketplaceCartClient,
+} from "@/services/marketplace-cart";
+import {
+  createHttpMarketplaceOrdersClient,
+  setMarketplaceOrdersClient,
+} from "@/services/marketplace-orders";
+import {
+  createHttpSellerBalanceClient,
+  setSellerBalanceClient,
+} from "@/services/seller-balance";
+import {
+  createHttpShippingReturnsClient,
+  setShippingReturnsClient,
+} from "@/services/shipping-returns";
+import {
+  createHttpMarketplacePromosClient,
+  setMarketplacePromosClient,
+} from "@/services/marketplace-promos";
+import {
+  createHttpMarketplaceTaxonomyClient,
+  setMarketplaceTaxonomyClient,
+} from "@/services/marketplace-taxonomy";
+import { createHttpWalletClient, setWalletClient } from "@/services/wallet";
+import {
+  createHttpArticlesFeedClient,
+  setArticlesFeedClient,
+} from "@/services/articles-feed";
+import {
+  createHttpSellerAnalyticsClient,
+  setSellerAnalyticsClient,
+} from "@/services/seller-analytics";
+import {
+  createHttpMarketplaceModerationClient,
+  setMarketplaceModerationClient,
+} from "@/services/marketplace-moderation";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -366,6 +403,18 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setSellerOnboardingClient(createHttpSellerOnboardingClient());
           setProductAuthoringClient(createHttpProductAuthoringClient());
           setProductVariantsClient(createHttpProductVariantsClient());
+          setMarketplaceCartClient(createHttpMarketplaceCartClient());
+          setMarketplaceOrdersClient(createHttpMarketplaceOrdersClient());
+          setSellerBalanceClient(createHttpSellerBalanceClient());
+          setShippingReturnsClient(createHttpShippingReturnsClient());
+          setMarketplacePromosClient(createHttpMarketplacePromosClient());
+          setMarketplaceTaxonomyClient(createHttpMarketplaceTaxonomyClient());
+          setWalletClient(createHttpWalletClient());
+          setArticlesFeedClient(createHttpArticlesFeedClient());
+          setSellerAnalyticsClient(createHttpSellerAnalyticsClient());
+          setMarketplaceModerationClient(
+            createHttpMarketplaceModerationClient(),
+          );
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());
