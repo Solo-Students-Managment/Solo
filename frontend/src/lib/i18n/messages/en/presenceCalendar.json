@@ -1,0 +1,11 @@
+{
+  "title": "Presence & DND",
+  "subtitle": "Calendar presence, session status and do-not-disturb.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
