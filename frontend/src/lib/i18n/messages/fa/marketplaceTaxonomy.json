@@ -1,0 +1,14 @@
+{
+  "title": "طبقه‌بندی محصول",
+  "subtitle": "دسته، برند، ناشر و تاریخچه قیمت.",
+  "categoriesLabel": "دسته‌ها",
+  "brandsLabel": "برندها",
+  "publishersLabel": "ناشران",
+  "priceHistoryLabel": "تاریخچه قیمت",
+  "create": "ایجاد",
+  "nameLabel": "نام",
+  "addPrice": "افزودن قیمت",
+  "signInRequired": "ورود لازم است",
+  "actionSuccess": "ایجاد شد.",
+  "errorTitle": "بارگذاری طبقه‌بندی ناموفق بود"
+}

@@ -1,0 +1,14 @@
+{
+  "title": "Product taxonomy",
+  "subtitle": "Categories, brands, publishers and price history.",
+  "categoriesLabel": "Categories",
+  "brandsLabel": "Brands",
+  "publishersLabel": "Publishers",
+  "priceHistoryLabel": "Price history",
+  "create": "Create",
+  "nameLabel": "Name",
+  "addPrice": "Add price entry",
+  "signInRequired": "Sign in required",
+  "actionSuccess": "Created.",
+  "errorTitle": "Could not load taxonomy"
+}
