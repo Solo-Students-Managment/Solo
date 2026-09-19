@@ -1,0 +1,13 @@
+{
+  "title": "My orders",
+  "sellerTitle": "Seller orders",
+  "subtitle": "Track marketplace purchases.",
+  "sellerSubtitle": "Manage and fulfill buyer orders.",
+  "listLabel": "Orders",
+  "emptyTitle": "No orders yet",
+  "errorTitle": "Could not load orders",
+  "signInRequired": "Sign in required",
+  "fulfill": "Mark fulfilled",
+  "fulfillSuccess": "Order fulfilled.",
+  "status": "Status"
+}

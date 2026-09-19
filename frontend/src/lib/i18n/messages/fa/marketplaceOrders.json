@@ -1,0 +1,13 @@
+{
+  "title": "سفارش‌های من",
+  "sellerTitle": "سفارش‌های فروشنده",
+  "subtitle": "پیگیری خریدهای بازار.",
+  "sellerSubtitle": "مدیریت و ارسال سفارش‌ها.",
+  "listLabel": "سفارش‌ها",
+  "emptyTitle": "سفارشی نیست",
+  "errorTitle": "بارگذاری سفارش‌ها ناموفق بود",
+  "signInRequired": "ورود لازم است",
+  "fulfill": "علامت ارسال",
+  "fulfillSuccess": "سفارش ارسال شد.",
+  "status": "وضعیت"
+}
