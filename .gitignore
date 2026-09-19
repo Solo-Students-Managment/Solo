@@ -18,6 +18,10 @@ test-results
 blob-report
 *.local
 
+# Python bytecode caches
+__pycache__/
+*.py[cod]
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
