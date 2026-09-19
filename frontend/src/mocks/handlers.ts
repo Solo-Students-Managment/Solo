@@ -415,6 +415,12 @@ import {
   createMockMarketplaceModerationClient,
   moderationQueueItemSchema,
 } from "@/services/marketplace-moderation";
+import {
+  createMockAiAssistantClient,
+  aiEntryPointSchema,
+  aiThreadSchema,
+  aiPersonaSchema,
+} from "@/services/ai-assistant";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -680,6 +686,7 @@ const mswWalletClient = createMockWalletClient();
 const mswArticlesFeedClient = createMockArticlesFeedClient();
 const mswSellerAnalyticsClient = createMockSellerAnalyticsClient();
 const mswMarketplaceModerationClient = createMockMarketplaceModerationClient();
+const mswAiAssistantClient = createMockAiAssistantClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -10290,4 +10297,98 @@ export const handlers = [
       return HttpResponse.json(moderationQueueItemSchema.parse(row));
     },
   ),
+
+  http.get("/api/ai/entry-points", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const url = new URL(request.url);
+    const persona = aiPersonaSchema.parse(
+      url.searchParams.get("persona") ?? "teacher",
+    );
+    const rows = await mswAiAssistantClient.listEntryPoints(persona);
+    return HttpResponse.json(rows.map((r) => aiEntryPointSchema.parse(r)));
+  }),
+
+  http.get("/api/ai/threads", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const url = new URL(request.url);
+    const persona = aiPersonaSchema.parse(
+      url.searchParams.get("persona") ?? "teacher",
+    );
+    const rows = await mswAiAssistantClient.listThreads(persona);
+    return HttpResponse.json(rows.map((r) => aiThreadSchema.parse(r)));
+  }),
+
+  http.get("/api/ai/threads/:id", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    try {
+      const row = await mswAiAssistantClient.getThread(String(params.id));
+      return HttpResponse.json(aiThreadSchema.parse(row));
+    } catch {
+      return HttpResponse.json(
+        {
+          code: "NOT_FOUND",
+          messageKey: "errors.not_found",
+          status: 404,
+          fieldErrors: {},
+        },
+        { status: 404 },
+      );
+    }
+  }),
+
+  http.post("/api/ai/threads", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      persona?: string;
+      entryPointId?: string | null;
+      title?: string;
+      firstMessage?: string;
+    };
+    const row = await mswAiAssistantClient.startThread({
+      persona: aiPersonaSchema.parse(body.persona ?? "teacher"),
+      entryPointId: body.entryPointId ?? null,
+      title: String(body.title ?? "AI chat"),
+      firstMessage: String(body.firstMessage ?? "Hello"),
+    });
+    persistMswState();
+    return HttpResponse.json(aiThreadSchema.parse(row));
+  }),
+
+  http.post("/api/ai/threads/:id/messages", async ({ params, request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { content?: string };
+    try {
+      const row = await mswAiAssistantClient.sendMessage(
+        String(params.id),
+        String(body.content ?? ""),
+      );
+      persistMswState();
+      return HttpResponse.json(aiThreadSchema.parse(row));
+    } catch {
+      return HttpResponse.json(
+        {
+          code: "NOT_FOUND",
+          messageKey: "errors.not_found",
+          status: 404,
+          fieldErrors: {},
+        },
+        { status: 404 },
+      );
+    }
+  }),
 ];

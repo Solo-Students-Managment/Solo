@@ -44,6 +44,7 @@ export const routes = {
     sellerAnalytics: () => "/personal/seller/analytics",
     shipping: () => "/personal/shipping",
     wallet: () => "/personal/wallet",
+    ai: () => "/personal/ai",
   },
   teacher: {
     home: () => "/teacher",

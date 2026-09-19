@@ -92,6 +92,7 @@ import enWallet from "./messages/en/wallet.json";
 import enArticlesFeed from "./messages/en/articlesFeed.json";
 import enSellerAnalytics from "./messages/en/sellerAnalytics.json";
 import enMarketplaceModeration from "./messages/en/marketplaceModeration.json";
+import enAiAssistant from "./messages/en/aiAssistant.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -195,6 +196,7 @@ import faWallet from "./messages/fa/wallet.json";
 import faArticlesFeed from "./messages/fa/articlesFeed.json";
 import faSellerAnalytics from "./messages/fa/sellerAnalytics.json";
 import faMarketplaceModeration from "./messages/fa/marketplaceModeration.json";
+import faAiAssistant from "./messages/fa/aiAssistant.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -304,6 +306,7 @@ export type MessageNamespace =
   | "articlesFeed"
   | "sellerAnalytics"
   | "marketplaceModeration"
+  | "aiAssistant"
   | "messaging"
   | "chat"
   | "notifications"
@@ -415,6 +418,7 @@ const dictionaries: Dictionaries = {
     articlesFeed: enArticlesFeed,
     sellerAnalytics: enSellerAnalytics,
     marketplaceModeration: enMarketplaceModeration,
+    aiAssistant: enAiAssistant,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -520,6 +524,7 @@ const dictionaries: Dictionaries = {
     articlesFeed: faArticlesFeed,
     sellerAnalytics: faSellerAnalytics,
     marketplaceModeration: faMarketplaceModeration,
+    aiAssistant: faAiAssistant,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

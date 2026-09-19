@@ -282,6 +282,10 @@ import {
   setMarketplaceModerationClient,
 } from "@/services/marketplace-moderation";
 import {
+  createHttpAiAssistantClient,
+  setAiAssistantClient,
+} from "@/services/ai-assistant";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -415,6 +419,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setMarketplaceModerationClient(
             createHttpMarketplaceModerationClient(),
           );
+          setAiAssistantClient(createHttpAiAssistantClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());
