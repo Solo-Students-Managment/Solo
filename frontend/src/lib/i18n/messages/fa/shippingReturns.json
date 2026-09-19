@@ -1,0 +1,14 @@
+{
+  "title": "ارسال و مرجوعی",
+  "subtitle": "مدیریت آدرس‌ها و درخواست مرجوعی.",
+  "addressesLabel": "آدرس‌ها",
+  "returnsLabel": "مرجوعی‌ها",
+  "addAddress": "افزودن آدرس",
+  "requestReturn": "درخواست مرجوعی",
+  "requestExchange": "درخواست تعویض",
+  "delete": "حذف",
+  "emptyTitle": "آدرسی نیست",
+  "signInRequired": "ورود لازم است",
+  "actionSuccess": "ذخیره شد.",
+  "errorTitle": "بارگذاری ارسال ناموفق بود"
+}

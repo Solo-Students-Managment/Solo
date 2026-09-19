@@ -1,0 +1,14 @@
+{
+  "title": "Shipping & returns",
+  "subtitle": "Manage addresses and return requests.",
+  "addressesLabel": "Addresses",
+  "returnsLabel": "Returns",
+  "addAddress": "Add address",
+  "requestReturn": "Request return",
+  "requestExchange": "Request exchange",
+  "delete": "Delete",
+  "emptyTitle": "No addresses",
+  "signInRequired": "Sign in required",
+  "actionSuccess": "Saved.",
+  "errorTitle": "Could not load shipping"
+}
