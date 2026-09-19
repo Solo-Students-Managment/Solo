@@ -1,0 +1,12 @@
+{
+  "title": "Articles",
+  "subtitle": "Public educational content feed.",
+  "listLabel": "Articles",
+  "emptyTitle": "No articles",
+  "errorTitle": "Could not load articles",
+  "commentLabel": "Comment",
+  "addComment": "Post comment",
+  "bookmark": "Bookmark",
+  "commentSuccess": "Comment posted.",
+  "signInRequired": "Sign in to comment"
+}

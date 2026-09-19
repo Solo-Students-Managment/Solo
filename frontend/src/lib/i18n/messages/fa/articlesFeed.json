@@ -1,0 +1,12 @@
+{
+  "title": "مقالات",
+  "subtitle": "فید محتوای آموزشی عمومی.",
+  "listLabel": "مقالات",
+  "emptyTitle": "مقاله‌ای نیست",
+  "errorTitle": "بارگذاری مقالات ناموفق بود",
+  "commentLabel": "نظر",
+  "addComment": "ارسال نظر",
+  "bookmark": "نشان‌گذاری",
+  "commentSuccess": "نظر ثبت شد.",
+  "signInRequired": "برای نظر وارد شوید"
+}
