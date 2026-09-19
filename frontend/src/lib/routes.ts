@@ -172,6 +172,8 @@ export const routes = {
     profile: (slug: string) => `/p/${encodeURIComponent(slug)}`,
     form: (slug: string) => `/f/${encodeURIComponent(slug)}`,
     discovery: () => "/discover",
+    catalog: () => "/catalog",
+    catalogDetail: (slug: string) => `/catalog/${encodeURIComponent(slug)}`,
   },
   states: {
     notFound: () => "/state/not-found",

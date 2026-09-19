@@ -338,6 +338,11 @@ import {
   discoveryKindSchema,
   savedItemSchema,
 } from "@/services/marketplace-discovery";
+import {
+  createMockPublicCatalogClient,
+  catalogEntrySchema,
+  enrollmentRequestSchema,
+} from "@/services/public-catalog";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -587,6 +592,7 @@ const mswPublicSchoolProfileClient = createMockPublicSchoolProfileClient();
 const mswPublicStudentPortfolioClient =
   createMockPublicStudentPortfolioClient();
 const mswMarketplaceDiscoveryClient = createMockMarketplaceDiscoveryClient();
+const mswPublicCatalogClient = createMockPublicCatalogClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9176,5 +9182,80 @@ export const handlers = [
     await mswMarketplaceDiscoveryClient.unsave(String(params.id));
     persistMswState();
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.get("/api/public/catalog", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const url = new URL(request.url);
+    const rows = await mswPublicCatalogClient.list({
+      q: url.searchParams.get("q") ?? undefined,
+      subject: url.searchParams.get("subject") ?? undefined,
+    });
+    return HttpResponse.json(rows.map((row) => catalogEntrySchema.parse(row)));
+  }),
+
+  http.get("/api/public/catalog/:slug", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    try {
+      const row = await mswPublicCatalogClient.getBySlug(String(params.slug));
+      return HttpResponse.json(catalogEntrySchema.parse(row));
+    } catch {
+      return HttpResponse.json(
+        {
+          code: "NOT_FOUND",
+          messageKey: "errors.not_found",
+          status: 404,
+          fieldErrors: {},
+        },
+        { status: 404 },
+      );
+    }
+  }),
+
+  http.get("/api/marketplace/enrollment-requests", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswPublicCatalogClient.listMyRequests();
+    return HttpResponse.json(
+      rows.map((row) => enrollmentRequestSchema.parse(row)),
+    );
+  }),
+
+  http.post("/api/marketplace/enrollment-requests", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      catalogEntryId?: string;
+      mode?: string;
+    };
+    try {
+      const row =
+        body.mode === "waitlist"
+          ? await mswPublicCatalogClient.joinWaitlist(
+              String(body.catalogEntryId ?? ""),
+            )
+          : await mswPublicCatalogClient.requestEnrollment(
+              String(body.catalogEntryId ?? ""),
+            );
+      persistMswState();
+      return HttpResponse.json(enrollmentRequestSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "forbidden";
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: "errors.forbidden",
+          status: 403,
+          fieldErrors: {},
+        },
+        { status: 403 },
+      );
+    }
   }),
 ];
