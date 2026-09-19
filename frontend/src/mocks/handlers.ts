@@ -343,6 +343,11 @@ import {
   catalogEntrySchema,
   enrollmentRequestSchema,
 } from "@/services/public-catalog";
+import {
+  createMockTrialBookingClient,
+  trialBookingSchema,
+  trialSlotSchema,
+} from "@/services/trial-booking";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -593,6 +598,7 @@ const mswPublicStudentPortfolioClient =
   createMockPublicStudentPortfolioClient();
 const mswMarketplaceDiscoveryClient = createMockMarketplaceDiscoveryClient();
 const mswPublicCatalogClient = createMockPublicCatalogClient();
+const mswTrialBookingClient = createMockTrialBookingClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9258,4 +9264,93 @@ export const handlers = [
       );
     }
   }),
+
+  http.get("/api/public/trials", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const url = new URL(request.url);
+    const rows = await mswTrialBookingClient.listSlots({
+      providerSlug: url.searchParams.get("providerSlug") ?? undefined,
+      subject: url.searchParams.get("subject") ?? undefined,
+    });
+    return HttpResponse.json(rows.map((row) => trialSlotSchema.parse(row)));
+  }),
+
+  http.get("/api/public/trials/:id", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    try {
+      const row = await mswTrialBookingClient.getSlot(String(params.id));
+      return HttpResponse.json(trialSlotSchema.parse(row));
+    } catch {
+      return HttpResponse.json(
+        {
+          code: "NOT_FOUND",
+          messageKey: "errors.not_found",
+          status: 404,
+          fieldErrors: {},
+        },
+        { status: 404 },
+      );
+    }
+  }),
+
+  http.get("/api/marketplace/trial-bookings", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswTrialBookingClient.listMyBookings();
+    return HttpResponse.json(rows.map((row) => trialBookingSchema.parse(row)));
+  }),
+
+  http.post("/api/marketplace/trial-bookings", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as { slotId?: string };
+    try {
+      const row = await mswTrialBookingClient.book(String(body.slotId ?? ""));
+      persistMswState();
+      return HttpResponse.json(trialBookingSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "forbidden";
+      const status = message === "not_found" ? 404 : 403;
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: status === 404 ? "errors.not_found" : "errors.forbidden",
+          status,
+          fieldErrors: {},
+        },
+        { status },
+      );
+    }
+  }),
+
+  http.post(
+    "/api/marketplace/trial-bookings/:id/cancel",
+    async ({ params }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      try {
+        const row = await mswTrialBookingClient.cancel(String(params.id));
+        persistMswState();
+        return HttpResponse.json(trialBookingSchema.parse(row));
+      } catch {
+        return HttpResponse.json(
+          {
+            code: "NOT_FOUND",
+            messageKey: "errors.not_found",
+            status: 404,
+            fieldErrors: {},
+          },
+          { status: 404 },
+        );
+      }
+    },
+  ),
 ];

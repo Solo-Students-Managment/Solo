@@ -225,6 +225,10 @@ import {
   setPublicCatalogClient,
 } from "@/services/public-catalog";
 import {
+  createHttpTrialBookingClient,
+  setTrialBookingClient,
+} from "@/services/trial-booking";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -341,6 +345,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           );
           setMarketplaceDiscoveryClient(createHttpMarketplaceDiscoveryClient());
           setPublicCatalogClient(createHttpPublicCatalogClient());
+          setTrialBookingClient(createHttpTrialBookingClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

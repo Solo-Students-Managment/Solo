@@ -174,6 +174,7 @@ export const routes = {
     discovery: () => "/discover",
     catalog: () => "/catalog",
     catalogDetail: (slug: string) => `/catalog/${encodeURIComponent(slug)}`,
+    trials: () => "/trials",
   },
   states: {
     notFound: () => "/state/not-found",
