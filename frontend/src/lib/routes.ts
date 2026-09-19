@@ -45,6 +45,7 @@ export const routes = {
   student: {
     home: () => "/student",
     activate: () => "/student/activate",
+    publicPortfolio: () => "/student/public-portfolio",
   },
   guardian: {
     home: () => "/guardian",

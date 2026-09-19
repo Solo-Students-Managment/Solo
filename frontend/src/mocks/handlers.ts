@@ -328,6 +328,10 @@ import {
   createMockPublicSchoolProfileClient,
   publicSchoolProfileSchema,
 } from "@/services/public-school-profile";
+import {
+  createMockPublicStudentPortfolioClient,
+  publicStudentPortfolioSchema,
+} from "@/services/public-student-portfolio";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -574,6 +578,8 @@ const mswStorageAdminClient = createMockStorageAdminClient();
 const mswOrgLifecycleClient = createMockOrgLifecycleClient();
 const mswPublicTeacherProfileClient = createMockPublicTeacherProfileClient();
 const mswPublicSchoolProfileClient = createMockPublicSchoolProfileClient();
+const mswPublicStudentPortfolioClient =
+  createMockPublicStudentPortfolioClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9044,4 +9050,57 @@ export const handlers = [
       return HttpResponse.json(publicSchoolProfileSchema.parse(row));
     },
   ),
+
+  http.get("/api/public/students/:slug", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    try {
+      const row = await mswPublicStudentPortfolioClient.getBySlug(
+        String(params.slug),
+      );
+      return HttpResponse.json(publicStudentPortfolioSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "not_found";
+      const status = message === "not_found" ? 404 : 403;
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey:
+            message === "not_found" ? "errors.not_found" : "errors.forbidden",
+          status,
+          fieldErrors: {},
+        },
+        { status },
+      );
+    }
+  }),
+
+  http.get("/api/student/public-portfolio", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPublicStudentPortfolioClient.getMine();
+    return HttpResponse.json(publicStudentPortfolioSchema.parse(row));
+  }),
+
+  http.post("/api/student/public-portfolio/publish", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPublicStudentPortfolioClient.publish();
+    persistMswState();
+    return HttpResponse.json(publicStudentPortfolioSchema.parse(row));
+  }),
+
+  http.post("/api/student/public-portfolio/unpublish", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPublicStudentPortfolioClient.unpublish();
+    persistMswState();
+    return HttpResponse.json(publicStudentPortfolioSchema.parse(row));
+  }),
 ];

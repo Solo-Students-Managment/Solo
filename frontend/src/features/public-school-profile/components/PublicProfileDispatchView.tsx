@@ -3,18 +3,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 
-import { PublicSchoolProfileView } from "@/features/public-school-profile";
+import { PublicSchoolProfileView } from "./PublicSchoolProfileView";
+import { PublicStudentPortfolioView } from "@/features/public-student-portfolio";
 import { PublicTeacherProfileView } from "@/features/public-teacher-profile";
 import { ErrorState, Skeleton } from "@/components/ui";
 import { resolveLocale, localeDirection } from "@/lib/i18n/locales";
 import { t } from "@/lib/i18n/t";
 import { createQueryKeyFactory } from "@/lib/query/keys";
 import { getPublicSchoolProfileClient } from "@/services/public-school-profile";
+import { getPublicStudentPortfolioClient } from "@/services/public-student-portfolio";
 import { getPublicTeacherProfileClient } from "@/services/public-teacher-profile";
 
 const keys = createQueryKeyFactory("public-profile-dispatch");
 
-type Kind = "teacher" | "school" | "missing" | "unpublished" | "moderated";
+type Kind =
+  "teacher" | "school" | "student" | "missing" | "unpublished" | "moderated";
 
 async function resolveKind(slug: string): Promise<Kind> {
   try {
@@ -35,6 +38,16 @@ async function resolveKind(slug: string): Promise<Kind> {
       schoolError instanceof Error ? schoolError.message : "not_found";
     if (schoolReason === "unpublished" || schoolReason === "moderated") {
       return schoolReason;
+    }
+  }
+  try {
+    await getPublicStudentPortfolioClient().getBySlug(slug);
+    return "student";
+  } catch (studentError) {
+    const studentReason =
+      studentError instanceof Error ? studentError.message : "not_found";
+    if (studentReason === "unpublished" || studentReason === "moderated") {
+      return studentReason;
     }
     return "missing";
   }
@@ -61,11 +74,8 @@ export function PublicProfileDispatchView() {
 
   if (kind === "teacher") return <PublicTeacherProfileView />;
   if (kind === "school") return <PublicSchoolProfileView slug={slug} />;
+  if (kind === "student") return <PublicStudentPortfolioView slug={slug} />;
 
-  const ns =
-    kind === "unpublished" || kind === "moderated"
-      ? "publicTeacherProfile"
-      : "publicTeacherProfile";
   const titleKey =
     kind === "unpublished"
       ? "unpublishedTitle"
@@ -75,7 +85,7 @@ export function PublicProfileDispatchView() {
 
   return (
     <main className="mx-auto max-w-3xl p-6" dir={dir} lang={locale}>
-      <ErrorState title={t(locale, ns, titleKey)} />
+      <ErrorState title={t(locale, "publicTeacherProfile", titleKey)} />
     </main>
   );
 }

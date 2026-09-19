@@ -1,0 +1,17 @@
+{
+  "title": "Public student portfolio",
+  "subtitle": "Optional minor-safe public portfolio. No grades, attendance, messages, or payments.",
+  "statusLabel": "Visibility",
+  "status.unpublished": "Unpublished",
+  "status.published": "Published",
+  "status.moderated": "Under moderation",
+  "publish": "Publish portfolio",
+  "unpublish": "Unpublish",
+  "publishSuccess": "Portfolio published.",
+  "unpublishSuccess": "Portfolio unpublished.",
+  "interests": "Interests",
+  "minorNotice": "Minor-safe portfolio \u2014 private school data stays private.",
+  "unpublishedTitle": "This portfolio is not public",
+  "unpublishedBody": "The student has not published a public portfolio.",
+  "notFoundTitle": "Portfolio not found"
+}
