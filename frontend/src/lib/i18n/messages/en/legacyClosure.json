@@ -1,0 +1,11 @@
+{
+  "title": "Legacy closure",
+  "subtitle": "Legacy Vite references closed or retained with rationale.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
