@@ -1,0 +1,11 @@
+{
+  "title": "Wallet",
+  "subtitle": "Store credit balance and ledger.",
+  "balanceLabel": "Available credit",
+  "ledgerLabel": "Ledger",
+  "applyCredit": "Apply credit at checkout",
+  "applySuccess": "Credit applied.",
+  "signInRequired": "Sign in required",
+  "emptyTitle": "No ledger entries",
+  "errorTitle": "Could not load wallet"
+}

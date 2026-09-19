@@ -1,0 +1,11 @@
+{
+  "title": "کیف پول",
+  "subtitle": "اعتبار فروشگاه و دفتر کل.",
+  "balanceLabel": "اعتبار موجود",
+  "ledgerLabel": "دفتر کل",
+  "applyCredit": "اعمال اعتبار در تسویه",
+  "applySuccess": "اعتبار اعمال شد.",
+  "signInRequired": "ورود لازم است",
+  "emptyTitle": "رکوردی نیست",
+  "errorTitle": "بارگذاری کیف پول ناموفق بود"
+}
