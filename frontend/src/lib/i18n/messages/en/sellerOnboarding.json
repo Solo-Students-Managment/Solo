@@ -1,0 +1,23 @@
+{
+  "title": "Seller onboarding",
+  "subtitle": "Activate seller capability and set up your shop profile.",
+  "statusLabel": "Seller status",
+  "shopLabel": "Shop slug",
+  "sellLabel": "Can sell",
+  "canSellYes": "Yes",
+  "canSellNo": "Not yet",
+  "displayNameLabel": "Shop display name",
+  "shopSlugLabel": "Shop slug",
+  "bioLabel": "Bio",
+  "start": "Submit for review",
+  "startSuccess": "Seller application submitted.",
+  "startError": "Could not start seller onboarding.",
+  "pendingBody": "Your seller profile is under review or already active.",
+  "signInRequired": "Sign in to become a seller",
+  "errorTitle": "Could not load seller profile",
+  "status.not_started": "Not started",
+  "status.pending_review": "Pending review",
+  "status.active": "Active",
+  "status.restricted": "Restricted",
+  "status.rejected": "Rejected"
+}

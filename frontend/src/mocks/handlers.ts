@@ -352,6 +352,10 @@ import {
   createMockVerifiedReviewsClient,
   verifiedReviewSchema,
 } from "@/services/verified-reviews";
+import {
+  createMockSellerOnboardingClient,
+  sellerProfileSchema,
+} from "@/services/seller-onboarding";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -604,6 +608,7 @@ const mswMarketplaceDiscoveryClient = createMockMarketplaceDiscoveryClient();
 const mswPublicCatalogClient = createMockPublicCatalogClient();
 const mswTrialBookingClient = createMockTrialBookingClient();
 const mswVerifiedReviewsClient = createMockVerifiedReviewsClient();
+const mswSellerOnboardingClient = createMockSellerOnboardingClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9409,6 +9414,73 @@ export const handlers = [
           fieldErrors: {},
         },
         { status: 403 },
+      );
+    }
+  }),
+
+  http.get("/api/seller/profile", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswSellerOnboardingClient.getMine();
+    return HttpResponse.json(sellerProfileSchema.parse(row));
+  }),
+
+  http.patch("/api/seller/profile", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      displayName?: string;
+      bio?: string | null;
+    };
+    try {
+      const row = await mswSellerOnboardingClient.updateProfile(body);
+      persistMswState();
+      return HttpResponse.json(sellerProfileSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "forbidden";
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: "errors.forbidden",
+          status: 403,
+          fieldErrors: {},
+        },
+        { status: 403 },
+      );
+    }
+  }),
+
+  http.post("/api/seller/onboarding", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      displayName?: string;
+      bio?: string | null;
+      shopSlug?: string;
+    };
+    try {
+      const row = await mswSellerOnboardingClient.startOnboarding({
+        displayName: String(body.displayName ?? ""),
+        bio: body.bio ?? null,
+        shopSlug: String(body.shopSlug ?? ""),
+      });
+      persistMswState();
+      return HttpResponse.json(sellerProfileSchema.parse(row));
+    } catch {
+      return HttpResponse.json(
+        {
+          code: "VALIDATION",
+          messageKey: "errors.validation",
+          status: 400,
+          fieldErrors: {},
+        },
+        { status: 400 },
       );
     }
   }),

@@ -1,0 +1,23 @@
+{
+  "title": "راه‌اندازی فروشنده",
+  "subtitle": "قابلیت فروش را فعال کنید و پروفایل فروشگاه را بسازید.",
+  "statusLabel": "وضعیت فروشنده",
+  "shopLabel": "شناسه فروشگاه",
+  "sellLabel": "امکان فروش",
+  "canSellYes": "بله",
+  "canSellNo": "هنوز نه",
+  "displayNameLabel": "نام نمایشی فروشگاه",
+  "shopSlugLabel": "شناسه فروشگاه",
+  "bioLabel": "درباره",
+  "start": "ارسال برای بررسی",
+  "startSuccess": "درخواست فروشنده ارسال شد.",
+  "startError": "شروع راه‌اندازی فروشنده ممکن نشد.",
+  "pendingBody": "پروفایل فروشنده در حال بررسی است یا فعال شده است.",
+  "signInRequired": "برای فروشنده شدن وارد شوید",
+  "errorTitle": "بارگذاری پروفایل فروشنده ممکن نیست",
+  "status.not_started": "شروع نشده",
+  "status.pending_review": "در انتظار بررسی",
+  "status.active": "فعال",
+  "status.restricted": "محدود شده",
+  "status.rejected": "رد شده"
+}

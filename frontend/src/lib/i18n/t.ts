@@ -79,6 +79,7 @@ import enMarketplaceDiscovery from "./messages/en/marketplaceDiscovery.json";
 import enPublicCatalog from "./messages/en/publicCatalog.json";
 import enTrialBooking from "./messages/en/trialBooking.json";
 import enVerifiedReviews from "./messages/en/verifiedReviews.json";
+import enSellerOnboarding from "./messages/en/sellerOnboarding.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -169,6 +170,7 @@ import faMarketplaceDiscovery from "./messages/fa/marketplaceDiscovery.json";
 import faPublicCatalog from "./messages/fa/publicCatalog.json";
 import faTrialBooking from "./messages/fa/trialBooking.json";
 import faVerifiedReviews from "./messages/fa/verifiedReviews.json";
+import faSellerOnboarding from "./messages/fa/sellerOnboarding.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -265,6 +267,7 @@ export type MessageNamespace =
   | "publicCatalog"
   | "trialBooking"
   | "verifiedReviews"
+  | "sellerOnboarding"
   | "messaging"
   | "chat"
   | "notifications"
@@ -363,6 +366,7 @@ const dictionaries: Dictionaries = {
     publicCatalog: enPublicCatalog,
     trialBooking: enTrialBooking,
     verifiedReviews: enVerifiedReviews,
+    sellerOnboarding: enSellerOnboarding,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -455,6 +459,7 @@ const dictionaries: Dictionaries = {
     publicCatalog: faPublicCatalog,
     trialBooking: faTrialBooking,
     verifiedReviews: faVerifiedReviews,
+    sellerOnboarding: faSellerOnboarding,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

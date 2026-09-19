@@ -35,6 +35,7 @@ export const routes = {
     security: () => "/personal/security",
     phone: () => "/personal/phone",
     profile: () => "/personal/profile",
+    seller: () => "/personal/seller",
   },
   teacher: {
     home: () => "/teacher",
