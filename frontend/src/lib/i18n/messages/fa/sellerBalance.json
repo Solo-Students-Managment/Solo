@@ -1,0 +1,13 @@
+{
+  "title": "موجودی فروشنده",
+  "subtitle": "کمیسیون، برداشت و اختلاف.",
+  "available": "قابل برداشت",
+  "pending": "در انتظار",
+  "commission": "نرخ کمیسیون",
+  "requestPayout": "درخواست برداشت",
+  "openDispute": "ثبت اختلاف",
+  "payoutSuccess": "درخواست برداشت ثبت شد.",
+  "disputeSuccess": "اختلاف ثبت شد.",
+  "signInRequired": "ورود لازم است",
+  "errorTitle": "بارگذاری موجودی ناموفق بود"
+}

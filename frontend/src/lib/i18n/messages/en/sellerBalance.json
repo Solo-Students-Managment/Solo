@@ -1,0 +1,13 @@
+{
+  "title": "Seller balance",
+  "subtitle": "Commission, payouts and disputes.",
+  "available": "Available",
+  "pending": "Pending",
+  "commission": "Commission rate",
+  "requestPayout": "Request payout",
+  "openDispute": "Open dispute",
+  "payoutSuccess": "Payout requested.",
+  "disputeSuccess": "Dispute opened.",
+  "signInRequired": "Sign in required",
+  "errorTitle": "Could not load balance"
+}
