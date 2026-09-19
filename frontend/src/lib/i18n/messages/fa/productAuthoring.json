@@ -1,0 +1,23 @@
+{
+  "title": "ایجاد محصول",
+  "subtitle": "پیش‌نویس بسازید، محتوای غنی و SEO را ویرایش کنید و منتشر کنید.",
+  "titleLabel": "عنوان",
+  "slugLabel": "شناسه",
+  "summaryLabel": "خلاصه",
+  "bodyLabel": "متن",
+  "priceLabel": "قیمت (ریال)",
+  "seoTitleLabel": "عنوان SEO",
+  "seoDescriptionLabel": "توضیح SEO",
+  "create": "ایجاد پیش‌نویس",
+  "publish": "انتشار",
+  "createSuccess": "پیش‌نویس ایجاد شد.",
+  "publishSuccess": "محصول منتشر شد.",
+  "listLabel": "محصولات شما",
+  "emptyTitle": "هنوز محصولی نیست",
+  "errorTitle": "بارگذاری محصولات ممکن نیست",
+  "signInRequired": "برای مدیریت محصولات وارد شوید",
+  "status.draft": "پیش‌نویس",
+  "status.published": "منتشر شده",
+  "status.paused": "متوقف",
+  "status.archived": "بایگانی"
+}

@@ -36,6 +36,7 @@ export const routes = {
     phone: () => "/personal/phone",
     profile: () => "/personal/profile",
     seller: () => "/personal/seller",
+    sellerProducts: () => "/personal/seller/products",
   },
   teacher: {
     home: () => "/teacher",

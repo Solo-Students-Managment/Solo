@@ -80,6 +80,7 @@ import enPublicCatalog from "./messages/en/publicCatalog.json";
 import enTrialBooking from "./messages/en/trialBooking.json";
 import enVerifiedReviews from "./messages/en/verifiedReviews.json";
 import enSellerOnboarding from "./messages/en/sellerOnboarding.json";
+import enProductAuthoring from "./messages/en/productAuthoring.json";
 import enMessaging from "./messages/en/messaging.json";
 import enChat from "./messages/en/chat.json";
 import enNotifications from "./messages/en/notifications.json";
@@ -171,6 +172,7 @@ import faPublicCatalog from "./messages/fa/publicCatalog.json";
 import faTrialBooking from "./messages/fa/trialBooking.json";
 import faVerifiedReviews from "./messages/fa/verifiedReviews.json";
 import faSellerOnboarding from "./messages/fa/sellerOnboarding.json";
+import faProductAuthoring from "./messages/fa/productAuthoring.json";
 import faMessaging from "./messages/fa/messaging.json";
 import faChat from "./messages/fa/chat.json";
 import faNotifications from "./messages/fa/notifications.json";
@@ -268,6 +270,7 @@ export type MessageNamespace =
   | "trialBooking"
   | "verifiedReviews"
   | "sellerOnboarding"
+  | "productAuthoring"
   | "messaging"
   | "chat"
   | "notifications"
@@ -367,6 +370,7 @@ const dictionaries: Dictionaries = {
     trialBooking: enTrialBooking,
     verifiedReviews: enVerifiedReviews,
     sellerOnboarding: enSellerOnboarding,
+    productAuthoring: enProductAuthoring,
     messaging: enMessaging,
     chat: enChat,
     notifications: enNotifications,
@@ -460,6 +464,7 @@ const dictionaries: Dictionaries = {
     trialBooking: faTrialBooking,
     verifiedReviews: faVerifiedReviews,
     sellerOnboarding: faSellerOnboarding,
+    productAuthoring: faProductAuthoring,
     messaging: faMessaging,
     chat: faChat,
     notifications: faNotifications,

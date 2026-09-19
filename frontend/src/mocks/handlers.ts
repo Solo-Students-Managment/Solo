@@ -356,6 +356,10 @@ import {
   createMockSellerOnboardingClient,
   sellerProfileSchema,
 } from "@/services/seller-onboarding";
+import {
+  createMockProductAuthoringClient,
+  productSchema,
+} from "@/services/product-authoring";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -609,6 +613,7 @@ const mswPublicCatalogClient = createMockPublicCatalogClient();
 const mswTrialBookingClient = createMockTrialBookingClient();
 const mswVerifiedReviewsClient = createMockVerifiedReviewsClient();
 const mswSellerOnboardingClient = createMockSellerOnboardingClient();
+const mswProductAuthoringClient = createMockProductAuthoringClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9483,5 +9488,84 @@ export const handlers = [
         { status: 400 },
       );
     }
+  }),
+
+  http.get("/api/seller/products", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswProductAuthoringClient.listMine();
+    return HttpResponse.json(rows.map((row) => productSchema.parse(row)));
+  }),
+
+  http.post("/api/seller/products", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      title?: string;
+      slug?: string;
+      summary?: string | null;
+      bodyHtml?: string;
+      price?: { amount: number; currency: "IRR" | "USD" | "EUR" };
+      seoTitle?: string | null;
+      seoDescription?: string | null;
+    };
+    const row = await mswProductAuthoringClient.create({
+      title: String(body.title ?? ""),
+      slug: String(body.slug ?? ""),
+      summary: body.summary ?? null,
+      bodyHtml: body.bodyHtml ?? "",
+      price: body.price ?? { amount: 0, currency: "IRR" },
+      seoTitle: body.seoTitle ?? null,
+      seoDescription: body.seoDescription ?? null,
+    });
+    persistMswState();
+    return HttpResponse.json(productSchema.parse(row));
+  }),
+
+  http.post("/api/seller/products/:id/publish", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    try {
+      const row = await mswProductAuthoringClient.publish(String(params.id));
+      persistMswState();
+      return HttpResponse.json(productSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "forbidden";
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: "errors.forbidden",
+          status: 403,
+          fieldErrors: {},
+        },
+        { status: 403 },
+      );
+    }
+  }),
+
+  http.post("/api/seller/products/:id/pause", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswProductAuthoringClient.pause(String(params.id));
+    persistMswState();
+    return HttpResponse.json(productSchema.parse(row));
+  }),
+
+  http.post("/api/seller/products/:id/archive", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswProductAuthoringClient.archive(String(params.id));
+    persistMswState();
+    return HttpResponse.json(productSchema.parse(row));
   }),
 ];

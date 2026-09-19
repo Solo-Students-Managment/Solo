@@ -1,0 +1,23 @@
+{
+  "title": "Product authoring",
+  "subtitle": "Create drafts, edit rich content and SEO, then publish.",
+  "titleLabel": "Title",
+  "slugLabel": "Slug",
+  "summaryLabel": "Summary",
+  "bodyLabel": "Body",
+  "priceLabel": "Price (IRR)",
+  "seoTitleLabel": "SEO title",
+  "seoDescriptionLabel": "SEO description",
+  "create": "Create draft",
+  "publish": "Publish",
+  "createSuccess": "Draft created.",
+  "publishSuccess": "Product published.",
+  "listLabel": "Your products",
+  "emptyTitle": "No products yet",
+  "errorTitle": "Could not load products",
+  "signInRequired": "Sign in to manage products",
+  "status.draft": "Draft",
+  "status.published": "Published",
+  "status.paused": "Paused",
+  "status.archived": "Archived"
+}
