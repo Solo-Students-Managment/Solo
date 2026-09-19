@@ -1,0 +1,11 @@
+{
+  "title": "Security review",
+  "subtitle": "Privacy and security hardening checklist.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
