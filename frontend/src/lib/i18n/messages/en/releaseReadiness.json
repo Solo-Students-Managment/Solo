@@ -1,0 +1,11 @@
+{
+  "title": "Release readiness",
+  "subtitle": "A11y, visual regression, i18n/RTL and perf gates.",
+  "listLabel": "Checklist",
+  "emptyTitle": "No items",
+  "errorTitle": "Could not load",
+  "signInRequired": "Sign in required",
+  "markPass": "Mark pass",
+  "actionSuccess": "Marked as pass.",
+  "passedLabel": "Passed"
+}
