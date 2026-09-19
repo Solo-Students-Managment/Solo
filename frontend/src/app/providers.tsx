@@ -229,6 +229,10 @@ import {
   setTrialBookingClient,
 } from "@/services/trial-booking";
 import {
+  createHttpVerifiedReviewsClient,
+  setVerifiedReviewsClient,
+} from "@/services/verified-reviews";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -346,6 +350,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setMarketplaceDiscoveryClient(createHttpMarketplaceDiscoveryClient());
           setPublicCatalogClient(createHttpPublicCatalogClient());
           setTrialBookingClient(createHttpTrialBookingClient());
+          setVerifiedReviewsClient(createHttpVerifiedReviewsClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

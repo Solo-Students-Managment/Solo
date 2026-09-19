@@ -1,0 +1,18 @@
+{
+  "title": "Verified reviews",
+  "subtitle": "Only learners with a verified enrollment can review",
+  "averageLabel": "Average rating",
+  "listLabel": "Reviews",
+  "emptyTitle": "No verified reviews yet",
+  "errorTitle": "Could not load reviews",
+  "formLabel": "Write a review",
+  "formTitle": "Write a review",
+  "ratingLabel": "Rating",
+  "bodyLabel": "Your review",
+  "submit": "Submit review",
+  "submitSuccess": "Review published.",
+  "submitError": "Could not submit review.",
+  "signInRequired": "Sign in to write a review",
+  "notEligible": "You need a verified enrollment to review this profile",
+  "verifiedBadge": "Verified enrollment"
+}

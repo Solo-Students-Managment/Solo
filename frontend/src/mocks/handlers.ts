@@ -348,6 +348,10 @@ import {
   trialBookingSchema,
   trialSlotSchema,
 } from "@/services/trial-booking";
+import {
+  createMockVerifiedReviewsClient,
+  verifiedReviewSchema,
+} from "@/services/verified-reviews";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -599,6 +603,7 @@ const mswPublicStudentPortfolioClient =
 const mswMarketplaceDiscoveryClient = createMockMarketplaceDiscoveryClient();
 const mswPublicCatalogClient = createMockPublicCatalogClient();
 const mswTrialBookingClient = createMockTrialBookingClient();
+const mswVerifiedReviewsClient = createMockVerifiedReviewsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9353,4 +9358,58 @@ export const handlers = [
       }
     },
   ),
+
+  http.get("/api/public/reviews/:slug", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const rows = await mswVerifiedReviewsClient.listByTarget(
+      String(params.slug),
+    );
+    return HttpResponse.json(
+      rows.map((row) => verifiedReviewSchema.parse(row)),
+    );
+  }),
+
+  http.get("/api/marketplace/reviews/eligibility/:slug", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const eligible = await mswVerifiedReviewsClient.canReview(
+      String(params.slug),
+    );
+    return HttpResponse.json({ eligible });
+  }),
+
+  http.post("/api/marketplace/reviews", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      targetSlug?: string;
+      rating?: number;
+      body?: string;
+    };
+    try {
+      const row = await mswVerifiedReviewsClient.submit({
+        targetSlug: String(body.targetSlug ?? ""),
+        rating: Number(body.rating ?? 0),
+        body: String(body.body ?? ""),
+      });
+      persistMswState();
+      return HttpResponse.json(verifiedReviewSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "forbidden";
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey: "errors.forbidden",
+          status: 403,
+          fieldErrors: {},
+        },
+        { status: 403 },
+      );
+    }
+  }),
 ];
