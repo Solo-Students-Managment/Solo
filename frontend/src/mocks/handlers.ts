@@ -360,6 +360,10 @@ import {
   createMockProductAuthoringClient,
   productSchema,
 } from "@/services/product-authoring";
+import {
+  createMockProductVariantsClient,
+  productVariantSchema,
+} from "@/services/product-variants";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -614,6 +618,7 @@ const mswTrialBookingClient = createMockTrialBookingClient();
 const mswVerifiedReviewsClient = createMockVerifiedReviewsClient();
 const mswSellerOnboardingClient = createMockSellerOnboardingClient();
 const mswProductAuthoringClient = createMockProductAuthoringClient();
+const mswProductVariantsClient = createMockProductVariantsClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -9567,5 +9572,65 @@ export const handlers = [
     const row = await mswProductAuthoringClient.archive(String(params.id));
     persistMswState();
     return HttpResponse.json(productSchema.parse(row));
+  }),
+
+  http.get("/api/seller/products/:productId/variants", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const rows = await mswProductVariantsClient.list(String(params.productId));
+    return HttpResponse.json(rows.map((r) => productVariantSchema.parse(r)));
+  }),
+  http.post(
+    "/api/seller/products/:productId/variants",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as {
+        sku?: string;
+        label?: string;
+        inventory?: number;
+        price?: { amount: number; currency: "IRR" | "USD" | "EUR" };
+        delivery?: "physical" | "digital";
+      };
+      const row = await mswProductVariantsClient.create({
+        productId: String(params.productId),
+        sku: String(body.sku ?? ""),
+        label: String(body.label ?? ""),
+        inventory: Number(body.inventory ?? 0),
+        price: body.price ?? { amount: 0, currency: "IRR" },
+        delivery: body.delivery ?? "physical",
+      });
+      persistMswState();
+      return HttpResponse.json(productVariantSchema.parse(row));
+    },
+  ),
+  http.post(
+    "/api/seller/variants/:id/inventory",
+    async ({ params, request }) => {
+      const failed = await maybeFail();
+      if (failed) return failed;
+      const unauthorized = requireAuth();
+      if (unauthorized) return unauthorized;
+      const body = (await request.json()) as { delta?: number };
+      const row = await mswProductVariantsClient.adjustInventory(
+        String(params.id),
+        Number(body.delta ?? 0),
+      );
+      persistMswState();
+      return HttpResponse.json(productVariantSchema.parse(row));
+    },
+  ),
+  http.post("/api/seller/variants/:id/license", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswProductVariantsClient.issueLicense(String(params.id));
+    persistMswState();
+    return HttpResponse.json(productVariantSchema.parse(row));
   }),
 ];

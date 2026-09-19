@@ -37,6 +37,7 @@ export const routes = {
     profile: () => "/personal/profile",
     seller: () => "/personal/seller",
     sellerProducts: () => "/personal/seller/products",
+    sellerVariants: () => "/personal/seller/variants",
   },
   teacher: {
     home: () => "/teacher",

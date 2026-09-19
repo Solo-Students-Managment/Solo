@@ -1,0 +1,15 @@
+{
+  "title": "Product variants",
+  "subtitle": "Manage inventory, digital delivery and licenses.",
+  "skuLabel": "SKU",
+  "labelLabel": "Label",
+  "create": "Add variant",
+  "listLabel": "Variants",
+  "emptyTitle": "No variants",
+  "errorTitle": "Could not load variants",
+  "signInRequired": "Sign in required",
+  "actionSuccess": "Variant created.",
+  "inStock": "In stock",
+  "outOfStock": "Out of stock",
+  "decrement": "Use 1 unit"
+}

@@ -241,6 +241,10 @@ import {
   setProductAuthoringClient,
 } from "@/services/product-authoring";
 import {
+  createHttpProductVariantsClient,
+  setProductVariantsClient,
+} from "@/services/product-variants";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -361,6 +365,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setVerifiedReviewsClient(createHttpVerifiedReviewsClient());
           setSellerOnboardingClient(createHttpSellerOnboardingClient());
           setProductAuthoringClient(createHttpProductAuthoringClient());
+          setProductVariantsClient(createHttpProductVariantsClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

@@ -1,0 +1,15 @@
+{
+  "title": "تنوع محصول",
+  "subtitle": "موجودی، تحویل دیجیتال و لایسنس را مدیریت کنید.",
+  "skuLabel": "کد",
+  "labelLabel": "برچسب",
+  "create": "افزودن تنوع",
+  "listLabel": "تنوع‌ها",
+  "emptyTitle": "تنوعی نیست",
+  "errorTitle": "بارگذاری ممکن نیست",
+  "signInRequired": "ورود لازم است",
+  "actionSuccess": "تنوع ایجاد شد.",
+  "inStock": "موجود",
+  "outOfStock": "ناموجود",
+  "decrement": "کاهش ۱ واحد"
+}
