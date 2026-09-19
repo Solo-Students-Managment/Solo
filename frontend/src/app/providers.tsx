@@ -205,6 +205,10 @@ import {
   setOrgLifecycleClient,
 } from "@/services/org-lifecycle";
 import {
+  createHttpPublicTeacherProfileClient,
+  setPublicTeacherProfileClient,
+} from "@/services/public-teacher-profile";
+import {
   createHttpMessagingClient,
   setMessagingClient,
 } from "@/services/messaging";
@@ -314,6 +318,7 @@ function MswBootstrap({ children }: { children: ReactNode }) {
           setFeatureFlagsClient(createHttpFeatureFlagsClient());
           setStorageAdminClient(createHttpStorageAdminClient());
           setOrgLifecycleClient(createHttpOrgLifecycleClient());
+          setPublicTeacherProfileClient(createHttpPublicTeacherProfileClient());
           setMessagingClient(createHttpMessagingClient());
           setChatClient(createHttpChatClient());
           setNotificationsClient(createHttpNotificationsClient());

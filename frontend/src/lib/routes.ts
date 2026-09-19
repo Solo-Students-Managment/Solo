@@ -38,6 +38,7 @@ export const routes = {
   },
   teacher: {
     home: () => "/teacher",
+    publicProfile: () => "/teacher/public-profile",
     activate: () => "/teacher/activate",
     plans: () => "/teacher/plans",
   },

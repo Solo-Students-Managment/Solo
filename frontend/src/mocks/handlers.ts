@@ -320,6 +320,10 @@ import {
   createMockOrgLifecycleClient,
   lifecycleSnapshotSchema,
 } from "@/services/org-lifecycle";
+import {
+  createMockPublicTeacherProfileClient,
+  publicTeacherProfileSchema,
+} from "@/services/public-teacher-profile";
 
 import { messageThreadSchema, type MessageThread } from "@/services/messaging";
 import {
@@ -564,6 +568,7 @@ const mswApiKeysClient = createMockApiKeysClient();
 const mswFeatureFlagsClient = createMockFeatureFlagsClient();
 const mswStorageAdminClient = createMockStorageAdminClient();
 const mswOrgLifecycleClient = createMockOrgLifecycleClient();
+const mswPublicTeacherProfileClient = createMockPublicTeacherProfileClient();
 const mockBillingInvoices = new Map<string, Invoice[]>();
 const mockResources = new Map<string, ResourceFile[]>();
 const mockReports = new Map<string, ReportView[]>();
@@ -8900,4 +8905,73 @@ export const handlers = [
       return HttpResponse.json(lifecycleSnapshotSchema.parse(snap));
     },
   ),
+
+  http.get("/api/public/teachers/:slug", async ({ params }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    try {
+      const row = await mswPublicTeacherProfileClient.getBySlug(
+        String(params.slug),
+      );
+      return HttpResponse.json(publicTeacherProfileSchema.parse(row));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "not_found";
+      const status = message === "not_found" ? 404 : 403;
+      return HttpResponse.json(
+        {
+          code: message.toUpperCase(),
+          messageKey:
+            message === "not_found" ? "errors.not_found" : "errors.forbidden",
+          status,
+          fieldErrors: {},
+        },
+        { status },
+      );
+    }
+  }),
+
+  http.get("/api/teacher/public-profile", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPublicTeacherProfileClient.getMine();
+    return HttpResponse.json(publicTeacherProfileSchema.parse(row));
+  }),
+
+  http.patch("/api/teacher/public-profile", async ({ request }) => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const body = (await request.json()) as {
+      headline?: string | null;
+      bio?: string | null;
+      subjects?: string[];
+      locationLabel?: string | null;
+    };
+    const row = await mswPublicTeacherProfileClient.updateMine(body);
+    persistMswState();
+    return HttpResponse.json(publicTeacherProfileSchema.parse(row));
+  }),
+
+  http.post("/api/teacher/public-profile/publish", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPublicTeacherProfileClient.publish();
+    persistMswState();
+    return HttpResponse.json(publicTeacherProfileSchema.parse(row));
+  }),
+
+  http.post("/api/teacher/public-profile/unpublish", async () => {
+    const failed = await maybeFail();
+    if (failed) return failed;
+    const unauthorized = requireAuth();
+    if (unauthorized) return unauthorized;
+    const row = await mswPublicTeacherProfileClient.unpublish();
+    persistMswState();
+    return HttpResponse.json(publicTeacherProfileSchema.parse(row));
+  }),
 ];

@@ -1,15 +1,5 @@
-type PublicProfilePageProps = {
-  params: Promise<{ slug: string }>;
-};
+import { PublicTeacherProfileView } from "@/features/public-teacher-profile";
 
-export default async function PublicProfilePage({
-  params,
-}: PublicProfilePageProps) {
-  const { slug } = await params;
-  return (
-    <main className="p-6">
-      <h1 className="font-display text-2xl">Public profile</h1>
-      <p className="text-muted">{slug}</p>
-    </main>
-  );
+export default function PublicProfilePage() {
+  return <PublicTeacherProfileView />;
 }
